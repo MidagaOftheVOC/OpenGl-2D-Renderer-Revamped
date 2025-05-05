@@ -5,13 +5,9 @@
 #include <sstream>
 #include <iostream>
 
-#define GLEW_STATIC
-
-#include "../dependancies/GL/glew.h"
-#include "../dependancies/GLFW/glfw3.h"
 
 #include "../common/common.h"
-#include <format>
+
 
 
 #define GLCall(x) GLClearError();\

@@ -6,6 +6,8 @@
 
 #include "components/sprite_sheet.h"
 #include "components/shader.h"
+#include "components/drawable.h"
+
 
 class Renderer2D {
 
@@ -56,7 +58,8 @@ public:
 
 	void LoadSpriteSheet(
 		const std::string& _locationRawImage,
-		const std::string& _sheetName,
+		const std::string& _sheetName, 
+		const Shader* _preferredShader,
 		int _spritesPerRow,
 		int _spritesPerCol
 	);

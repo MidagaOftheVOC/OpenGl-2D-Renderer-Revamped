@@ -40,12 +40,14 @@ void Renderer2D::LoadShader(
 void Renderer2D::LoadSpriteSheet(
 	const std::string& _locationRawImage,
 	const std::string& _sheetName,
+	const Shader* _preferredShader,
 	int _spritesPerRow,
 	int _spritesPerCol
 ) {
 	m_SpriteSheetArray.emplace_back(
 		_locationRawImage,
 		_sheetName,
+		_preferredShader,
 		_spritesPerRow,
 		_spritesPerCol
 	);

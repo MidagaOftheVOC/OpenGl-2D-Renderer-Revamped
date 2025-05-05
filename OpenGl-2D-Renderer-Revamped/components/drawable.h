@@ -1,9 +1,7 @@
 #pragma once
 
 
-#include "../common/common.h"
 
-#include "sprite_sheet.h"
 /*
 * Class: Drawable
 * Purpose: Data that can be drawn to the screen. Should represent the graphical side
@@ -15,6 +13,11 @@
 * 
 * Common sprites will use a base 100/100px square vert buffer, and resize from there.
 */
+
+
+#include "../common/common.h"
+
+#include "sprite_sheet.h"
 
 class Drawable {
 

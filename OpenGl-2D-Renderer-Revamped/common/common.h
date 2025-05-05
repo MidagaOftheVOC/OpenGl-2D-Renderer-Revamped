@@ -3,7 +3,7 @@
 // -- PROJECT SETTINGS -- //
 
 #define DEBUG__ALLOW_ASSERTS
-
+#define GLEW_STATIC
 
 
 
@@ -15,7 +15,7 @@
 #include <iostream>
 
 
-#define GLEW_STATIC
+
 #include "../dependancies/GL/glew.h"
 #include "../dependancies/GLFW/glfw3.h"
 

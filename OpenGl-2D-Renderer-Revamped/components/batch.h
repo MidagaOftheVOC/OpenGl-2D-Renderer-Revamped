@@ -26,7 +26,7 @@ public:
 
 	void LoadDrawableArray(
 		const Drawable* _drawableArray,
-		const _nCount;
+		const int _nCount
 	);
 
 private:

@@ -1,7 +1,7 @@
 #include "sprite_sheet.h"
 
-
-
+#define STB_IMAGE_IMPLEMENTATION
+#include "../dependancies/stb_image.h"
 
 
 
@@ -64,8 +64,8 @@ void SpriteSheet::ExtractSpriteRegionsToArray(
 	int SpriteCount = m_SpriteCountPerCol * m_SpriteCountPerRow;
 	for (int i = 0; i < SpriteCount; i++) {
 		
-		float xSpriteCoord = i % m_SpriteCountPerRow;
-		float ySpriteCoord = i / m_SpriteCountPerRow;
+		float xSpriteCoord = float(i % m_SpriteCountPerRow);
+		float ySpriteCoord = float(i / m_SpriteCountPerRow);
 
 		OUT_spriteRegionVector.emplace_back(
 			xSpriteCoord * m_SpriteWidth, ySpriteCoord * m_SpriteHeight,
@@ -90,7 +90,7 @@ SpriteRegion::SpriteRegion(
 	float _u0, float _v0,
 	float _u1, float _v1,
 	unsigned _textureID,
-	Shader* _shader
+	const Shader* _shader
 )
 	: Region(_u0, _v0, _u1 ,_v1),
 	TextureID(_textureID),

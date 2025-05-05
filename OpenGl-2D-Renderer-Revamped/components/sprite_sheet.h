@@ -9,17 +9,38 @@
 #include <string>
 #include <vector>
 
-#include "drawable.h"
+#include "../common/common.h"
 
 
-
-#define GLEW_STATIC
-#include "../dependancies/GL/glew.h"
-#include "../dependancies/GLFW/glfw3.h"
-
-#include "../dependancies/stb_image.h"
 
 #include "shader.h"
+
+
+struct UVRegion {
+	float u0, v0;
+	float u1, v1;
+
+	UVRegion(
+		float _u0, float _v0,
+		float _u1, float _v1
+	);
+};
+
+struct SpriteRegion {
+	UVRegion Region;
+	unsigned int TextureID = 0;
+	const Shader* ShaderPtr = nullptr;
+
+	SpriteRegion(
+		float _u0, float _v0,
+		float _u1, float _v1,
+		unsigned _textureID,
+		const Shader* _shader
+	);
+};
+
+
+
 
 class SpriteSheet {
 
@@ -74,27 +95,4 @@ public:
 
 };
 
-
-struct UVRegion {
-	float u0, v0;
-	float u1, v1;
-
-	UVRegion(
-		float _u0, float _v0,
-		float _u1, float _v1
-	);
-};
-
-struct SpriteRegion {
-	UVRegion Region;
-	unsigned int TextureID = 0;
-	const Shader* ShaderPtr = nullptr;
-
-	SpriteRegion(
-		float _u0, float _v0,
-		float _u1, float _v1,
-		unsigned _textureID,
-		Shader* _shader
-	);
-};
 

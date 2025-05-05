@@ -32,7 +32,8 @@ void Batch<_elementCount>::LoadData(
 	DEBUG_ASSERT(_nCount <= _elementCount, "Batch obj with more elements than in template arg.\n");
 
 	for (int i = 0; i < _nCount; i++) {
-		m_RegionArray[i] = *(_drawableArray + i).GetSpriteRegion().Region;
+		//m_RegionArray[i] = *(_drawableArray + i).GetSpriteRegion().Region;
 	}
+
 
 }
