@@ -18,6 +18,8 @@ class Renderer2D {
 	std::vector<Shader> m_ShaderArray;
 	std::vector<SpriteRegion> m_SpriteRegionArray;
 
+	GLFWwindow* m_MainWindowHandle = nullptr;
+
 public:
 	
 	Renderer2D() {}
@@ -33,6 +35,13 @@ public:
 
 	
 	
+
+
+
+	glm::vec2 GetMousePosition();
+
+
+public:
 
 	SpriteSheet* GetSpriteSheetByName(
 		const char* _spriteSheetName
