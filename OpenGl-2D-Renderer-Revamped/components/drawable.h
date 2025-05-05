@@ -38,7 +38,7 @@ public:
 
 
 
-	const SpriteRegion* GetSpriteRegion();
+	const SpriteRegion* GetSpriteRegion() const;
 
 
 	bool IsGood();

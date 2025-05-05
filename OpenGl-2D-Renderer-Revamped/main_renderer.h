@@ -7,6 +7,7 @@
 #include "components/sprite_sheet.h"
 #include "components/shader.h"
 #include "components/drawable.h"
+#include "components/batch.h"
 
 
 class Renderer2D {
@@ -24,20 +25,13 @@ public:
 	void Init();
 	
 	
-
-
-
-	void DrawAt(
+	void Draw(
 		Drawable _drawable,
-		int _xCoord,
-		int _yCoord,
-		const char* _shaderName,
-		bool true_if_ignore_forced_dims
+		float _xPosition,
+		float _yPosition
 	);
 
-
-	void WipeRenderer();
-
+	
 	
 
 	SpriteSheet* GetSpriteSheetByName(

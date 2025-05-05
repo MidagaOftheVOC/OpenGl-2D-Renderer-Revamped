@@ -36,6 +36,9 @@
     <ClCompile Include="components\batch.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="components\camera.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="main_renderer.h">
@@ -54,6 +57,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="components\batch.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="components\camera.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

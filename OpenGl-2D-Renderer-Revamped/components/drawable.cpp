@@ -47,7 +47,7 @@ void Drawable::SetForcedDimentionsInPixels(
 }
 
 
-const SpriteRegion* Drawable::GetSpriteRegion() {
+const SpriteRegion* Drawable::GetSpriteRegion() const {
 	return m_SpriteRegion;
 }
 

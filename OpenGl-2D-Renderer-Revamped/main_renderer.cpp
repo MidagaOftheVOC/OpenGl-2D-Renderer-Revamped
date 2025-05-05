@@ -3,28 +3,12 @@
 
 
 
-void Renderer2D::DrawAt(
-	Drawable _drawable,
-	int _xCoord,
-	int _yCoord,
-	const char* _shaderName,
-	bool true_if_ignore_forced_dims
-) {
-
-	if (!_drawable.IsGood()) {
-		return;
-	}
-
-	
-
-}
-
-
-void Renderer2D::WipeRenderer() {
 
 
 
-}
+
+
+
 
 void Renderer2D::LoadShader(
 	const std::string& _locationShaderFile,

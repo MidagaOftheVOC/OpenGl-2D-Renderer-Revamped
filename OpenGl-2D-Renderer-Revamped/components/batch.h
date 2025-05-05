@@ -1,18 +1,30 @@
 #pragma once
 
 
+#include <vector>
+
+#include "../common/common.h"
 #include "drawable.h"
 
-template<int _elementCount>
 class Batch {
 
-	//	Copying and storign this data is more expensive than indexing
-	//	from the Renderer obj BUT it's also more efficient since
-	//	it only contains UVRegion objects rather then SpriteRegions
-	UVRegion m_RegionArray[_elementCount];
+	//	Updated each frame.
+	//	Will be initiated with GL_DYNAMIC
+	unsigned int m_UVtextureVertexBufferID = 0;
+
+	//	Updated each frame.
+	//	Will be initiated with GL_DYNAMIC
+	unsigned int m_MatrixVertexBuffer = 0;
+
+
+	int m_InstanceCount = -1;
+
+	
+	bool m_IsUVtextureBuffered = false;
+	bool m_IsMatricesBuffered = false;
+
 
 	SpriteSheet* m_SpriteSheet = nullptr;
-
 	Shader* m_Shader = nullptr;
 
 public:
@@ -20,21 +32,36 @@ public:
 	Batch() {}
 
 
-	void LoadDrawableArray(
-		const std::vector<Drawable>& _drawableArray
+	Batch(
+		Shader* _shader,
+		SpriteSheet* _spriteSheet,
+		int _instanceCount
 	);
 
-	void LoadDrawableArray(
-		const Drawable* _drawableArray,
-		const int _nCount
+
+	void BufferUVtextureData(
+		const std::vector< UVRegion > &_uvRegionArray
 	);
+
+	void BufferMatrixData(
+		const std::vector< glm::mat4 > &_matrixArray
+	);
+
+
+	void GetBuffersForInstancedRendering(
+		unsigned int& OUT_UVtextureVertexBuffer,
+		unsigned int& OUT_MatrixVertexBuffer
+	);
+
+	int GetInstanceCount() { return m_InstanceCount; }
+	Shader* GetShader() { return m_Shader; }
+	SpriteSheet* GetSpriteSheet() { return m_SpriteSheet; }
+
+	~Batch();
 
 private:
 
-	void LoadData(
-		const Drawable* _drawableArray,
-		const int _nCount
-	);
-
+	bool IsTextureArrayBuffered() { return m_IsUVtextureBuffered; }
+	bool isMatrixArrayBuffered() { return m_IsMatricesBuffered; }
 };
 

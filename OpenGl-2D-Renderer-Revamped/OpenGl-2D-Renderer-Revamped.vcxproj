@@ -141,6 +141,7 @@
   <ItemGroup>
     <ClCompile Include="common\common.cpp" />
     <ClCompile Include="components\batch.cpp" />
+    <ClCompile Include="components\camera.cpp" />
     <ClCompile Include="components\drawable.cpp" />
     <ClCompile Include="components\shader.cpp" />
     <ClCompile Include="components\sprite_sheet.cpp" />
@@ -150,6 +151,7 @@
   <ItemGroup>
     <ClInclude Include="common\common.h" />
     <ClInclude Include="components\batch.h" />
+    <ClInclude Include="components\camera.h" />
     <ClInclude Include="components\drawable.h" />
     <ClInclude Include="components\shader.h" />
     <ClInclude Include="components\sprite_sheet.h" />

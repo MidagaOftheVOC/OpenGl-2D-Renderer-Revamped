@@ -12,13 +12,16 @@
 
 
 #include <cmath>
-#include <iostream>
+#include <cstdio>
 
 
 
 #include "../dependancies/GL/glew.h"
 #include "../dependancies/GLFW/glfw3.h"
 
+#include "../dependancies/glm/glm.hpp"
+#include "../dependancies/glm/gtc/matrix_transform.hpp"
+#include "../dependancies/glm/gtc/type_ptr.hpp"
 
 
 
@@ -27,14 +30,19 @@
 
 #ifdef DEBUG__ALLOW_ASSERTS
 
-#define DEBUG_ASSERT(x_, msg_)\
-if(!x_) {std::cerr << __FILE__ << " : " << __LINE__ << msg_; __debugbreak(); }
+#define DEBUG_ASSERT(x_, msg_, ...) \
+    if (!(x_)) { \
+        fprintf(stderr, "%s : %d ASSERT FAILED: " msg_ "\n", __FILE__, __LINE__, ##__VA_ARGS__); \
+        __debugbreak(); \
+    }
 
-#define DEBUG_WARN(x_, msg_)\
-if(!x_) {std::cerr << __FILE__ << " : " << __LINE__ << msg_;}
+#define DEBUG_WARN(x_, msg_, ...) \
+    if (!(x_)) { \
+        fprintf(stderr, "%s : %d WARNING: " msg_ "\n", __FILE__, __LINE__, ##__VA_ARGS__); \
+    }
 
-#define DEBUG_LOG(msg_)\
-std::cerr << msg_;
+#define DEBUG_LOG(msg_, ...) \
+    fprintf(stderr, "LOG: " msg_ "\n", ##__VA_ARGS__)
 
 #else
 
