@@ -42,57 +42,19 @@ bool fEqual(
 }
 
 
-
-
-void StandardQuad::Unbind() {
-	glBindVertexArray(0);
+void CheckGLErrors(const char* context) {
+	GLenum err;
+	while ((err = glGetError()) != GL_NO_ERROR) {
+		const char* errorStr = "Unknown error";
+		switch (err) {
+		case GL_INVALID_ENUM:      errorStr = "GL_INVALID_ENUM"; break;
+		case GL_INVALID_VALUE:     errorStr = "GL_INVALID_VALUE"; break;
+		case GL_INVALID_OPERATION: errorStr = "GL_INVALID_OPERATION"; break;
+		case GL_STACK_OVERFLOW:    errorStr = "GL_STACK_OVERFLOW"; break;
+		case GL_STACK_UNDERFLOW:   errorStr = "GL_STACK_UNDERFLOW"; break;
+		case GL_OUT_OF_MEMORY:     errorStr = "GL_OUT_OF_MEMORY"; break;
+		case GL_INVALID_FRAMEBUFFER_OPERATION: errorStr = "GL_INVALID_FRAMEBUFFER_OPERATION"; break;
+		}
+		std::cerr << "[OpenGL Error] (" << errorStr << ") in context: " << context << std::endl;
+	}
 }
-
-void StandardQuad::Init() {
-
-	unsigned int  g_stdVertexCoordArray[] = {
-		0,		0,
-		0,		100,
-		100,	100,
-		100,	0
-	};
-
-	float g_stdTexCoordArray[] = {
-		0.f,	0.f,
-		0.f,	1.f,
-		1.f,	1.f,
-		1.f,	0.f
-	};
-
-	unsigned short g_stdIndexArray[] = {
-		0,	1,	2,
-		0,	2,	3
-	};
-
-
-	glGenVertexArrays(1, &m_VAO);
-	glBindVertexArray(m_VAO);
-
-	glGenBuffers(1, &m_VextexBuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, m_VextexBuffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(g_stdVertexCoordArray), g_stdVertexCoordArray, GL_STATIC_DRAW);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 2, GL_UNSIGNED_INT, GL_FALSE, 0, 0);
-
-	glGenBuffers(1, &m_TexCoordBuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, m_TexCoordBuffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(g_stdTexCoordArray), g_stdTexCoordArray, GL_STATIC_DRAW);
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, 0);
-
-	glGenBuffers(1, &m_IndexBuffer);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_IndexBuffer);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(g_stdIndexArray), g_stdIndexArray, GL_STATIC_DRAW);
-
-	glBindVertexArray(0);
-}
-
-void StandardQuad::Bind() {
-	glBindVertexArray(m_VAO);
-}
-

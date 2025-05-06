@@ -3,8 +3,6 @@
 
 
 
-Camera::Camera() 
-{}
 
 void Camera::Initialisation(
 	glm::vec2 _position,
@@ -30,8 +28,8 @@ void Camera::UpdateProjectionMatrix() {
 	m_ProjectionMatrix = glm::ortho(
 		0.f,
 		m_ViewPortSize.x / m_Zoom,
-		0.f,
 		m_ViewPortSize.y / m_Zoom,
+		0.f,
 		-1.f,
 		-10.f
 	);
@@ -55,7 +53,7 @@ void Camera::SetZoom(
 
 bool Camera::IsInView(
 	glm::vec2 _positionInWorld,
-	glm::vec2 _objectSize = { 0.f, 0.f }
+	glm::vec2 _objectSize
 ) {
 	DEBUG_ASSERT(_objectSize.x > 0 && _objectSize.y > 0, "Caught object with negative sizes.")
 
@@ -75,7 +73,7 @@ bool Camera::IsInView(
 glm::vec2 Camera::ScreenToWorldSpaceConversion(
 	glm::vec2 _screenPosition
 ) {
-	return GetPosition() + _screenPosition;
+	return GetPosition() + _screenPosition * ( 1.f / m_Zoom);
 }
 
 

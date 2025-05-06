@@ -14,8 +14,31 @@ Shader::Shader(
 
 
 const void Shader::UseShader() const {
-    DEBUG_ASSERT(m_ProgramID != 0, std::string(m_ShaderName).append(" <> Unitiliased shader used.\n").c_str())
+    DEBUG_ASSERT(m_ProgramID != 0, "Using uninitialised shader.")
     glUseProgram(m_ProgramID);
+}
+
+void Shader::SetMat4(
+    const char* _uniformName,
+    const glm::mat4& _uniformValue
+) const {
+    int a = glGetUniformLocation(GetShaderId(), _uniformName);
+    glUniformMatrix4fv(
+        glGetUniformLocation(GetShaderId(), _uniformName),
+        1,
+        GL_FALSE,
+        glm::value_ptr(_uniformValue)
+    );
+}
+
+void Shader::SetFloat(
+    const char* _uniformName,
+    const float _uniformValue
+) const {
+    glUniform1f(
+        glGetUniformLocation(GetShaderId(), _uniformName),
+        _uniformValue
+    );
 }
 
 

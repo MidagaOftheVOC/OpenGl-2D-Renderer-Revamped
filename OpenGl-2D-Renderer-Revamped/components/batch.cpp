@@ -3,6 +3,9 @@
 
 
 
+
+
+
 Batch::Batch(
 	Shader* _shader,
 	SpriteSheet* _spriteSheet,

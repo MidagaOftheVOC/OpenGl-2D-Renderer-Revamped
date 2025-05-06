@@ -13,7 +13,7 @@
 
 #include <cmath>
 #include <cstdio>
-
+#include <iostream>
 
 
 #include "../dependancies/GL/glew.h"
@@ -55,23 +55,8 @@
 
 
 
-struct StandardQuad {
 
-	unsigned int m_VAO = 0;
-
-	unsigned int m_VextexBuffer = 0;
-	unsigned int m_TexCoordBuffer = 0;
-	unsigned int m_IndexBuffer = 0;	
-
-	void Init();
-	void Bind();
-	void Unbind();
-
-};
-
-extern StandardQuad g_StandardQuad;
-
-
+void CheckGLErrors(const char* context = "OpenGL");
 
 
 

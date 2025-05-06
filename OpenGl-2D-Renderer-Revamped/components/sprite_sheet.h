@@ -31,6 +31,7 @@ struct SpriteRegion {
 	unsigned int TextureID = 0;
 	const Shader* ShaderPtr = nullptr;
 
+
 	SpriteRegion(
 		float _u0, float _v0,
 		float _u1, float _v1,

@@ -34,7 +34,7 @@ struct ShaderProgramSources {
 static ShaderProgramSources ParseShader(const std::string& filepath) {
     std::ifstream stream(filepath);
 
-    DEBUG_ASSERT(stream.is_open(), std::string(filepath).insert(0, "Bad shader file at: "))
+    DEBUG_ASSERT(stream.is_open(), "Failed to open shader file: %s", filepath.c_str())
 
     enum class ShaderType {
         NONE = -1, VERTEX = 0, FRAGMENT = 1
@@ -132,10 +132,24 @@ public:
         const std::string& _shaderName
     );
 
-    const unsigned int GetShaderId() const;
+public:
 
-    const std::string& GetName() const;
+    void SetMat4(
+        const char* _uniformName,
+        const glm::mat4& _uniformValue
+    ) const;
+
+    void SetFloat(
+        const char* _uniformName,
+        const float _uniformValue
+    ) const;
+
 
     const void UseShader() const;
+
+
+public:
+    const unsigned int GetShaderId() const;
+    const std::string& GetName() const;
 };
 
