@@ -8,11 +8,17 @@ uniform mat4 u_Model;
 uniform mat4 u_View;
 uniform mat4 u_Projection;
 
+uniform vec2 u_SpriteOffsets;
+
+
 out vec2 v_TexCoord;
 
 void main(){
+
+	vec2 PreparedTexUVs = b_TextureUVs + u_SpriteOffsets;
+	v_TexCoord = PreparedTexUVs;
+
 	gl_Position = u_Projection * u_View * u_Model * vec4(b_Positions, 0.f, 1.f);
-	v_TexCoord = b_TextureUVs;
 }
 
 #shader fragment
@@ -29,6 +35,3 @@ void main(){
 	FragColour = texture(u_Texture, v_TexCoord);
 	//FragColour = vec4(1.f, 0.f, 0.f, 1.f);
 }
-
-
-

@@ -144,6 +144,16 @@ public:
         const float _uniformValue
     ) const;
 
+    void SetInt(
+        const char* _uniformName,
+        const int _uniformValue
+    ) const;
+
+    void SetVec2(
+        const char* _uniformName,
+        const glm::vec2 _uniformValue
+    ) const;
+
 
     const void UseShader() const;
 

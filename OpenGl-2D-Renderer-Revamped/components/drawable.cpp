@@ -12,10 +12,12 @@
 
 
 Drawable::Drawable(
-	const SpriteRegion* _spriteRegion
-) {
-	m_SpriteRegion = _spriteRegion;
-}
+	const SpriteSheet* _spriteSheet,
+	int _spriteIndex
+)
+	: m_SpriteIndexInSheet(_spriteIndex),
+	m_SpriteSheet(_spriteSheet)
+{}
 
 
 bool Drawable::IsGood() {
@@ -31,7 +33,7 @@ bool Drawable::HasForcedDimensions() {
 }
 
 
-
+//		UNUSED
 void Drawable::SetForcedDimentionsInPixels(
 	int _forcedXvalue,
 	int _forcedYvalue
@@ -45,11 +47,5 @@ void Drawable::SetForcedDimentionsInPixels(
 		m_ForcedYvalue = _forcedYvalue;
 	}
 }
-
-
-const SpriteRegion* Drawable::GetSpriteRegion() const {
-	return m_SpriteRegion;
-}
-
 
 

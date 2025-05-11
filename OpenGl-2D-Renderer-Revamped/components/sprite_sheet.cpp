@@ -5,6 +5,17 @@
 
 
 
+glm::vec2 SpriteSheet::GetCalculatedSpriteOffsets(
+	int _spriteIndex
+) const {
+	DEBUG_ASSERT(_spriteIndex >= 0 && _spriteIndex < m_SpriteCountPerCol * m_SpriteCountPerCol, "Sprite index out of bounds.");
+	
+	int xCoord = _spriteIndex % m_SpriteCountPerRow;
+	int yCoord = _spriteIndex / m_SpriteCountPerRow;
+
+	return { xCoord * m_SpriteUniformUVs.u1, yCoord * m_SpriteUniformUVs.v1 };
+}
+
 SpriteSheet::SpriteSheet(
 	const std::string& _locationRawImage,
 	const std::string& _sheetName,
@@ -53,29 +64,17 @@ SpriteSheet::SpriteSheet(
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 	//	Keep it within [0, 1]
-	m_SpriteWidth	= static_cast<float>(1.f / m_SpriteCountPerRow);
-	m_SpriteHeight	= static_cast<float>(1.f / m_SpriteCountPerCol);
+	m_SpriteUniformUVs.u0 = 0;	m_SpriteUniformUVs.v0 = 0;
+	m_SpriteUniformUVs.u1 = static_cast<float>(1.f / m_SpriteCountPerRow);
+	m_SpriteUniformUVs.v1 = static_cast<float>(1.f / m_SpriteCountPerCol);
 }
 
 
-void SpriteSheet::ExtractSpriteRegionsToArray(
-	std::vector<SpriteRegion>& OUT_spriteRegionVector
-) {
-	int SpriteCount = m_SpriteCountPerCol * m_SpriteCountPerRow;
-	for (int i = 0; i < SpriteCount; i++) {
-		
-		float xSpriteCoord = float(i % m_SpriteCountPerRow);
-		float ySpriteCoord = float(i / m_SpriteCountPerRow);
+void SpriteSheet::DestroyGLTextureObject() { glDeleteTextures(1, &m_TextureBufferID); }
+const std::string& SpriteSheet::GetName() const { return m_SheetName; }
+SpriteSheet::SpriteSheet() {}
 
-		OUT_spriteRegionVector.emplace_back(
-			xSpriteCoord * m_SpriteWidth, ySpriteCoord * m_SpriteHeight,
-			(xSpriteCoord + 1) * m_SpriteWidth,
-			(ySpriteCoord + 1) * m_SpriteHeight,
-			m_TextureBufferID,
-			m_Shader
-		);
-	}
-}
+
 
 UVRegion::UVRegion(
 	float _u0, float _v0,
@@ -86,17 +85,14 @@ UVRegion::UVRegion(
 {}
 
 
-SpriteRegion::SpriteRegion(
-	float _u0, float _v0,
-	float _u1, float _v1,
-	unsigned _textureID,
-	const Shader* _shader
-)
-	: Region(_u0, _v0, _u1 ,_v1),
-	TextureID(_textureID),
-	ShaderPtr(_shader)
-{}
 
-void SpriteSheet::DestroyGLTextureObject() { glDeleteTextures(1, &m_TextureBufferID); }
-const std::string& SpriteSheet::GetName() const { return m_SheetName; }
-SpriteSheet::SpriteSheet() {}
+
+
+bool UVRegion::operator==(const UVRegion& other) const {
+	
+	return fEqual(u0, other.u0)
+		&& fEqual(v0, other.v0)
+		&& fEqual(u1, other.u1)
+		&& fEqual(v1, other.v1);
+}
+

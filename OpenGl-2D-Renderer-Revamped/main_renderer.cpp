@@ -10,31 +10,95 @@
 
 
 void Renderer2D::Draw(
-	Drawable _drawable,
-	int _xPosition,
-	int _yPosition
+	const Drawable* _drawable,
+	float _xPosition,
+	float _yPosition,
+	float _zLayer
 ) {
 
-	const Shader* shaderToUse = _drawable.GetSpriteRegion()->ShaderPtr;
+	m_DrawCallQueue.emplace( _drawable, _xPosition, _yPosition, _zLayer );
+}
 
-	shaderToUse->UseShader();
 
+void Renderer2D::ExecuteDraws() {
+	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);  // some background color
+	glClear(GL_COLOR_BUFFER_BIT);
 
-	shaderToUse->SetMat4("u_Projection", m_Camera.GetProjectionMatrix());
-	shaderToUse->SetMat4("u_View", m_Camera.GetViewMatrix());
-	shaderToUse->SetMat4("u_Model", glm::translate(glm::mat4(1.f), glm::vec3(_xPosition, _yPosition, +2.f)));
-
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, _drawable.GetSpriteRegion()->TextureID);
-
-	GetQuad().BufferTexCoords(_drawable.GetSpriteRegion());
+	// SETUP:	COMMON VARIABLES
 	GetQuad().Bind();
+	size_t DrawCallQueueInitialSize = m_DrawCallQueue.size();
 
-	CheckGLErrors();
-	GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr));
-	CheckGLErrors();
+	const Shader* LastShaderUsed = nullptr;
 
+	//	Start executing draw calls
+	for (size_t i = 0; i < DrawCallQueueInitialSize; i++) {
+		DrawCall DrawCallCurrent = m_DrawCallQueue.top();
+		m_DrawCallQueue.pop();
+
+		const SpriteSheet* SheetCurrent = DrawCallCurrent.drawable->GetAsociatedSpriteSheet();
+		const Shader* ShaderCurrent = SheetCurrent->GetShader();
+
+		//	SETUP:	COMMON SHEET VARIABLES
+
+		if (LastShaderUsed != ShaderCurrent) {
+			LastShaderUsed = ShaderCurrent;
+			ShaderCurrent->UseShader();
+
+			ShaderCurrent->SetMat4("u_Projection", m_Camera.GetProjectionMatrix());
+			ShaderCurrent->SetMat4("u_View", m_Camera.GetViewMatrix());	
+		}
+
+		if (!GetQuad().BufferTexCoords(SheetCurrent)) {
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, SheetCurrent->GetTextureBufferID());
+		}
+
+		ShaderCurrent->SetMat4("u_Model",	//	this is per-instance data, unskippable
+			glm::translate(glm::mat4(1.f), DrawCallCurrent.GetPositionVector()));
+
+		ShaderCurrent->SetVec2("u_SpriteOffsets",
+			SheetCurrent->GetCalculatedSpriteOffsets(DrawCallCurrent.drawable->GetSpriteIndex()));
+
+
+		if (!DrawCallCurrent.drawable->HasForcedDimensions()) {
+			GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr));
+			continue;
+		}
+		else {
+			//	terrible idea
+			//	would probably be better to bind a temporary, dynamically buffered
+			//	VBO with the forced coords, call glDrawElements() and rebind the 
+			//	standard VBO from StandardQuad
+
+			unsigned int StandardVBO = GetQuad().m_VextexBuffer;
+			
+			unsigned int NewXValue = DrawCallCurrent.drawable->GetForcedXValue() != -1 ? DrawCallCurrent.drawable->GetForcedXValue() : GetQuad().m_StandardSpritePixelLength;
+			unsigned int NewYValue = DrawCallCurrent.drawable->GetForcedYValue() != -1 ? DrawCallCurrent.drawable->GetForcedYValue() : GetQuad().m_StandardSpritePixelLength;
+
+			unsigned int  TEMP_buffer[] = {
+				0,								0,
+				0,								NewYValue,
+				NewXValue,						NewYValue,
+				NewXValue,						0
+			};
+				
+			glBindBuffer(GL_ARRAY_BUFFER, StandardVBO);
+			glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(TEMP_buffer), TEMP_buffer);
+
+			GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr));
+
+			glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(TEMP_buffer), GetQuad().g_stdVertexCoordArray);
+		}
+
+	}
+
+	//--	CLEAN UP	--//
+
+	glBindTexture(GL_TEXTURE_2D, 0);
 	GetQuad().Unbind();
+
+	glfwSwapBuffers(GetWinHandle());
+	glfwPollEvents();
 }
 
 
@@ -114,7 +178,6 @@ void Renderer2D::LoadSpriteSheet(
 		_spritesPerRow,
 		_spritesPerCol
 	);
-	m_SpriteSheetArray.back().ExtractSpriteRegionsToArray(m_SpriteRegionArray);
 }
 
 SpriteSheet* Renderer2D::GetSpriteSheetByName(
@@ -146,34 +209,13 @@ Shader* Renderer2D::GetShaderByName(
 }
 
 
-
-
-
 void StandardQuad::Unbind() {
 	glBindVertexArray(0);
 }
 
 void StandardQuad::Init() {
 
-	unsigned int  g_stdVertexCoordArray[] = {
-		0,								0,
-		0,								m_StandardSpritePixelLength,
-		m_StandardSpritePixelLength,	m_StandardSpritePixelLength,
-		m_StandardSpritePixelLength,	0
-	};
-
-	float g_stdTexCoordArray[] = {
-		0.f,	0.f,
-		0.f,	1.f,
-		1.f,	1.f,
-		1.f,	0.f
-	};
-
-	unsigned short g_stdIndexArray[] = {
-		0,	1,	2,
-		0,	2,	3
-	};
-
+	
 
 	glGenVertexArrays(1, &m_VAO);
 	glBindVertexArray(m_VAO);
@@ -201,18 +243,25 @@ void StandardQuad::Bind() {
 	glBindVertexArray(m_VAO);
 }
 
-void StandardQuad::BufferTexCoords(
-	const SpriteRegion* _spriteRegion
+bool StandardQuad::BufferTexCoords(
+	const SpriteSheet* _spriteSheet
 ) {
+	const UVRegion Region = (_spriteSheet)->GetSheetSpriteUVregion();
+
+	if (Region == GetCurrentUVregion()) return true;
+
 	float texCoords[8] = {
-		_spriteRegion->Region.u0, _spriteRegion->Region.v0,
-		_spriteRegion->Region.u0, _spriteRegion->Region.v1,
-		_spriteRegion->Region.u1, _spriteRegion->Region.v1,
-		_spriteRegion->Region.u1, _spriteRegion->Region.v0
+		Region.u0, Region.v0,
+		Region.u0, Region.v1,
+		Region.u1, Region.v1,
+		Region.u1, Region.v0
 	};
 
 	glBindBuffer(GL_ARRAY_BUFFER, m_TexCoordBuffer);
 	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(texCoords), texCoords);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	m_UVregionCurrentlyUsed = Region;
+	return false;
 }
 

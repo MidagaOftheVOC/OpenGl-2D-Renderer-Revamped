@@ -41,6 +41,29 @@ void Shader::SetFloat(
     );
 }
 
+void Shader::SetInt(
+    const char* _uniformName,
+    const int _uniformValue
+) const {
+    glUniform1i(
+        glGetUniformLocation(GetShaderId(), _uniformName),
+        _uniformValue
+    );
+}
+
+void Shader::SetVec2(
+    const char* _uniformName,
+    const glm::vec2 _uniformValue
+) const {
+    glUniform2f(
+        glGetUniformLocation(GetShaderId(), _uniformName),
+        _uniformValue.x,
+        _uniformValue.y
+    );
+}
+
 
 const std::string& Shader::GetName() const { return m_ShaderName; }
 const unsigned int Shader::GetShaderId() const { return m_ProgramID; }
+
+

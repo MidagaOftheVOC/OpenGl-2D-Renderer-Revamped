@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <queue>
 
 #include "common/common.h"
 
@@ -20,28 +21,46 @@ struct StandardQuad {
 	unsigned int m_TexCoordBuffer = 0;
 	unsigned int m_IndexBuffer = 0;
 
+	UVRegion m_UVregionCurrentlyUsed;
+	const UVRegion& GetCurrentUVregion() const { return m_UVregionCurrentlyUsed; }
+
+
 	void Init();
 	void Bind();
 	void Unbind();
 
-	void BufferTexCoords(
-		const SpriteRegion* _spriteRegion
+	//	Returns true if this and last used SpriteSheet are the same
+	//	and no buffering happens.
+	//	Returns false if they're different and buffering does occur.
+	bool BufferTexCoords(
+		const SpriteSheet* _spriteSheet
 	);
+
+
+public:
+
+	unsigned int  g_stdVertexCoordArray[8] = {
+		0,								0,
+		0,								m_StandardSpritePixelLength,
+		m_StandardSpritePixelLength,	m_StandardSpritePixelLength,
+		m_StandardSpritePixelLength,	0
+	};
+
+	float g_stdTexCoordArray[8] = {
+		0.f,	0.f,
+		0.f,	1.f,
+		1.f,	1.f,
+		1.f,	0.f
+	};
+
+	unsigned short g_stdIndexArray[6] = {
+		0,	1,	2,
+		0,	2,	3
+	};
 
 };
 
 class Renderer2D {
-
-	StandardQuad m_StandardQuad;
-
-	Camera m_Camera;
-
-	std::vector<SpriteSheet> m_SpriteSheetArray;	// TODO: marked for removal
-	std::vector<Shader> m_ShaderArray;
-	std::vector<SpriteRegion> m_SpriteRegionArray;
-
-
-	GLFWwindow* m_MainWindowHandle = nullptr;
 
 	
 	int m_ScreenWidth = -1;
@@ -49,6 +68,36 @@ class Renderer2D {
 	std::string m_WindowTitle = nullptr;
 
 	bool m_Fullscreen = false;
+	GLFWwindow* m_MainWindowHandle = nullptr;
+
+private:
+
+	StandardQuad m_StandardQuad;
+
+	Camera m_Camera;
+
+	std::vector<SpriteSheet> m_SpriteSheetArray;
+	std::vector<Shader> m_ShaderArray;
+
+
+private:
+
+	struct DrawCall {
+		const Drawable* drawable;
+		float xScreenCoord, yScreenCoord;
+		float zLayer = 2.f;
+		DrawCall(const Drawable* _drawable, float x, float y, float z)
+			: drawable(_drawable), xScreenCoord(x), yScreenCoord(y), zLayer(z) {}
+		glm::vec3 GetPositionVector() { return glm::vec3(xScreenCoord, yScreenCoord, zLayer); }
+	};
+
+	struct DrawCallComparator{
+		bool operator()(const DrawCall& a, const DrawCall& b) const {
+			return a.drawable->GetAsociatedSpriteSheet() > b.drawable->GetAsociatedSpriteSheet();
+		}
+	};
+
+	std::priority_queue<DrawCall, std::vector<DrawCall>, DrawCallComparator> m_DrawCallQueue;
 
 public:
 	
@@ -65,18 +114,25 @@ public:
 	bool Init();
 
 
-	void Draw(
-		Drawable _drawable,
-		int _xPosition,
-		int _yPosition
-	);
+	void ExecuteDraws();
 
+
+	void Draw(
+		const Drawable* _drawable,
+		float _xPosition,
+		float _yPosition,
+		float _zLayer
+	);
 
 
 
 public:
 
-	SpriteRegion* GetSpriteRegionByIndex(int index) { return &m_SpriteRegionArray[index]; }
+	Drawable* GetDrawable(	// useless
+		const char* _spriteSheetName,
+		int _indexInSpriteSheet
+	);
+
 
 	StandardQuad& GetQuad() { return m_StandardQuad; }
 
@@ -84,9 +140,7 @@ public:
 
 public:
 
-	SpriteSheet* GetSpriteSheetByName(
-		const char* _spriteSheetName
-	);
+	
 
 
 	Shader* GetShaderByName(
@@ -106,6 +160,10 @@ public:
 		const Shader* _preferredShader,
 		int _spritesPerRow,
 		int _spritesPerCol
+	);
+
+	SpriteSheet* GetSpriteSheetByName(
+		const char* _spriteSheetName
 	);
 };
 

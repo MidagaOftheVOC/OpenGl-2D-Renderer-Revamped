@@ -4,6 +4,12 @@
 /*
 * Regular Sprite sheet where each sprite is next to each other
 * and all have uniform dimensions
+* 
+*	SpriteSheet		- an image subdivided in N x M uniform regions
+*	Sprite index	- subregions in the sprite sheet are indexed 
+*					  left to right, top to bottom, starting from 0
+*	
+* 
 */
 
 #include <string>
@@ -17,29 +23,35 @@
 
 
 struct UVRegion {
-	float u0, v0;
-	float u1, v1;
+
+	UVRegion() {}
+	//	  x		  y
+	float u0 = 0, v0 = 0;	
+	float u1 = 0, v1 = 0;
 
 	UVRegion(
 		float _u0, float _v0,
 		float _u1, float _v1
 	);
+
+	bool operator==(const UVRegion& other) const;
+
 };
-
-struct SpriteRegion {
-	UVRegion Region;
-	unsigned int TextureID = 0;
-	const Shader* ShaderPtr = nullptr;
-
-
-	SpriteRegion(
-		float _u0, float _v0,
-		float _u1, float _v1,
-		unsigned _textureID,
-		const Shader* _shader
-	);
-};
-
+//
+//struct SpriteRegion {
+//	UVRegion Region;
+//	unsigned int TextureID = 0;
+//	const Shader* ShaderPtr = nullptr;
+//
+//
+//	SpriteRegion(
+//		float _u0, float _v0,
+//		float _u1, float _v1,
+//		unsigned _textureID,
+//		const Shader* _shader
+//	);
+//};
+//
 
 
 
@@ -49,8 +61,7 @@ class SpriteSheet {
 	int m_SheetHeight = -1;
 
 	//	These will be calculated at the creation of each object
-	float m_SpriteWidth = -1;
-	float m_SpriteHeight = -1;
+	UVRegion m_SpriteUniformUVs;
 
 	int m_SpriteCountPerRow = -1;	//	pieces per row
 	int m_SpriteCountPerCol = -1;	//	pieces per col
@@ -60,6 +71,16 @@ class SpriteSheet {
 
 	unsigned int m_TextureBufferID = 0x7FFFFFFF;
 	const Shader* m_Shader = nullptr;
+
+public:
+
+
+	glm::vec2 GetCalculatedSpriteOffsets(
+		int _spriteIndex
+	) const;
+
+	const UVRegion& GetSheetSpriteUVregion() const { return m_SpriteUniformUVs; }
+
 
 public:
 
@@ -74,26 +95,11 @@ public:
 
 	SpriteSheet();
 
-
-	//	ABANDONED
-	//	Actions to be taken after supplying basic information like:
-	//	Image location and sprite counts
-	void AfterCreation();
-
-
 	const std::string& GetName() const;
-
-
-	//	TODO: idea for operator
-	//	Drawable operator[](int index)
-	
-	void ExtractSpriteRegionsToArray(
-		std::vector<SpriteRegion>& OUT_spriteRegionVector
-	);
-
+	const Shader* GetShader() const { return m_Shader; }
+	unsigned int GetTextureBufferID() const { return m_TextureBufferID; }
 
 	void DestroyGLTextureObject();
-
 };
 
 

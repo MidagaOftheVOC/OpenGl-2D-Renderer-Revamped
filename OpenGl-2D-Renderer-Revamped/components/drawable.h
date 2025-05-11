@@ -7,11 +7,9 @@
 * Purpose: Data that can be drawn to the screen. Should represent the graphical side
 * of objects.
 * 
-* More specifically, this will include information locating a sprite within a spritesheet
-* or otherwise information about where to find what to draw with what dimensions.
+* NOTE:	If forced values in Drawables are needed, it's probably better to clone the
+*		Drawable object, store it, and set its values to initiate Drawcalls with.
 * 
-* 
-* Common sprites will use a base 100/100px square vert buffer, and resize from there.
 */
 
 
@@ -23,28 +21,32 @@ class Drawable {
 
 private:
 
-	const SpriteRegion* m_SpriteRegion = nullptr;
-	
+	const SpriteSheet* m_SpriteSheet = nullptr;
+	const int m_SpriteIndexInSheet = -1;
 	int m_ForcedXvalue = -1;
 	int m_ForcedYvalue = -1;
 
 public:
 
+
 	Drawable() {}
 
 	Drawable(
-		const SpriteRegion* _spriteRegion
+		const SpriteSheet* _spriteSheet,
+		int _spriteIndex
 	);
 
 
+	const SpriteSheet* GetAsociatedSpriteSheet() const { return m_SpriteSheet; }
+	
+	int GetSpriteIndex()  const { return m_SpriteIndexInSheet; }
+	int GetForcedXValue() const { return m_ForcedXvalue; }
+	int GetForcedYValue() const { return m_ForcedYvalue; }
 
-	const SpriteRegion* GetSpriteRegion() const;
+	bool IsGood() const;
 
 
-	bool IsGood();
-
-
-	bool HasForcedDimensions();
+	bool HasForcedDimensions() const;
 
 
 	void SetForcedDimentionsInPixels(
