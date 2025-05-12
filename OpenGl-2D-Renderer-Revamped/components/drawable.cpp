@@ -20,7 +20,7 @@ Drawable::Drawable(
 {}
 
 
-bool Drawable::IsGood() {
+bool Drawable::IsGood() const {
 
 	// TODO: bug check
 
@@ -28,7 +28,7 @@ bool Drawable::IsGood() {
 }
 
 
-bool Drawable::HasForcedDimensions() {
+bool Drawable::HasForcedDimensions() const {
 	return m_ForcedXvalue != -1 || m_ForcedYvalue != -1;
 }
 

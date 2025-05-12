@@ -43,21 +43,28 @@ SpriteSheet::SpriteSheet(
 		// unfixable, crash here
 		
 		throw std::exception(stbi_failure_reason());
-		
-		//throw std::exception(std::format("Failed to load sprite sheet \'{}\' at {} : {}",
-		//	m_SheetName, _locationRawImage, stbi_failure_reason()));
 	}
 
 	glGenTextures(1, &m_TextureBufferID);
 	glBindTexture(GL_TEXTURE_2D, m_TextureBufferID);
 
-	
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_SheetWidth, m_SheetHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, imageData);
+	/*
+	unsigned char test[] = {
+		1, 1, 1, 1,
+		1, 1, 1, 1,
+		1, 1, 1, 1,
+		1, 1, 1, 1
+	};
+	GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 2, 2, 0, GL_RGBA, GL_UNSIGNED_BYTE, test));
+	*/
+
+	GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_SheetWidth, m_SheetHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, imageData));
+
 	glGenerateMipmap(GL_TEXTURE_2D);
 
 	stbi_image_free(imageData);

@@ -40,10 +40,10 @@ struct StandardQuad {
 public:
 
 	unsigned int  g_stdVertexCoordArray[8] = {
-		0,								0,
-		0,								m_StandardSpritePixelLength,
-		m_StandardSpritePixelLength,	m_StandardSpritePixelLength,
-		m_StandardSpritePixelLength,	0
+		0,										0,
+		0,										(unsigned)m_StandardSpritePixelLength,
+		(unsigned)m_StandardSpritePixelLength,	(unsigned)m_StandardSpritePixelLength,
+		(unsigned)m_StandardSpritePixelLength,	0
 	};
 
 	float g_stdTexCoordArray[8] = {
@@ -128,19 +128,28 @@ public:
 
 public:
 
-	Drawable* GetDrawable(	// useless
+	//	Returns a brand new Drawable object derived from an existing SpriteSheet object.
+	//	This, used anywhere else other than the loading process that exposes
+	//	all Drawable instances for each SpriteSheet, violates the Drawable doctrine
+	//	of being a one-for-all template.
+	Drawable GetDrawable(
 		const char* _spriteSheetName,
 		int _indexInSpriteSheet
 	);
 
 
-	StandardQuad& GetQuad() { return m_StandardQuad; }
-
 	GLFWwindow* GetWinHandle() { return m_MainWindowHandle; }
 
 public:
 
-	
+	//	Gets the single instance governing OpenGL objects like 
+	//	VBOs, IBO and VAO used for rendering
+	StandardQuad& GetQuad() { return m_StandardQuad; }
+
+
+	void ExtractDrawablesFromSheets(
+		std::vector<Drawable> OUT_drawableVector
+	);
 
 
 	Shader* GetShaderByName(

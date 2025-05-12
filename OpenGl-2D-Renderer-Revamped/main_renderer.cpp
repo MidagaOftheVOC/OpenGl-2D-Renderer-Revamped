@@ -6,7 +6,25 @@
 
 
 
+Drawable Renderer2D::GetDrawable(
+	const char* _spriteSheetName,
+	int _indexInSpriteSheet
+) {
+	SpriteSheet* SheetOfTarget = GetSpriteSheetByName(_spriteSheetName);
 
+	DEBUG_ASSERT(SheetOfTarget != nullptr, "Indexing Drawable from non-existant SpriteSheet object or name.");
+
+	return Drawable(SheetOfTarget, _indexInSpriteSheet);
+}
+
+
+void Renderer2D::ExtractDrawablesFromSheets(
+	std::vector<Drawable> OUT_drawableVector
+) {
+	for (size_t i = 0; i < m_SpriteSheetArray.size(); i++) {
+
+	}
+}
 
 
 void Renderer2D::Draw(
@@ -15,7 +33,6 @@ void Renderer2D::Draw(
 	float _yPosition,
 	float _zLayer
 ) {
-
 	m_DrawCallQueue.emplace( _drawable, _xPosition, _yPosition, _zLayer );
 }
 
@@ -24,83 +41,47 @@ void Renderer2D::ExecuteDraws() {
 	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);  // some background color
 	glClear(GL_COLOR_BUFFER_BIT);
 
-	// SETUP:	COMMON VARIABLES
 	GetQuad().Bind();
-	size_t DrawCallQueueInitialSize = m_DrawCallQueue.size();
+	const Shader* LastUsedShader = nullptr;
+	const SpriteSheet* LastUsedSheet = nullptr;
 
-	const Shader* LastShaderUsed = nullptr;
-
-	//	Start executing draw calls
-	for (size_t i = 0; i < DrawCallQueueInitialSize; i++) {
-		DrawCall DrawCallCurrent = m_DrawCallQueue.top();
+	int size = m_DrawCallQueue.size();
+	for(int i = 0; i < size; i++)
+	{
+		DrawCall DrawcallCurrent = m_DrawCallQueue.top();
 		m_DrawCallQueue.pop();
 
-		const SpriteSheet* SheetCurrent = DrawCallCurrent.drawable->GetAsociatedSpriteSheet();
-		const Shader* ShaderCurrent = SheetCurrent->GetShader();
+		const SpriteSheet* sheet;
+		const Shader* shader;
 
-		//	SETUP:	COMMON SHEET VARIABLES
+		sheet = DrawcallCurrent.drawable->GetAsociatedSpriteSheet();
+		shader = sheet->GetShader();
 
-		if (LastShaderUsed != ShaderCurrent) {
-			LastShaderUsed = ShaderCurrent;
-			ShaderCurrent->UseShader();
-
-			ShaderCurrent->SetMat4("u_Projection", m_Camera.GetProjectionMatrix());
-			ShaderCurrent->SetMat4("u_View", m_Camera.GetViewMatrix());	
+		if (LastUsedSheet != sheet) {
+			LastUsedSheet = sheet;
+			glBindTexture(GL_TEXTURE_2D, sheet->GetTextureBufferID());
+			GetQuad().BufferTexCoords(sheet);
 		}
 
-		if (!GetQuad().BufferTexCoords(SheetCurrent)) {
-			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, SheetCurrent->GetTextureBufferID());
+		if(LastUsedShader != shader){
+			LastUsedShader = shader;
+			shader->UseShader();
+			shader->SetMat4("u_Projection", m_Camera.GetProjectionMatrix());
+			shader->SetMat4("u_View", m_Camera.GetViewMatrix());
 		}
 
-		ShaderCurrent->SetMat4("u_Model",	//	this is per-instance data, unskippable
-			glm::translate(glm::mat4(1.f), DrawCallCurrent.GetPositionVector()));
+		//	per-instance data, unskippable
+		shader->SetMat4("u_Model", glm::translate(glm::mat4(1.f), DrawcallCurrent.GetPositionVector()));
+		shader->SetVec2("u_SpriteOffsets",
+			sheet->GetCalculatedSpriteOffsets(DrawcallCurrent.drawable->GetSpriteIndex()));
 
-		ShaderCurrent->SetVec2("u_SpriteOffsets",
-			SheetCurrent->GetCalculatedSpriteOffsets(DrawCallCurrent.drawable->GetSpriteIndex()));
-
-
-		if (!DrawCallCurrent.drawable->HasForcedDimensions()) {
-			GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr));
-			continue;
-		}
-		else {
-			//	terrible idea
-			//	would probably be better to bind a temporary, dynamically buffered
-			//	VBO with the forced coords, call glDrawElements() and rebind the 
-			//	standard VBO from StandardQuad
-
-			unsigned int StandardVBO = GetQuad().m_VextexBuffer;
-			
-			unsigned int NewXValue = DrawCallCurrent.drawable->GetForcedXValue() != -1 ? DrawCallCurrent.drawable->GetForcedXValue() : GetQuad().m_StandardSpritePixelLength;
-			unsigned int NewYValue = DrawCallCurrent.drawable->GetForcedYValue() != -1 ? DrawCallCurrent.drawable->GetForcedYValue() : GetQuad().m_StandardSpritePixelLength;
-
-			unsigned int  TEMP_buffer[] = {
-				0,								0,
-				0,								NewYValue,
-				NewXValue,						NewYValue,
-				NewXValue,						0
-			};
-				
-			glBindBuffer(GL_ARRAY_BUFFER, StandardVBO);
-			glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(TEMP_buffer), TEMP_buffer);
-
-			GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr));
-
-			glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(TEMP_buffer), GetQuad().g_stdVertexCoordArray);
-		}
-
+		GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr));
 	}
 
-	//--	CLEAN UP	--//
-
-	glBindTexture(GL_TEXTURE_2D, 0);
 	GetQuad().Unbind();
-
 	glfwSwapBuffers(GetWinHandle());
 	glfwPollEvents();
 }
-
 
 bool Renderer2D::Init() {
 

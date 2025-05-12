@@ -37,22 +37,6 @@ struct UVRegion {
 	bool operator==(const UVRegion& other) const;
 
 };
-//
-//struct SpriteRegion {
-//	UVRegion Region;
-//	unsigned int TextureID = 0;
-//	const Shader* ShaderPtr = nullptr;
-//
-//
-//	SpriteRegion(
-//		float _u0, float _v0,
-//		float _u1, float _v1,
-//		unsigned _textureID,
-//		const Shader* _shader
-//	);
-//};
-//
-
 
 
 class SpriteSheet {
@@ -92,8 +76,9 @@ public:
 		int _spritesPerCol
 	);
 
-
 	SpriteSheet();
+
+public:
 
 	const std::string& GetName() const;
 	const Shader* GetShader() const { return m_Shader; }

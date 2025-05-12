@@ -15,8 +15,7 @@ out vec2 v_TexCoord;
 
 void main(){
 
-	vec2 PreparedTexUVs = b_TextureUVs + u_SpriteOffsets;
-	v_TexCoord = PreparedTexUVs;
+	v_TexCoord = b_TextureUVs + u_SpriteOffsets;
 
 	gl_Position = u_Projection * u_View * u_Model * vec4(b_Positions, 0.f, 1.f);
 }
@@ -32,6 +31,5 @@ uniform sampler2D u_Texture;
 
 
 void main(){
-	FragColour = texture(u_Texture, v_TexCoord);
-	//FragColour = vec4(1.f, 0.f, 0.f, 1.f);
+	FragColour = mix(texture(u_Texture, v_TexCoord), vec4(1.f, 0.f, 0.f, 1.f), 0.2f);
 }
