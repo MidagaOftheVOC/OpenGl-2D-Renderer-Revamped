@@ -1,4 +1,6 @@
 #include "strict_batch.h"
+#include "../../common/standard_quad.h"
+
 
 
 StrictBatch::StrictBatch(
@@ -51,12 +53,12 @@ void StrictBatch::UpdateBuffer(
 }
 
 
-void StrictBatch::Bind() {
+void StrictBatch::Bind() const {
 	glBindVertexArray(m_LocalBatchVAO);
 }
 
 
-void StrictBatch::Unbind() {
+void StrictBatch::Unbind() const {
 	glBindVertexArray(0);
 }
 

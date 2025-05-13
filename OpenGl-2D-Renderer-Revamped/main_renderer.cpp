@@ -207,9 +207,6 @@ bool Renderer2D::Init() {
 
 
 
-	g_StandardQuad.Init();
-	m_StandardQuad = g_StandardQuad;
-
 	m_Camera.Initialisation(
 		{ 1, 1 },
 		{ m_ScreenWidth, m_ScreenHeight }
@@ -229,7 +226,8 @@ Renderer2D::Renderer2D(
 	: m_ScreenWidth(_screenWidth),
 	m_ScreenHeight(_screenHeight),
 	m_WindowTitle(_windowTitle),
-	m_Fullscreen(_fullscreen)
+	m_Fullscreen(_fullscreen),
+	m_StandardQuad(g_StandardQuad)
 {}
 
 void Renderer2D::LoadShader(

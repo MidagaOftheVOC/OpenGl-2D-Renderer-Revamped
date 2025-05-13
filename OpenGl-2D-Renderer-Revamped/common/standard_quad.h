@@ -15,6 +15,7 @@ struct StandardQuad {
 	UVRegion m_UVregionCurrentlyUsed;
 	const UVRegion& GetCurrentUVregion() const { return m_UVregionCurrentlyUsed; }
 
+	StandardQuad();
 
 	void Init();
 	void Bind();

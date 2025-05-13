@@ -2,7 +2,6 @@
 
 
 #include "../../common/common.h"
-#include "../../common/standard_quad.h"
 
 #include "../sprite_sheet.h"
 

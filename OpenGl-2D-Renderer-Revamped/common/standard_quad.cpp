@@ -1,5 +1,13 @@
 #include "standard_quad.h"
 
+
+
+StandardQuad g_StandardQuad = StandardQuad();
+
+StandardQuad::StandardQuad() {
+	Init();
+}
+
 void StandardQuad::Unbind() {
 	glBindVertexArray(0);
 }
