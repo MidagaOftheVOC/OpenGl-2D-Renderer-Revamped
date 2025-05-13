@@ -4,63 +4,19 @@
 #include <queue>
 
 #include "common/common.h"
+#include "common/standard_quad.h"
 
 #include "components/sprite_sheet.h"
 #include "components/shader.h"
 #include "components/drawable.h"
-#include "components/batch_types/batch.h"
 #include "components/camera.h"
+
+#include "components/batch_types/strict_batch.h"
 
 #include "components/uniform/uniform_data.h"
 
-struct StandardQuad {
-
-	int m_StandardSpritePixelLength = 100;
-
-	unsigned int m_VAO = 0;
-
-	unsigned int m_VextexBuffer = 0;
-	unsigned int m_TexCoordBuffer = 0;
-	unsigned int m_IndexBuffer = 0;
-
-	UVRegion m_UVregionCurrentlyUsed;
-	const UVRegion& GetCurrentUVregion() const { return m_UVregionCurrentlyUsed; }
 
 
-	void Init();
-	void Bind();
-	void Unbind();
-
-	//	Returns true if this and last used SpriteSheet are the same
-	//	and no buffering happens.
-	//	Returns false if they're different and buffering does occur.
-	bool BufferTexCoords(
-		const SpriteSheet* _spriteSheet
-	);
-
-
-public:
-
-	unsigned int  g_stdVertexCoordArray[8] = {
-		0,										0,
-		0,										(unsigned)m_StandardSpritePixelLength,
-		(unsigned)m_StandardSpritePixelLength,	(unsigned)m_StandardSpritePixelLength,
-		(unsigned)m_StandardSpritePixelLength,	0
-	};
-
-	float g_stdTexCoordArray[8] = {
-		0.f,	0.f,
-		0.f,	1.f,
-		1.f,	1.f,
-		1.f,	0.f
-	};
-
-	unsigned short g_stdIndexArray[6] = {
-		0,	1,	2,
-		0,	2,	3
-	};
-
-};
 
 class Renderer2D {
 private:	//	Window-related information
@@ -76,7 +32,7 @@ private:	//	Window-related information
 
 private:	//	Logical components
 
-	StandardQuad m_StandardQuad;
+	StandardQuad& m_StandardQuad;
 
 	Camera m_Camera;
 
@@ -99,7 +55,7 @@ private:	//	Structures for draw queue optimisation
 			: drawable(_drawable), xScreenCoord(x), yScreenCoord(y), zLayer(z), m_AppliedUniforms(_uniformDataArray)
 		{}
 
-		glm::vec3 GetPositionVector() { return glm::vec3(xScreenCoord, yScreenCoord, zLayer); }
+		glm::vec3 GetPositionVector() const { return glm::vec3(xScreenCoord, yScreenCoord, zLayer); }
 	};
 
 	//	This comparator orders DrawCalls first by Shader*, and within
@@ -112,10 +68,30 @@ private:	//	Structures for draw queue optimisation
 	std::priority_queue<DrawCall, std::vector<DrawCall>, DrawCallComparator> m_DrawCallQueue;
 
 	
-	//	Batch queue
-	
+	//	Batch array
+	//	This doesn't need to be an array
+	struct StrictBatchDrawCall {
+		const StrictBatch* m_Strict = nullptr;
+		float m_xScreenCoord, m_yScreenCoord;
+		float m_zLayer;
+
+		const UniformDataVector* m_AppliedUniforms = nullptr;
+
+		StrictBatchDrawCall(const StrictBatch* _strictBatch, float x, float y, float z, const UniformDataVector* _uniformDataArray)
+			: m_Strict(_strictBatch), m_xScreenCoord(x), m_yScreenCoord(y), m_zLayer(z), m_AppliedUniforms(_uniformDataArray)
+		{}
+
+		glm::vec3 GetPositionVector() const { return glm::vec3(m_xScreenCoord, m_yScreenCoord, m_zLayer); }
+	};
+
+	std::vector<StrictBatchDrawCall> m_StrictBatchArray;
+
+private:
+
+	void RenderDrawables();
 
 
+	void RenderStrictBatches();
 
 public:		//	Exposed functions
 	
@@ -134,6 +110,15 @@ public:		//	Exposed functions
 
 	//	Execute all draw calls and flush the draw queue.
 	void ExecuteDraws();
+
+
+	void Draw(
+		const StrictBatch* _batch,
+		float _initialXpos,
+		float _initialYpos,
+		float _zLayer,
+		UniformDataVector* _uniformArray
+	);
 
 
 	//	Adds a draw call to the queue for _drawable at position {_xPosition, _yPosition} with
@@ -193,6 +178,7 @@ public:		// getters and setters,
 	//	VBOs, IBO and VAO used for rendering
 	StandardQuad&	GetQuad() { return m_StandardQuad; }
 	GLFWwindow*		GetWinHandle() { return m_MainWindowHandle; }
+	Camera&			GetCamera() { return m_Camera; }
 };
 
 

@@ -31,30 +31,99 @@ void Renderer2D::Draw(
 }
 
 
-void Renderer2D::ExecuteDraws() {
-	
-#ifdef DEBUG__CODE
+void Renderer2D::Draw(
+	const StrictBatch* _batch,
+	float _initialXpos,
+	float _initialYpos,
+	float _zLayer,
+	UniformDataVector* _uniformArray
+) {
+	m_StrictBatchArray.emplace_back(_batch, _initialXpos, _initialYpos, _zLayer, _uniformArray);
+}
 
+
+void Renderer2D::ExecuteDraws() {
+
+#ifdef DEBUG__CODE
 	// easily recognisable when some sprite is black or at all drawn
 	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 
-	int d_SheetChanges = 0;
-	int d_ShaderChanges = 0;
-
 #else
-	
-	glClearColor(0.f, 0.f, 0.f, 1.f);		
+
+	glClearColor(0.f, 0.f, 0.f, 1.f);
 
 #endif
 
 	glClear(GL_COLOR_BUFFER_BIT);
+
+	
+	//	-- RENDERING STARTS --	//
+
+	RenderDrawables();
+	RenderStrictBatches();
+
+	//	-- RENDERING ENDS	--	//
+
+
+	glfwSwapBuffers(GetWinHandle());
+	glfwPollEvents();
+}
+
+
+void Renderer2D::RenderStrictBatches() {
+
+	//	Since these batches are pretty much guaranteed to use
+	//	unique sprite sheets paired with unique shaders
+	//	there's not much point in trying to optimise this part
+
+	std::vector<StrictBatchDrawCall>& Arr = m_StrictBatchArray;
+
+	for (size_t i = 0; i < Arr.size(); i++) {
+		const StrictBatchDrawCall& DrawCallCurrent = Arr[i];
+		
+		const StrictBatch* Strict = DrawCallCurrent.m_Strict;
+		const SpriteSheet* SheetCurrent = Strict->GetSheet();
+		const Shader* ShaderCurrent = SheetCurrent->GetShader();
+
+		int InstanceCount = Strict->GetInstanceCount();
+
+		Strict->Bind();
+
+		// SHADER SET UP
+		ShaderCurrent->UseShader();
+		ShaderCurrent->SetMat4("u_Projection", m_Camera.GetProjectionMatrix());
+		ShaderCurrent->SetMat4("u_View", m_Camera.GetViewMatrix());
+		ShaderCurrent->SetMat4("u_Model", glm::translate(glm::mat4(1.f), DrawCallCurrent.GetPositionVector()));
+
+		ShaderCurrent->ApplyUniforms(DrawCallCurrent.m_AppliedUniforms);
+
+
+		// SHEET SET UP
+		glBindTexture(GL_TEXTURE_2D, SheetCurrent->GetTextureBufferID());
+		GetQuad().BufferTexCoords(SheetCurrent);
+
+		glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr, InstanceCount);
+
+		Strict->Unbind();
+	}
+	Arr.clear();
+}
+
+
+void Renderer2D::RenderDrawables() {
+
+#ifdef DEBUG__CODE
+	int d_SheetChanges = 0;
+	int d_ShaderChanges = 0;
+#endif
+
 
 	GetQuad().Bind();
 	const Shader* LastUsedShader = nullptr;
 	const SpriteSheet* LastUsedSheet = nullptr;
 
 	size_t DrawQueueOriginalSize = m_DrawCallQueue.size();
-	for(size_t i = 0; i < DrawQueueOriginalSize; i++)
+	for (size_t i = 0; i < DrawQueueOriginalSize; i++)
 	{
 		DrawCall DrawcallCurrent = m_DrawCallQueue.top();
 		m_DrawCallQueue.pop();
@@ -65,27 +134,27 @@ void Renderer2D::ExecuteDraws() {
 		SheetCurrent = DrawcallCurrent.drawable->GetAsociatedSpriteSheet();
 		ShaderCurrent = SheetCurrent->GetShader();
 
-		DEBUG_ASSERT(SheetCurrent  != nullptr, "SpriteSheet* set to nullptr when executing draw calls.\n\tDrawable object has initial index [%llu] in queue.", i);
+		DEBUG_ASSERT(SheetCurrent != nullptr, "SpriteSheet* set to nullptr when executing draw calls.\n\tDrawable object has initial index [%llu] in queue.", i);
 		DEBUG_ASSERT(ShaderCurrent != nullptr, "Shader* set to nullptr when executing draw calls.\n\t-- from SpriteSheet with name [%s]", SheetCurrent->GetName().c_str());
 
 		if (LastUsedSheet != SheetCurrent) {	//	SHADER CHANGE
 			LastUsedSheet = SheetCurrent;
 			glBindTexture(GL_TEXTURE_2D, SheetCurrent->GetTextureBufferID());
 			GetQuad().BufferTexCoords(SheetCurrent);
-			
+
 #ifdef DEBUG__CODE
-						d_SheetChanges++;
+			d_SheetChanges++;
 #endif
 		}
 
-		if(LastUsedShader != ShaderCurrent){	//	SPRITESHEET CHANGE
+		if (LastUsedShader != ShaderCurrent) {	//	SPRITESHEET CHANGE
 			LastUsedShader = ShaderCurrent;
 			ShaderCurrent->UseShader();
 			ShaderCurrent->SetMat4("u_Projection", m_Camera.GetProjectionMatrix());
 			ShaderCurrent->SetMat4("u_View", m_Camera.GetViewMatrix());
 
 #ifdef DEBUG__CODE
-						d_ShaderChanges++;
+			d_ShaderChanges++;
 #endif
 		}
 
@@ -100,15 +169,14 @@ void Renderer2D::ExecuteDraws() {
 	}
 
 #ifdef DEBUG__CODE
-		fprintf(stdout, "ExecuteDraws() stats for [%lld] DrawCall objects:\n\tSheet changes: %d\n\tShader changes: %d\n",
-			DrawQueueOriginalSize, d_SheetChanges, d_ShaderChanges);
+	fprintf(stdout, "ExecuteDraws() stats for [%lld] DrawCall objects:\n\tSheet changes: %d\n\tShader changes: %d\n",
+		DrawQueueOriginalSize, d_SheetChanges, d_ShaderChanges);
 #endif
 
 	//	CLEAN UP
 	GetQuad().Unbind();
-	glfwSwapBuffers(GetWinHandle());
-	glfwPollEvents();
 }
+
 
 bool Renderer2D::Init() {
 
@@ -137,7 +205,10 @@ bool Renderer2D::Init() {
 		return false;
 	}
 
-	m_StandardQuad.Init();
+
+
+	g_StandardQuad.Init();
+	m_StandardQuad = g_StandardQuad;
 
 	m_Camera.Initialisation(
 		{ 1, 1 },
@@ -216,60 +287,6 @@ Shader* Renderer2D::GetShaderByName(
 	return nullptr;
 }
 
-
-void StandardQuad::Unbind() {
-	glBindVertexArray(0);
-}
-
-void StandardQuad::Init() {
-
-	glGenVertexArrays(1, &m_VAO);
-	glBindVertexArray(m_VAO);
-
-	glGenBuffers(1, &m_VextexBuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, m_VextexBuffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(g_stdVertexCoordArray), g_stdVertexCoordArray, GL_STATIC_DRAW);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 2, GL_UNSIGNED_INT, GL_FALSE, 0, 0);
-
-	glGenBuffers(1, &m_TexCoordBuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, m_TexCoordBuffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(g_stdTexCoordArray), g_stdTexCoordArray, GL_DYNAMIC_DRAW);
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, 0);
-
-	glGenBuffers(1, &m_IndexBuffer);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_IndexBuffer);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(g_stdIndexArray), g_stdIndexArray, GL_STATIC_DRAW);
-
-	glBindVertexArray(0);
-}
-
-void StandardQuad::Bind() {
-	glBindVertexArray(m_VAO);
-}
-
-bool StandardQuad::BufferTexCoords(
-	const SpriteSheet* _spriteSheet
-) {
-	const UVRegion Region = (_spriteSheet)->GetSheetSpriteUVregion();
-
-	if (Region == GetCurrentUVregion()) return true;
-
-	float texCoords[8] = {
-		Region.u0, Region.v0,
-		Region.u0, Region.v1,
-		Region.u1, Region.v1,
-		Region.u1, Region.v0
-	};
-
-	glBindBuffer(GL_ARRAY_BUFFER, m_TexCoordBuffer);
-	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(texCoords), texCoords);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-	m_UVregionCurrentlyUsed = Region;
-	return false;
-}
 
 
 bool Renderer2D::DrawCallComparator::operator()(const DrawCall& a, const DrawCall& b) const {

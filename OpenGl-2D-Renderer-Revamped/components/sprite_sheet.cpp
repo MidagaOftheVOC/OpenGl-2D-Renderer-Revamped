@@ -53,16 +53,6 @@ SpriteSheet::SpriteSheet(
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-	/*
-	unsigned char test[] = {
-		1, 1, 1, 1,
-		1, 1, 1, 1,
-		1, 1, 1, 1,
-		1, 1, 1, 1
-	};
-	GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 2, 2, 0, GL_RGBA, GL_UNSIGNED_BYTE, test));
-	*/
-
 	GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_SheetWidth, m_SheetHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, imageData));
 
 	glGenerateMipmap(GL_TEXTURE_2D);
@@ -92,9 +82,6 @@ UVRegion::UVRegion(
 {}
 
 
-
-
-
 bool UVRegion::operator==(const UVRegion& other) const {
 	
 	return fEqual(u0, other.u0)
@@ -102,4 +89,8 @@ bool UVRegion::operator==(const UVRegion& other) const {
 		&& fEqual(u1, other.u1)
 		&& fEqual(v1, other.v1);
 }
+
+
+
+
 

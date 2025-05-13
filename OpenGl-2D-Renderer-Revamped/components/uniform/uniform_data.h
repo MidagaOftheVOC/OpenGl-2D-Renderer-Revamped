@@ -25,8 +25,8 @@ struct UniformData {
 	std::string name;
 	UniformValue value;
 
-	UniformData(const char* name, UniformValue val)
-		:name(name), value(val) {}
+	UniformData(const char* _name, UniformValue _val)
+		:name(_name), value(_val) {}
 
 };
 
