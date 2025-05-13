@@ -6,7 +6,7 @@
 
 
 
-Drawable Renderer2D::GetDrawable(
+Drawable Renderer2D::GenerateDrawable(
 	const char* _spriteSheetName,
 	int _indexInSpriteSheet
 ) {
@@ -18,66 +18,93 @@ Drawable Renderer2D::GetDrawable(
 }
 
 
-void Renderer2D::ExtractDrawablesFromSheets(
-	std::vector<Drawable> OUT_drawableVector
-) {
-	for (size_t i = 0; i < m_SpriteSheetArray.size(); i++) {
-
-	}
-}
 
 
 void Renderer2D::Draw(
 	const Drawable* _drawable,
 	float _xPosition,
 	float _yPosition,
-	float _zLayer
+	float _zLayer,
+	UniformDataVector* _uniformArray
 ) {
-	m_DrawCallQueue.emplace( _drawable, _xPosition, _yPosition, _zLayer );
+	m_DrawCallQueue.emplace( _drawable, _xPosition, _yPosition, _zLayer, _uniformArray);
 }
 
 
 void Renderer2D::ExecuteDraws() {
-	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);  // some background color
+	
+#ifdef DEBUG__CODE
+
+	// easily recognisable when some sprite is black or at all drawn
+	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+
+	int d_SheetChanges = 0;
+	int d_ShaderChanges = 0;
+
+#else
+	
+	glClearColor(0.f, 0.f, 0.f, 1.f);		
+
+#endif
+
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	GetQuad().Bind();
 	const Shader* LastUsedShader = nullptr;
 	const SpriteSheet* LastUsedSheet = nullptr;
 
-	int size = m_DrawCallQueue.size();
-	for(int i = 0; i < size; i++)
+	size_t DrawQueueOriginalSize = m_DrawCallQueue.size();
+	for(size_t i = 0; i < DrawQueueOriginalSize; i++)
 	{
 		DrawCall DrawcallCurrent = m_DrawCallQueue.top();
 		m_DrawCallQueue.pop();
 
-		const SpriteSheet* sheet;
-		const Shader* shader;
+		const SpriteSheet* SheetCurrent = nullptr;
+		const Shader* ShaderCurrent = nullptr;
 
-		sheet = DrawcallCurrent.drawable->GetAsociatedSpriteSheet();
-		shader = sheet->GetShader();
+		SheetCurrent = DrawcallCurrent.drawable->GetAsociatedSpriteSheet();
+		ShaderCurrent = SheetCurrent->GetShader();
 
-		if (LastUsedSheet != sheet) {
-			LastUsedSheet = sheet;
-			glBindTexture(GL_TEXTURE_2D, sheet->GetTextureBufferID());
-			GetQuad().BufferTexCoords(sheet);
+		DEBUG_ASSERT(SheetCurrent  != nullptr, "SpriteSheet* set to nullptr when executing draw calls.\n\tDrawable object has initial index [%llu] in queue.", i);
+		DEBUG_ASSERT(ShaderCurrent != nullptr, "Shader* set to nullptr when executing draw calls.\n\t-- from SpriteSheet with name [%s]", SheetCurrent->GetName().c_str());
+
+		if (LastUsedSheet != SheetCurrent) {	//	SHADER CHANGE
+			LastUsedSheet = SheetCurrent;
+			glBindTexture(GL_TEXTURE_2D, SheetCurrent->GetTextureBufferID());
+			GetQuad().BufferTexCoords(SheetCurrent);
+			
+#ifdef DEBUG__CODE
+						d_SheetChanges++;
+#endif
 		}
 
-		if(LastUsedShader != shader){
-			LastUsedShader = shader;
-			shader->UseShader();
-			shader->SetMat4("u_Projection", m_Camera.GetProjectionMatrix());
-			shader->SetMat4("u_View", m_Camera.GetViewMatrix());
+		if(LastUsedShader != ShaderCurrent){	//	SPRITESHEET CHANGE
+			LastUsedShader = ShaderCurrent;
+			ShaderCurrent->UseShader();
+			ShaderCurrent->SetMat4("u_Projection", m_Camera.GetProjectionMatrix());
+			ShaderCurrent->SetMat4("u_View", m_Camera.GetViewMatrix());
+
+#ifdef DEBUG__CODE
+						d_ShaderChanges++;
+#endif
 		}
 
 		//	per-instance data, unskippable
-		shader->SetMat4("u_Model", glm::translate(glm::mat4(1.f), DrawcallCurrent.GetPositionVector()));
-		shader->SetVec2("u_SpriteOffsets",
-			sheet->GetCalculatedSpriteOffsets(DrawcallCurrent.drawable->GetSpriteIndex()));
+		ShaderCurrent->SetMat4("u_Model", glm::translate(glm::mat4(1.f), DrawcallCurrent.GetPositionVector()));
+		ShaderCurrent->SetVec2("u_SpriteOffsets",
+			SheetCurrent->GetCalculatedSpriteOffsets(DrawcallCurrent.drawable->GetSpriteIndex()));
+
+		ShaderCurrent->ApplyUniforms(DrawcallCurrent.m_AppliedUniforms);
 
 		GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr));
 	}
 
+#ifdef DEBUG__CODE
+		fprintf(stdout, "ExecuteDraws() stats for [%lld] DrawCall objects:\n\tSheet changes: %d\n\tShader changes: %d\n",
+			DrawQueueOriginalSize, d_SheetChanges, d_ShaderChanges);
+#endif
+
+	//	CLEAN UP
 	GetQuad().Unbind();
 	glfwSwapBuffers(GetWinHandle());
 	glfwPollEvents();
@@ -196,8 +223,6 @@ void StandardQuad::Unbind() {
 
 void StandardQuad::Init() {
 
-	
-
 	glGenVertexArrays(1, &m_VAO);
 	glBindVertexArray(m_VAO);
 
@@ -244,5 +269,19 @@ bool StandardQuad::BufferTexCoords(
 
 	m_UVregionCurrentlyUsed = Region;
 	return false;
+}
+
+
+bool Renderer2D::DrawCallComparator::operator()(const DrawCall& a, const DrawCall& b) const {
+
+	const Shader* aS = a.drawable->GetAsociatedSpriteSheet()->GetShader();
+	const Shader* bS = b.drawable->GetAsociatedSpriteSheet()->GetShader();
+
+
+	if (aS == bS) {
+		return a.drawable->GetAsociatedSpriteSheet() > b.drawable->GetAsociatedSpriteSheet();
+	}
+
+	return aS > bS;
 }
 

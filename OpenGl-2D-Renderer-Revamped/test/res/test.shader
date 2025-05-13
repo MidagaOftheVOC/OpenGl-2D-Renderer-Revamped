@@ -10,7 +10,6 @@ uniform mat4 u_Projection;
 
 uniform vec2 u_SpriteOffsets;
 
-
 out vec2 v_TexCoord;
 
 void main(){
@@ -23,9 +22,9 @@ void main(){
 #shader fragment
 #version 330 core
 
-in vec2 v_TexCoord;
 out vec4 FragColour;
 
+in vec2 v_TexCoord;
 
 uniform sampler2D u_Texture;
 

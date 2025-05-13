@@ -4,106 +4,11 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
-
+#include <unordered_map>
 
 #include "../common/common.h"
 
-
-
-#define GLCall(x) GLClearError();\
-    x;\
-    DEBUG_ASSERT(GLLogCall(#x, __FILE__, __LINE__))
-
-static void GLClearError() {
-    while (glGetError() != GL_NO_ERROR);
-}
-
-static bool GLLogCall(const char* function, const char* file, int line) {
-    while (GLenum error = glGetError()) {
-        std::cout << "[OpenGL ERR] (" << error << "): " << function << " " << file << ":" << line << '\n';
-        return false;
-    }
-    return true;
-}
-
-struct ShaderProgramSources {
-    std::string VertexSource;
-    std::string FragmentSource;
-};
-
-static ShaderProgramSources ParseShader(const std::string& filepath) {
-    std::ifstream stream(filepath);
-
-    DEBUG_ASSERT(stream.is_open(), "Failed to open shader file: %s", filepath.c_str())
-
-    enum class ShaderType {
-        NONE = -1, VERTEX = 0, FRAGMENT = 1
-    };
-
-    ShaderType type = ShaderType::NONE;
-
-    std::string line;
-    std::stringstream ss[2];
-
-    while (getline(stream, line))
-    {
-        if (line.find("#shader") != std::string::npos) {
-
-            if (line.find("vertex") != std::string::npos) {
-                //set mode to vertex
-                type = ShaderType::VERTEX;
-            }
-            else if (line.find("fragment") != std::string::npos) {
-                //set mode to frag
-                type = ShaderType::FRAGMENT;
-            }
-        }
-        else
-            ss[(int)type] << line << "\n";
-    }
-
-    return { ss[0].str(), ss[1].str() };
-}
-
-static unsigned int CompileShader(unsigned int type, const std::string& source) {
-
-    unsigned int id = glCreateShader(type);
-    const char* src = source.c_str();
-    glShaderSource(id, 1, &src, nullptr);
-    glCompileShader(id);
-
-    int result;
-    glGetShaderiv(id, GL_COMPILE_STATUS, &result);
-    if (result == GL_FALSE) {
-        int length;
-        glGetShaderiv(id, GL_INFO_LOG_LENGTH, &length);
-        char* message = (char*)alloca(length * sizeof(char));  //dynamic stack allocation
-        glGetShaderInfoLog(id, length, &length, message);
-        std::cout << "Failed to compile " << (type == GL_VERTEX_SHADER ? "vertex" : "fragment") << " shader!\n";
-        std::cout << message << "\n";
-        glDeleteShader(id);
-        return 0;
-    }
-
-    return id;
-}
-
-static unsigned int CreateShader(const std::string& vertexShader, const std::string& fragmentShader) {
-
-    unsigned int program = glCreateProgram();
-    unsigned int vs = CompileShader(GL_VERTEX_SHADER, vertexShader);
-    unsigned int fs = CompileShader(GL_FRAGMENT_SHADER, fragmentShader);
-
-    glAttachShader(program, vs);
-    glAttachShader(program, fs);
-    glLinkProgram(program);
-    glValidateProgram(program);
-
-    glDeleteShader(vs);
-    glDeleteShader(fs);
-
-    return program;
-}
+#include "uniform/uniform_data.h"
 
 /*
 *   Shader class
@@ -119,18 +24,37 @@ class Shader {
 
     unsigned int m_ProgramID = 0;
 
+    
     std::string m_ShaderName;
 
+
+private:    //  UniformName -> UniformLocation map + type 
+
+    struct UniformLocation {
+        int location;
+        GLenum type;
+    };
+
+    
+    std::unordered_map<std::string, UniformLocation> m_UniformLocationMap;
     
 
-public:
+    void InitialiseUniformLocationMap();
+
+public:     
 
     Shader() {}
+    
 
     Shader(
         const std::string& _locationShaderFile,
         const std::string& _shaderName
     );
+
+
+    void ApplyUniforms(
+        const UniformDataVector* _uniformArray
+    ) const;
 
 public:
 
@@ -139,15 +63,18 @@ public:
         const glm::mat4& _uniformValue
     ) const;
 
+
     void SetFloat(
         const char* _uniformName,
         const float _uniformValue
     ) const;
 
+
     void SetInt(
         const char* _uniformName,
         const int _uniformValue
     ) const;
+
 
     void SetVec2(
         const char* _uniformName,
@@ -157,9 +84,27 @@ public:
 
     const void UseShader() const;
 
-
 public:
+
     const unsigned int GetShaderId() const;
     const std::string& GetName() const;
+
 };
+
+
+
+#define GLCall(x) GLClearError();\
+    x;\
+    DEBUG_ASSERT(GLLogCall(#x, __FILE__, __LINE__), "OpenGL Error from [%s]", #x)
+
+static void GLClearError() {
+    while (glGetError() != GL_NO_ERROR);
+}
+
+static bool GLLogCall(const char* function, const char* file, int line) {
+    while (GLenum error = glGetError()) {
+        return false;
+    }
+    return true;
+}
 

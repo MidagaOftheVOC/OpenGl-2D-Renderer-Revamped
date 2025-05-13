@@ -2,6 +2,7 @@
 
 // -- PROJECT SETTINGS -- //
 
+#define DEBUG__CODE            // use for debug-build-only code snippets
 #define DEBUG__ALLOW_ASSERTS
 #define GLEW_STATIC
 
@@ -32,13 +33,13 @@
 
 #define DEBUG_ASSERT(x_, msg_, ...) \
     if (!(x_)) { \
-        fprintf(stderr, "%s : %d ASSERT FAILED: " msg_ "\n", __FILE__, __LINE__, ##__VA_ARGS__); \
+        fprintf(stderr, "%s : %d\nASSERT FAILED: " msg_ "\n", __FILE__, __LINE__, ##__VA_ARGS__); \
         __debugbreak(); \
     }
 
 #define DEBUG_WARN(x_, msg_, ...) \
     if (!(x_)) { \
-        fprintf(stderr, "%s : %d WARNING: " msg_ "\n", __FILE__, __LINE__, ##__VA_ARGS__); \
+        fprintf(stderr, "%s : %d\nWARNING: " msg_ "\n", __FILE__, __LINE__, ##__VA_ARGS__); \
     }
 
 #define DEBUG_LOG(msg_, ...) \

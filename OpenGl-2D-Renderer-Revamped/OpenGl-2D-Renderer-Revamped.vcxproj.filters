@@ -33,10 +33,16 @@
     <ClCompile Include="components\shader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="components\batch.cpp">
+    <ClCompile Include="components\batch_types\batch.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="components\camera.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="components\batch_types\strict_batch.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="components\uniform\uniform_data.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -56,10 +62,16 @@
     <ClInclude Include="components\shader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="components\batch.h">
+    <ClInclude Include="components\batch_types\batch.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="components\camera.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="components\batch_types\strict_batch.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="components\uniform\uniform_data.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
