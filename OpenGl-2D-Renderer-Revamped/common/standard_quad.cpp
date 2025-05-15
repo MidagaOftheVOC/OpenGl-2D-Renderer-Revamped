@@ -62,3 +62,33 @@ bool StandardQuad::BufferTexCoords(
 }
 
 
+void StandardQuad::BindVertexBufferAt(
+	int _verAttribPointerIndex
+) {
+	glBindBuffer(GL_ARRAY_BUFFER, m_VextexBuffer);
+	glEnableVertexAttribArray(_verAttribPointerIndex);
+	glVertexAttribPointer(
+		_verAttribPointerIndex,
+		2,
+		GL_FLOAT,
+		GL_FALSE,
+		2 * sizeof(float),
+		0
+	);
+}
+
+void StandardQuad::BindTexUVbufferAt(
+	int _verAttribPointerIndex
+) {
+	glBindBuffer(GL_ARRAY_BUFFER, m_TexCoordBuffer);
+	glEnableVertexAttribArray(_verAttribPointerIndex);
+	glVertexAttribPointer(
+		_verAttribPointerIndex,
+		2,
+		GL_FLOAT,
+		GL_FALSE,
+		2 * sizeof(float),
+		0
+	);
+}
+

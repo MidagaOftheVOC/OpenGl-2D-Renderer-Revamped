@@ -3,7 +3,7 @@
 
 layout(location = 0) in vec2 b_VertexBuffer;
 layout(location = 1) in vec2 b_TexBuffer;
-layout(location = 2) in int  b_SpriteIndicies;	// this has divisor for 1 element
+layout(location = 2) in int  b_SpriteIndicies;	// per-instance data
 
 
 uniform mat4 u_Model;

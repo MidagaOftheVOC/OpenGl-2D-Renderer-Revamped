@@ -144,18 +144,73 @@ public:		//	Exposed functions
 		int _indexInSpriteSheet
 	);
 
-public:
+public:		//	Loading functions, which append loading parameters to the queues.
+			//	All necessary resources must pass through those, after which we
+			//	call StartLoadingProcess() to turn them into usable objects.
+			//
+			//	Note:	At calling StartLoadingProcess(), all necessary data must 
+			//	be in the queues, even previously allocated, if you'll be switching scenes
+			//	or similar.
 
-	void ExtractDrawablesFromSheets(
-		std::vector<Drawable>& OUT_drawableVector
+	void UploadShaderParameters(
+		const char* _shaderName,
+		const char* _location
 	);
 
+	void UploadSpriteSheetParameters(
+		const char* _locationRawImage,
+		const char* _sheetName,
+		const char* _preferredShader,
+		int _spritesPerRow,
+		int _spritesPerCol
+	);
+
+	void StartLoadingProcess();
+
+private:	//	The loading functions in this block begin the actual OpenGL
+			//	initialisation process, taking data from the load params queues.
+
+	struct ShaderLoadingParameters {
+		const std::string m_ShaderName;
+		const std::string m_LocationOfShaderFile;
+		ShaderLoadingParameters(
+			const char* _location,
+			const char* _shaderName
+		)
+			: m_ShaderName(_shaderName), m_LocationOfShaderFile(_location) {}
+	};
+
+	std::vector<ShaderLoadingParameters> m_ShaderLoadQueue;
 
 	void LoadShader(
 		const std::string& _locationShaderFile,
 		const std::string& _shaderName
 	);
 
+
+	struct SpriteSheetLoadingParameters {
+		const std::string m_LocationOfImage;
+		const std::string m_SheetName;
+		const std::string m_PreferredShaderName;
+		int m_SpritesPerRow;
+		int m_SpritesPerCol;
+		
+		SpriteSheetLoadingParameters(
+			const char* _locationRawImage,
+			const char* _sheetName,
+			const char* _preferredShader,
+			int _spritesPerRow,
+			int _spritesPerCol
+		) :
+			m_LocationOfImage(_locationRawImage),
+			m_SheetName(_sheetName),
+			m_PreferredShaderName(_preferredShader),
+			m_SpritesPerRow(_spritesPerRow),
+			m_SpritesPerCol(_spritesPerCol)
+		{}
+	};
+
+	std::vector<SpriteSheetLoadingParameters> m_SpriteSheetLoadQueue;
 
 	void LoadSpriteSheet(
 		const std::string& _locationRawImage,

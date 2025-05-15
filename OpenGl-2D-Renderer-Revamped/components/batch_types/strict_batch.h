@@ -6,7 +6,7 @@
 #include "../sprite_sheet.h"
 
 /*
-*	StrictBatch:	A Batch for instanced rendering where all objects rendered have
+*	StrictBatch:	A Batch for instanced rendering where all objects have
 *					strong resrtictions.
 *
 *	Requirements for drawn objects:
@@ -22,7 +22,7 @@ class StrictBatch {
 	unsigned int m_LocalBatchVAO = 0;
 
 	int m_InstanceCount = -1;
-	SpriteSheet* m_SpriteSheet = nullptr;
+	const SpriteSheet* m_SpriteSheet = nullptr;
 
 public:
 
@@ -47,10 +47,16 @@ public:
 
 	void Unbind() const;
 
+#ifdef DEBUG__CODE
+
+	std::string d_Name;
+
+#endif
+
 public:
 
 	int GetInstanceCount() const { return m_InstanceCount; }
-	SpriteSheet* GetSheet() const { return m_SpriteSheet; }
+	const SpriteSheet* GetSheet() const { return m_SpriteSheet; }
 	unsigned int GetSpriteIndexVBO() const { return m_SpriteIndexVBO; }
 
 };

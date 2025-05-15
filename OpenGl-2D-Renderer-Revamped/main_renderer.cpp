@@ -292,7 +292,7 @@ SpriteSheet* Renderer2D::GetSpriteSheetByName(
 			return &m_SpriteSheetArray[i];
 		}
 	}
-	DEBUG_WARN(1, "GetSpriteSheetByName() for name [%s] returned nullptr.", _spriteSheetName);
+	DEBUG_WARN(0, "GetSpriteSheetByName() for name [%s] returned nullptr.", _spriteSheetName);
 	return nullptr;
 }
 
@@ -307,9 +307,72 @@ Shader* Renderer2D::GetShaderByName(
 			return &m_ShaderArray[i];
 		}
 	}
-	DEBUG_WARN(1, "GetShaderByName() for name [%s] returned nullptr.", _shaderName);
+	DEBUG_WARN(0, "GetShaderByName() for name [%s] returned nullptr.", _shaderName);
 	return nullptr;
 }
+
+
+void Renderer2D::UploadShaderParameters(
+	const char* _shaderName,
+	const char* _location
+) {
+	m_ShaderLoadQueue.emplace_back(_shaderName, _location);
+}
+
+void Renderer2D::UploadSpriteSheetParameters(
+	const char* _locationRawImage,
+	const char* _sheetName,
+	const char* _preferredShader,
+	int _spritesPerRow,
+	int _spritesPerCol
+) {
+	m_SpriteSheetLoadQueue.emplace_back(
+		_locationRawImage,
+		_sheetName,
+		_preferredShader,
+		_spritesPerRow,
+		_spritesPerCol
+	);
+}
+
+void Renderer2D::StartLoadingProcess() {
+
+	m_ShaderArray.clear();
+	m_SpriteSheetArray.clear();
+
+	if (m_ShaderArray.capacity() <= m_ShaderLoadQueue.size()) {
+		m_ShaderArray.reserve(m_ShaderLoadQueue.size());
+	}
+
+	for (size_t i = 0; i < m_ShaderLoadQueue.size(); i++) {
+		ShaderLoadingParameters& params = m_ShaderLoadQueue[i];
+		LoadShader(
+			std::string(params.m_LocationOfShaderFile),
+			std::string(params.m_ShaderName)
+		);
+	}
+	m_ShaderLoadQueue.clear();
+
+	
+	if (m_SpriteSheetArray.capacity() <= m_SpriteSheetLoadQueue.size()) {
+		m_SpriteSheetArray.reserve(m_SpriteSheetLoadQueue.size());
+	}
+
+	for (size_t i = 0; i < m_SpriteSheetLoadQueue.size(); i++) {
+		SpriteSheetLoadingParameters& params = m_SpriteSheetLoadQueue[i];
+		LoadSpriteSheet(
+			std::string(params.m_LocationOfImage),
+			std::string(params.m_SheetName),
+			GetShaderByName(params.m_PreferredShaderName.c_str()),
+			params.m_SpritesPerRow,
+			params.m_SpritesPerCol
+		);
+	}
+	m_SpriteSheetLoadQueue.clear();
+
+}
+
+
 
 
 

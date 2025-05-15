@@ -28,6 +28,14 @@ struct StandardQuad {
 		const SpriteSheet* _spriteSheet
 	);
 
+	void BindVertexBufferAt(
+		int _verAttribPointerIndex
+	);
+
+	void BindTexUVbufferAt(
+		int _verAttribPointerIndex
+	);
+
 
 public:
 
