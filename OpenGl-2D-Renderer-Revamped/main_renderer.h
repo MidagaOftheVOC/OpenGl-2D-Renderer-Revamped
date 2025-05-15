@@ -74,11 +74,12 @@ private:	//	Structures for draw queue optimisation
 		const StrictBatch* m_Strict = nullptr;
 		float m_xScreenCoord, m_yScreenCoord;
 		float m_zLayer;
+		int m_RowSpriteCount;
 
 		const UniformDataVector* m_AppliedUniforms = nullptr;
 
-		StrictBatchDrawCall(const StrictBatch* _strictBatch, float x, float y, float z, const UniformDataVector* _uniformDataArray)
-			: m_Strict(_strictBatch), m_xScreenCoord(x), m_yScreenCoord(y), m_zLayer(z), m_AppliedUniforms(_uniformDataArray)
+		StrictBatchDrawCall(const StrictBatch* _strictBatch, float x, float y, float z, const UniformDataVector* _uniformDataArray, int _rowCount)
+			: m_Strict(_strictBatch), m_xScreenCoord(x), m_yScreenCoord(y), m_zLayer(z), m_AppliedUniforms(_uniformDataArray), m_RowSpriteCount(_rowCount)
 		{}
 
 		glm::vec3 GetPositionVector() const { return glm::vec3(m_xScreenCoord, m_yScreenCoord, m_zLayer); }
@@ -117,6 +118,7 @@ public:		//	Exposed functions
 		float _initialXpos,
 		float _initialYpos,
 		float _zLayer,
+		int _rowSpriteCount,
 		UniformDataVector* _uniformArray
 	);
 

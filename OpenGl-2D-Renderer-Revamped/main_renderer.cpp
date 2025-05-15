@@ -27,7 +27,13 @@ void Renderer2D::Draw(
 	float _zLayer,
 	UniformDataVector* _uniformArray
 ) {
-	m_DrawCallQueue.emplace( _drawable, _xPosition, _yPosition, _zLayer, _uniformArray);
+	m_DrawCallQueue.emplace(
+		_drawable,
+		_xPosition,
+		_yPosition,
+		_zLayer,
+		_uniformArray
+	);
 }
 
 
@@ -36,9 +42,17 @@ void Renderer2D::Draw(
 	float _initialXpos,
 	float _initialYpos,
 	float _zLayer,
+	int _rowSpriteCount,
 	UniformDataVector* _uniformArray
 ) {
-	m_StrictBatchArray.emplace_back(_batch, _initialXpos, _initialYpos, _zLayer, _uniformArray);
+	m_StrictBatchArray.emplace_back(
+		_batch,
+		_initialXpos,
+		_initialYpos,
+		_zLayer,
+		_uniformArray,
+		_rowSpriteCount
+	);
 }
 
 
@@ -55,15 +69,15 @@ void Renderer2D::ExecuteDraws() {
 #endif
 
 	glClear(GL_COLOR_BUFFER_BIT);
-
 	
 	//	-- RENDERING STARTS --	//
+
 
 	RenderDrawables();
 	RenderStrictBatches();
 
-	//	-- RENDERING ENDS	--	//
 
+	//	-- RENDERING ENDS	--	//
 
 	glfwSwapBuffers(GetWinHandle());
 	glfwPollEvents();
@@ -89,18 +103,24 @@ void Renderer2D::RenderStrictBatches() {
 
 		Strict->Bind();
 
+		// SHEET SET UP
+		glBindTexture(GL_TEXTURE_2D, SheetCurrent->GetTextureBufferID());
+		GetQuad().BufferTexCoords(SheetCurrent);
+
 		// SHADER SET UP
 		ShaderCurrent->UseShader();
 		ShaderCurrent->SetMat4("u_Projection", m_Camera.GetProjectionMatrix());
 		ShaderCurrent->SetMat4("u_View", m_Camera.GetViewMatrix());
 		ShaderCurrent->SetMat4("u_Model", glm::translate(glm::mat4(1.f), DrawCallCurrent.GetPositionVector()));
 
+		ShaderCurrent->SetInt("u_SheetRowSpriteCount", SheetCurrent->GetSheetRowSpriteCount());
+		ShaderCurrent->SetVec2("u_SpriteTexUVDimensions", SheetCurrent->GetSpriteDimensions());
+		
+		ShaderCurrent->SetInt("u_RowSpriteCount", DrawCallCurrent.m_RowSpriteCount);
+		ShaderCurrent->SetInt("u_SpriteSideLengthPx", GetQuad().m_StandardSpritePixelLength);
+
 		ShaderCurrent->ApplyUniforms(DrawCallCurrent.m_AppliedUniforms);
 
-
-		// SHEET SET UP
-		glBindTexture(GL_TEXTURE_2D, SheetCurrent->GetTextureBufferID());
-		GetQuad().BufferTexCoords(SheetCurrent);
 
 		glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr, InstanceCount);
 
@@ -133,6 +153,8 @@ void Renderer2D::RenderDrawables() {
 
 		SheetCurrent = DrawcallCurrent.drawable->GetAsociatedSpriteSheet();
 		ShaderCurrent = SheetCurrent->GetShader();
+
+		//const Shader* hui = GetShaderByName(ShaderCurrent->GetName().c_str());
 
 		DEBUG_ASSERT(SheetCurrent != nullptr, "SpriteSheet* set to nullptr when executing draw calls.\n\tDrawable object has initial index [%llu] in queue.", i);
 		DEBUG_ASSERT(ShaderCurrent != nullptr, "Shader* set to nullptr when executing draw calls.\n\t-- from SpriteSheet with name [%s]", SheetCurrent->GetName().c_str());
@@ -211,7 +233,9 @@ bool Renderer2D::Init() {
 		{ 1, 1 },
 		{ m_ScreenWidth, m_ScreenHeight }
 	);
+	
 
+	g_StandardQuad.Init();
 
 	return true;
 }
@@ -268,6 +292,7 @@ SpriteSheet* Renderer2D::GetSpriteSheetByName(
 			return &m_SpriteSheetArray[i];
 		}
 	}
+	DEBUG_WARN(1, "GetSpriteSheetByName() for name [%s] returned nullptr.", _spriteSheetName);
 	return nullptr;
 }
 
@@ -282,6 +307,7 @@ Shader* Renderer2D::GetShaderByName(
 			return &m_ShaderArray[i];
 		}
 	}
+	DEBUG_WARN(1, "GetShaderByName() for name [%s] returned nullptr.", _shaderName);
 	return nullptr;
 }
 

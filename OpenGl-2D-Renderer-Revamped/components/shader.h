@@ -86,6 +86,11 @@ public:
 
 public:
 
+    int GetUniformLocation(
+        const char* _uniformName
+    ) const;
+
+
     const unsigned int GetShaderId() const;
     const std::string& GetName() const;
 

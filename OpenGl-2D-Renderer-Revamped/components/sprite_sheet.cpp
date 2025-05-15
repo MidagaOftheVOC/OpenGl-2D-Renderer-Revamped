@@ -3,6 +3,9 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "../dependancies/stb_image.h"
 
+glm::vec2 SpriteSheet::GetSpriteDimensions() const {
+	return { m_SpriteUniformUVs.u1, m_SpriteUniformUVs.v1 };
+}
 
 
 glm::vec2 SpriteSheet::GetCalculatedSpriteOffsets(

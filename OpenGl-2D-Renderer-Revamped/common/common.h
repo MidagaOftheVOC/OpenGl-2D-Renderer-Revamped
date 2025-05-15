@@ -54,29 +54,16 @@
 #endif
 
 
-
-
-
 void CheckGLErrors(const char* context = "OpenGL");
 
-
-
-template<typename t>
-struct vec2 {
-
-	t x = 0;
-	t y = 0;
-
-	vec2 operator+(const vec2& other);
-	vec2 operator-(const vec2& other);
-
-	float GetLength();
-
-	//	Positive degrees is anti-clockwise
-	void SetAngle(float radian);
-};
-
-
-
 bool fEqual(float _val1, float _val2);
+
+
+struct GL_DiagnosticFunctions {
+
+    //static void Shader_
+
+
+
+};
 

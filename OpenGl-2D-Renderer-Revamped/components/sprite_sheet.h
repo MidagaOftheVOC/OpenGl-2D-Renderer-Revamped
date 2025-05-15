@@ -61,13 +61,9 @@ class SpriteSheet {
 
 public:
 
-
 	glm::vec2 GetCalculatedSpriteOffsets(
 		int _spriteIndex
 	) const;
-
-	const UVRegion& GetSheetSpriteUVregion() const { return m_SpriteUniformUVs; }
-
 
 public:
 
@@ -79,15 +75,20 @@ public:
 		int _spritesPerCol
 	);
 
+
 	SpriteSheet();
 
 public:
 
+	glm::vec2 GetSpriteDimensions() const;
+	const UVRegion& GetSheetSpriteUVregion() const { return m_SpriteUniformUVs; }
 	const std::string& GetName() const;
 	const Shader* GetShader() const { return m_Shader; }
+	int GetSheetRowSpriteCount() const { return m_SpriteCountPerRow; }
 	unsigned int GetTextureBufferID() const { return m_TextureBufferID; }
 
 	void DestroyGLTextureObject();
+
 };
 
 

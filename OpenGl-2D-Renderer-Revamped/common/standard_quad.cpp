@@ -5,7 +5,6 @@
 StandardQuad g_StandardQuad = StandardQuad();
 
 StandardQuad::StandardQuad() {
-	Init();
 }
 
 void StandardQuad::Unbind() {

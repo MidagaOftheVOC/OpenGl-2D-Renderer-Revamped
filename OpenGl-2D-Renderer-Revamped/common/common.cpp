@@ -1,38 +1,6 @@
 
 #include "common.h"
 
-template <typename t>
-vec2<t> vec2<t>::operator+(const vec2<t>& other) {
-	return { x + other.x, y + other.y };
-}
-
-
-template <typename t>
-vec2<t> vec2<t>::operator-(const vec2<t>& other) {
-	return { x - other.x, y - other.y };
-}
-
-
-template <typename t>
-float vec2<t>::GetLength() {
-	return static_cast<float>(sqrt(x * x + y * y));
-}
-
-template <typename t>
-void vec2<t>::SetAngle(float radian) {
-	float vecLength = GetLength();
-
-	t xNew, yNew;
-	float length = GetLength();
-
-	xNew = x * cos(radian) * length;
-	yNew = y * sin(radian) * length;
-
-	x = xNew;
-	y = yNew;
-}
-
-
 bool fEqual(
 	float _val1,
 	float _val2) 

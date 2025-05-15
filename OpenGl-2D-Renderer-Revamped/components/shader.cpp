@@ -133,7 +133,7 @@ void Shader::ApplyUniforms(
         auto Iterator = m_UniformLocationMap.find(Uniform.name);
 
         if (Iterator == m_UniformLocationMap.end()) {
-            DEBUG_LOG("Non-existant uniform [%s] within shader [%s]", Uniform.name, GetName().c_str());
+            DEBUG_LOG("Non-existant uniform [%s] within shader [%s]", Uniform.name.c_str(), GetName().c_str());
         }
         else {
 
@@ -173,13 +173,26 @@ function_; return;}
 }
 
 
+int Shader::GetUniformLocation(
+    const char* _uniformName
+) const {
+    auto Iterator = m_UniformLocationMap.find(_uniformName);
+    
+    if (Iterator != m_UniformLocationMap.end()) {
+        return Iterator->second.location;
+    }
+
+    DEBUG_WARN(1, "Shader [%s] can't find uniform with name [%s].", GetName().c_str(), _uniformName);
+    return -1;
+}
+
+
 void Shader::SetMat4(
     const char* _uniformName,
     const glm::mat4& _uniformValue
 ) const {
-    int a = glGetUniformLocation(GetShaderId(), _uniformName);
     glUniformMatrix4fv(
-        glGetUniformLocation(GetShaderId(), _uniformName),
+        GetUniformLocation(_uniformName),
         1,
         GL_FALSE,
         glm::value_ptr(_uniformValue)
@@ -191,7 +204,7 @@ void Shader::SetFloat(
     const float _uniformValue
 ) const {
     glUniform1f(
-        glGetUniformLocation(GetShaderId(), _uniformName),
+        GetUniformLocation(_uniformName),
         _uniformValue
     );
 }
@@ -201,7 +214,7 @@ void Shader::SetInt(
     const int _uniformValue
 ) const {
     glUniform1i(
-        glGetUniformLocation(GetShaderId(), _uniformName),
+        GetUniformLocation(_uniformName),
         _uniformValue
     );
 }
@@ -211,7 +224,7 @@ void Shader::SetVec2(
     const glm::vec2 _uniformValue
 ) const {
     glUniform2f(
-        glGetUniformLocation(GetShaderId(), _uniformName),
+        GetUniformLocation(_uniformName),
         _uniformValue.x,
         _uniformValue.y
     );
