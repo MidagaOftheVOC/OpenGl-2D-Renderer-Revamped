@@ -10,6 +10,7 @@
 #include "components/shader.h"
 #include "components/drawable.h"
 #include "components/camera.h"
+#include "components/input_controller.h"
 
 #include "components/batch_types/strict_batch.h"
 #include "components/batch_types/soft_batch.h"
@@ -35,7 +36,12 @@ private:	//	Logical components
 
 	StandardQuad& m_StandardQuad;
 
+
 	Camera m_Camera;
+
+
+	InputController m_InputController;
+
 
 	std::vector<SpriteSheet> m_SpriteSheetArray;
 	std::vector<Shader> m_ShaderArray;
@@ -65,7 +71,7 @@ private:	//	Structures for draw queue optimisation
 		glm::vec3 GetPositionVector() const { return glm::vec3(m_xScreenCoord, m_yScreenCoord, m_zLayer); }
 	};
 
-	//	Drawable queue
+
 	struct DrawableDrawCall : DrawCall {
 	private:
 		const Drawable* m_Drawable = nullptr;
@@ -75,6 +81,7 @@ private:	//	Structures for draw queue optimisation
 		{}
 		const Drawable* GetDrawablePointer() const { return m_Drawable; }
 	};
+
 
 	//	This comparator orders DrawCalls first by Shader*, and within
 	//	those Shader* groups, second by SpriteSheet*
@@ -86,8 +93,6 @@ private:	//	Structures for draw queue optimisation
 	std::priority_queue<DrawableDrawCall, std::vector<DrawableDrawCall>, DrawCallComparator> m_DrawCallQueue;
 
 	
-	//	StrictBatch array
-	//	This doesn't need to be an array
 	struct StrictBatchDrawCall : DrawCall {
 	private:
 		const StrictBatch* m_Strict = nullptr;
@@ -279,9 +284,11 @@ public:		// getters and setters,
 
 	//	Gets the single instance governing OpenGL objects like 
 	//	VBOs, IBO and VAO used for rendering
-	StandardQuad&	GetQuad() { return m_StandardQuad; }
-	GLFWwindow*		GetWinHandle() const { return m_MainWindowHandle; }
-	Camera&			GetCamera() { return m_Camera; }
+	StandardQuad&		GetQuad() { return m_StandardQuad; }
+	GLFWwindow*			GetWinHandle() const { return m_MainWindowHandle; }
+	Camera&				GetCamera() { return m_Camera; }
+	InputController&	GetInputController() { return m_InputController; }
+
 };
 
 

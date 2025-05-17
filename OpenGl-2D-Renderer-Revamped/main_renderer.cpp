@@ -185,6 +185,7 @@ void Renderer2D::RenderStrictBatches() {
 void Renderer2D::RenderDrawables() {
 
 #ifdef DEBUG__CODE
+	bool d_Print = false;
 	int d_SheetChanges = 0;
 	int d_ShaderChanges = 0;
 #endif
@@ -243,6 +244,7 @@ void Renderer2D::RenderDrawables() {
 	}
 
 #ifdef DEBUG__CODE
+	if(d_Print)
 	fprintf(stdout, "ExecuteDraws() stats for [%lld] DrawCall objects:\n\tSheet changes: %d\n\tShader changes: %d\n",
 		DrawQueueOriginalSize, d_SheetChanges, d_ShaderChanges);
 #endif
@@ -254,6 +256,7 @@ void Renderer2D::RenderDrawables() {
 
 bool Renderer2D::Init() {
 
+	//	Window and GLFW context initialisation
 	if (!glfwInit()) {
 		std::cout << "Window not opened.\n";
 		return false;
@@ -279,13 +282,23 @@ bool Renderer2D::Init() {
 		return false;
 	}
 
-
+	//	Component initialisation
 
 	m_Camera.Initialisation(
 		{ 1, 1 },
 		{ m_ScreenWidth, m_ScreenHeight }
 	);
+
+	m_InputController = InputController(
+		GetWinHandle()
+	);
+
+	m_InputController.SetTrackedKeystatesBitmask(
+		InputController::c_ArrowTrackBit |
+		InputController::c_LetterTrackBit
+	);
 	
+	//	Globals initialisation
 
 	g_StandardQuad.Init();
 

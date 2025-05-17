@@ -48,6 +48,9 @@
     <ClCompile Include="components\batch_types\soft_batch.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="components\input_controller.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="main_renderer.h">
@@ -78,6 +81,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="components\batch_types\soft_batch.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="components\input_controller.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
