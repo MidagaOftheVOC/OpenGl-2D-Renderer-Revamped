@@ -39,11 +39,11 @@ struct StandardQuad {
 
 public:
 
-	unsigned int  g_stdVertexCoordArray[8] = {
+	float  g_stdVertexCoordArray[8] = {
 		0,										0,
-		0,										(unsigned)m_StandardSpritePixelLength,
-		(unsigned)m_StandardSpritePixelLength,	(unsigned)m_StandardSpritePixelLength,
-		(unsigned)m_StandardSpritePixelLength,	0
+		0,									(float)m_StandardSpritePixelLength,
+		(float)m_StandardSpritePixelLength,	(float)m_StandardSpritePixelLength,
+		(float)m_StandardSpritePixelLength,	0
 	};
 
 	float g_stdTexCoordArray[8] = {

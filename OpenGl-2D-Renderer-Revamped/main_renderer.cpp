@@ -18,6 +18,21 @@ Drawable Renderer2D::GenerateDrawable(
 }
 
 
+void Renderer2D::Draw(
+	const SoftBatch* _batch,
+	float _xPosition,
+	float _yPosition,
+	float _zLayer,
+	UniformDataVector* _uniformArray
+) {
+	m_SoftBatchArray.emplace_back(
+		_batch,
+		_xPosition,
+		_yPosition,
+		_zLayer,
+		_uniformArray
+	);
+}
 
 
 void Renderer2D::Draw(
@@ -75,6 +90,7 @@ void Renderer2D::ExecuteDraws() {
 
 	RenderDrawables();
 	RenderStrictBatches();
+	RenderSoftBatches();
 
 
 	//	-- RENDERING ENDS	--	//
@@ -84,9 +100,45 @@ void Renderer2D::ExecuteDraws() {
 }
 
 
+void Renderer2D::RenderSoftBatches() {
+	std::vector<SoftBatchDrawCall>& Arr = m_SoftBatchArray;
+	
+	for (size_t i = 0; i < Arr.size(); i++) {
+		const SoftBatchDrawCall& DrawCall = Arr[i];
+
+		const SoftBatch* Soft = DrawCall.GetSoftBatchPointer();
+		const SpriteSheet* Sheet = Soft->GetSheet();
+		const Shader* Shader = Sheet->GetShader();
+
+		int InstanceCount = Soft->GetInstanceCount();
+
+		Soft->Bind();
+
+		glBindTexture(GL_TEXTURE_2D, Sheet->GetTextureBufferID());
+		GetQuad().BufferTexCoords(Sheet);
+
+		Shader->UseShader();
+		Shader->SetMat4("u_Model", glm::translate(glm::mat4(1.f), DrawCall.GetPositionVector()));
+		Shader->SetMat4("u_View", GetCamera().GetViewMatrix());
+		Shader->SetMat4("u_Projection", GetCamera().GetProjectionMatrix());
+
+		Shader->SetInt("u_SheetRowSpriteCount", Sheet->GetSheetRowSpriteCount());
+		Shader->SetVec2("u_SpriteTexUVDimensions", Sheet->GetSpriteDimensions());
+
+		Shader->ApplyUniforms(DrawCall.GetAppliedUniforms());
+
+		
+		glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr, InstanceCount);
+
+		Soft->Unbind();
+	}
+	Arr.clear();
+}
+
+
 void Renderer2D::RenderStrictBatches() {
 
-	//	Since these batches are pretty much guaranteed to use
+	//	Since these batches are guaranteed to use
 	//	unique sprite sheets paired with unique shaders
 	//	there's not much point in trying to optimise this part
 
@@ -95,7 +147,7 @@ void Renderer2D::RenderStrictBatches() {
 	for (size_t i = 0; i < Arr.size(); i++) {
 		const StrictBatchDrawCall& DrawCallCurrent = Arr[i];
 		
-		const StrictBatch* Strict = DrawCallCurrent.m_Strict;
+		const StrictBatch* Strict = DrawCallCurrent.GetStrictBatchPointer();
 		const SpriteSheet* SheetCurrent = Strict->GetSheet();
 		const Shader* ShaderCurrent = SheetCurrent->GetShader();
 
@@ -116,10 +168,10 @@ void Renderer2D::RenderStrictBatches() {
 		ShaderCurrent->SetInt("u_SheetRowSpriteCount", SheetCurrent->GetSheetRowSpriteCount());
 		ShaderCurrent->SetVec2("u_SpriteTexUVDimensions", SheetCurrent->GetSpriteDimensions());
 		
-		ShaderCurrent->SetInt("u_RowSpriteCount", DrawCallCurrent.m_RowSpriteCount);
+		ShaderCurrent->SetInt("u_RowSpriteCount", DrawCallCurrent.GetRowSpriteCount());
 		ShaderCurrent->SetInt("u_SpriteSideLengthPx", GetQuad().m_StandardSpritePixelLength);
 
-		ShaderCurrent->ApplyUniforms(DrawCallCurrent.m_AppliedUniforms);
+		ShaderCurrent->ApplyUniforms(DrawCallCurrent.GetAppliedUniforms());
 
 
 		glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr, InstanceCount);
@@ -145,13 +197,13 @@ void Renderer2D::RenderDrawables() {
 	size_t DrawQueueOriginalSize = m_DrawCallQueue.size();
 	for (size_t i = 0; i < DrawQueueOriginalSize; i++)
 	{
-		DrawCall DrawcallCurrent = m_DrawCallQueue.top();
+		DrawableDrawCall DrawcallCurrent = m_DrawCallQueue.top();
 		m_DrawCallQueue.pop();
 
 		const SpriteSheet* SheetCurrent = nullptr;
 		const Shader* ShaderCurrent = nullptr;
 
-		SheetCurrent = DrawcallCurrent.drawable->GetAsociatedSpriteSheet();
+		SheetCurrent = DrawcallCurrent.GetDrawablePointer()->GetAsociatedSpriteSheet();
 		ShaderCurrent = SheetCurrent->GetShader();
 
 		//const Shader* hui = GetShaderByName(ShaderCurrent->GetName().c_str());
@@ -183,9 +235,9 @@ void Renderer2D::RenderDrawables() {
 		//	per-instance data, unskippable
 		ShaderCurrent->SetMat4("u_Model", glm::translate(glm::mat4(1.f), DrawcallCurrent.GetPositionVector()));
 		ShaderCurrent->SetVec2("u_SpriteOffsets",
-			SheetCurrent->GetCalculatedSpriteOffsets(DrawcallCurrent.drawable->GetSpriteIndex()));
+			SheetCurrent->GetCalculatedSpriteOffsets(DrawcallCurrent.GetDrawablePointer()->GetSpriteIndex()));
 
-		ShaderCurrent->ApplyUniforms(DrawcallCurrent.m_AppliedUniforms);
+		ShaderCurrent->ApplyUniforms(DrawcallCurrent.GetAppliedUniforms());
 
 		GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr));
 	}
@@ -313,10 +365,10 @@ Shader* Renderer2D::GetShaderByName(
 
 
 void Renderer2D::UploadShaderParameters(
-	const char* _shaderName,
-	const char* _location
+	const char* _location,
+	const char* _shaderName
 ) {
-	m_ShaderLoadQueue.emplace_back(_shaderName, _location);
+	m_ShaderLoadQueue.emplace_back(_location, _shaderName);
 }
 
 void Renderer2D::UploadSpriteSheetParameters(
@@ -373,17 +425,21 @@ void Renderer2D::StartLoadingProcess() {
 }
 
 
+bool Renderer2D::IsRunning() const {
+	return glfwWindowShouldClose(GetWinHandle());
+}
 
 
 
-bool Renderer2D::DrawCallComparator::operator()(const DrawCall& a, const DrawCall& b) const {
 
-	const Shader* aS = a.drawable->GetAsociatedSpriteSheet()->GetShader();
-	const Shader* bS = b.drawable->GetAsociatedSpriteSheet()->GetShader();
+bool Renderer2D::DrawCallComparator::operator()(const DrawableDrawCall& a, const DrawableDrawCall& b) const {
+
+	const Shader* aS = a.GetDrawablePointer()->GetAsociatedSpriteSheet()->GetShader();
+	const Shader* bS = b.GetDrawablePointer()->GetAsociatedSpriteSheet()->GetShader();
 
 
 	if (aS == bS) {
-		return a.drawable->GetAsociatedSpriteSheet() > b.drawable->GetAsociatedSpriteSheet();
+		return a.GetDrawablePointer()->GetAsociatedSpriteSheet() > b.GetDrawablePointer()->GetAsociatedSpriteSheet();
 	}
 
 	return aS > bS;

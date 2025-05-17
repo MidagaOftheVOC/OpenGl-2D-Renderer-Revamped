@@ -2,11 +2,11 @@
 
 // -- PROJECT SETTINGS -- //
 
-#define DEBUG__CODE            // use for debug-build-only code snippets
-#define DEBUG__ALLOW_ASSERTS
 #define GLEW_STATIC
 
 
+#define DEBUG__CODE            // use for debug-build-only code snippets
+#define DEBUG__ALLOW_ASSERTS
 
 // -- END PROJECT SETTINGS -- //
 

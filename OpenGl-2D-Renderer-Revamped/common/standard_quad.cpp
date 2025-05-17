@@ -20,7 +20,7 @@ void StandardQuad::Init() {
 	glBindBuffer(GL_ARRAY_BUFFER, m_VextexBuffer);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(g_stdVertexCoordArray), g_stdVertexCoordArray, GL_STATIC_DRAW);
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 2, GL_UNSIGNED_INT, GL_FALSE, 0, 0);
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
 
 	glGenBuffers(1, &m_TexCoordBuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, m_TexCoordBuffer);

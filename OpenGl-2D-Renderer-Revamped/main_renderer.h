@@ -12,6 +12,7 @@
 #include "components/camera.h"
 
 #include "components/batch_types/strict_batch.h"
+#include "components/batch_types/soft_batch.h"
 
 #include "components/uniform/uniform_data.h"
 
@@ -42,50 +43,80 @@ private:	//	Logical components
 
 private:	//	Structures for draw queue optimisation
 
-	//	Drawable queue
+	//	Base class for DrawCall-like structures
+	//	This contains required data for all draw calls like positions and a uniform array
+	//	This class should not(and cannot as of now) be used anywhere else, one should only
+	//	derive from it to create specialised draw calls.
 	struct DrawCall {
-		const Drawable* drawable = nullptr;
-		float xScreenCoord, yScreenCoord;
-		float zLayer = 2.f;
+	protected:
+		float m_xScreenCoord;
+		float m_yScreenCoord;
+		float m_zLayer;
 
-		//	This is really expensive, should probably only be used 
-		const UniformDataVector* m_AppliedUniforms = nullptr;
+		//	If value is left at nullptr, no additional uniforms will be applied
+		const UniformDataVector* m_AppliedUniforms = nullptr; 
 
-		DrawCall(const Drawable* _drawable, float x, float y, float z, const UniformDataVector* _uniformDataArray)
-			: drawable(_drawable), xScreenCoord(x), yScreenCoord(y), zLayer(z), m_AppliedUniforms(_uniformDataArray)
+	public:
+		DrawCall(float x, float y, float z, const UniformDataVector* _uniformDataArray)
+			: m_xScreenCoord(x), m_yScreenCoord(y), m_zLayer(z), m_AppliedUniforms(_uniformDataArray)
 		{}
 
-		glm::vec3 GetPositionVector() const { return glm::vec3(xScreenCoord, yScreenCoord, zLayer); }
+		const UniformDataVector* GetAppliedUniforms() const { return m_AppliedUniforms; }
+		glm::vec3 GetPositionVector() const { return glm::vec3(m_xScreenCoord, m_yScreenCoord, m_zLayer); }
+	};
+
+	//	Drawable queue
+	struct DrawableDrawCall : DrawCall {
+	private:
+		const Drawable* m_Drawable = nullptr;
+	public:
+		DrawableDrawCall(const Drawable* _drawable, float x, float y, float z, const UniformDataVector* _uniformDataArray)
+			: m_Drawable(_drawable), DrawCall(x, y, z, _uniformDataArray)
+		{}
+		const Drawable* GetDrawablePointer() const { return m_Drawable; }
 	};
 
 	//	This comparator orders DrawCalls first by Shader*, and within
 	//	those Shader* groups, second by SpriteSheet*
 	struct DrawCallComparator{
-		bool operator()(const DrawCall& a, const DrawCall& b) const;
+		bool operator()(const DrawableDrawCall& a, const DrawableDrawCall& b) const;
 	};
 
 
-	std::priority_queue<DrawCall, std::vector<DrawCall>, DrawCallComparator> m_DrawCallQueue;
+	std::priority_queue<DrawableDrawCall, std::vector<DrawableDrawCall>, DrawCallComparator> m_DrawCallQueue;
 
 	
-	//	Batch array
+	//	StrictBatch array
 	//	This doesn't need to be an array
-	struct StrictBatchDrawCall {
+	struct StrictBatchDrawCall : DrawCall {
+	private:
 		const StrictBatch* m_Strict = nullptr;
-		float m_xScreenCoord, m_yScreenCoord;
-		float m_zLayer;
-		int m_RowSpriteCount;
-
-		const UniformDataVector* m_AppliedUniforms = nullptr;
-
+		const int m_RowSpriteCount;
+	public:
 		StrictBatchDrawCall(const StrictBatch* _strictBatch, float x, float y, float z, const UniformDataVector* _uniformDataArray, int _rowCount)
-			: m_Strict(_strictBatch), m_xScreenCoord(x), m_yScreenCoord(y), m_zLayer(z), m_AppliedUniforms(_uniformDataArray), m_RowSpriteCount(_rowCount)
+			: m_Strict(_strictBatch), m_RowSpriteCount(_rowCount), DrawCall(x, y, z, _uniformDataArray)
 		{}
-
-		glm::vec3 GetPositionVector() const { return glm::vec3(m_xScreenCoord, m_yScreenCoord, m_zLayer); }
+		const StrictBatch* GetStrictBatchPointer() const { return m_Strict; }
+		const int GetRowSpriteCount() const { return m_RowSpriteCount; }
 	};
 
+	
 	std::vector<StrictBatchDrawCall> m_StrictBatchArray;
+
+
+	struct SoftBatchDrawCall : DrawCall {
+	private:
+		const SoftBatch* m_Soft = nullptr;
+	public:
+		SoftBatchDrawCall(const SoftBatch* _softBatch, float x, float y, float z, const UniformDataVector* _uniformDataArray)
+			: m_Soft(_softBatch), DrawCall(x, y, z, _uniformDataArray)
+		{}
+		const SoftBatch* GetSoftBatchPointer() const { return m_Soft; }
+	};
+
+
+	std::vector<SoftBatchDrawCall> m_SoftBatchArray;
+
 
 private:
 
@@ -93,6 +124,9 @@ private:
 
 
 	void RenderStrictBatches();
+
+
+	void RenderSoftBatches();
 
 public:		//	Exposed functions
 	
@@ -111,6 +145,15 @@ public:		//	Exposed functions
 
 	//	Execute all draw calls and flush the draw queue.
 	void ExecuteDraws();
+
+
+	void Draw(
+		const SoftBatch* _batch,
+		float _xPosition,
+		float _yPosition,
+		float _zLayer,
+		UniformDataVector* _uniformArray
+	);
 
 
 	void Draw(
@@ -144,6 +187,9 @@ public:		//	Exposed functions
 		int _indexInSpriteSheet
 	);
 
+
+	bool IsRunning() const;
+
 public:		//	Loading functions, which append loading parameters to the queues.
 			//	All necessary resources must pass through those, after which we
 			//	call StartLoadingProcess() to turn them into usable objects.
@@ -153,8 +199,8 @@ public:		//	Loading functions, which append loading parameters to the queues.
 			//	or similar.
 
 	void UploadShaderParameters(
-		const char* _shaderName,
-		const char* _location
+		const char* _location,
+		const char* _shaderName
 	);
 
 	void UploadSpriteSheetParameters(
@@ -234,7 +280,7 @@ public:		// getters and setters,
 	//	Gets the single instance governing OpenGL objects like 
 	//	VBOs, IBO and VAO used for rendering
 	StandardQuad&	GetQuad() { return m_StandardQuad; }
-	GLFWwindow*		GetWinHandle() { return m_MainWindowHandle; }
+	GLFWwindow*		GetWinHandle() const { return m_MainWindowHandle; }
 	Camera&			GetCamera() { return m_Camera; }
 };
 

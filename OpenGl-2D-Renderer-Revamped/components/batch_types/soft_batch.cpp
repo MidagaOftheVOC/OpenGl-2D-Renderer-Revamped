@@ -26,6 +26,8 @@ void SoftBatch::InitialiseBuffers(
 	g_StandardQuad.BindVertexBufferAt(0);
 	g_StandardQuad.BindTexUVbufferAt(1);
 
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, g_StandardQuad.m_IndexBuffer);
+
 
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);	//	1 int / instance		- sprite index
 	glBufferData(GL_ARRAY_BUFFER, sizeof(int) * GetInstanceCount(), _spriteIndexArray, GL_DYNAMIC_DRAW);
@@ -55,12 +57,12 @@ void SoftBatch::InitialiseBuffers(
 }
 
 
-void SoftBatch::Bind() {
+void SoftBatch::Bind() const {
 	glBindVertexArray(m_LocalBatchVAO);
 }
 
 
-void SoftBatch::Unbind() {
+void SoftBatch::Unbind() const {
 	glBindVertexArray(0);
 }
 

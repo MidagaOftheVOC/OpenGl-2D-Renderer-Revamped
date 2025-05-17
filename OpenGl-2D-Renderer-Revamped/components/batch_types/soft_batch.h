@@ -40,10 +40,10 @@ public:
 	);
 
 
-	void Bind();
+	void Bind() const;
 
 
-	void Unbind();
+	void Unbind() const;
 
 public:
 
