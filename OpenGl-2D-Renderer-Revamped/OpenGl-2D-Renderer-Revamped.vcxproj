@@ -150,6 +150,7 @@
     <ClCompile Include="components\input_controller.cpp" />
     <ClCompile Include="components\shader.cpp" />
     <ClCompile Include="components\sprite_sheet.cpp" />
+    <ClCompile Include="components\ui\font.cpp" />
     <ClCompile Include="components\uniform\uniform_data.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="main_renderer.cpp" />
@@ -164,6 +165,7 @@
     <ClInclude Include="components\input_controller.h" />
     <ClInclude Include="components\shader.h" />
     <ClInclude Include="components\sprite_sheet.h" />
+    <ClInclude Include="components\ui\font.h" />
     <ClInclude Include="components\uniform\uniform_data.h" />
     <ClInclude Include="main_renderer.h" />
   </ItemGroup>

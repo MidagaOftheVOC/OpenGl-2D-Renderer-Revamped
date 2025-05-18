@@ -2,10 +2,6 @@
 #include "main_renderer.h"
 
 
-
-
-
-
 Drawable Renderer2D::GenerateDrawable(
 	const char* _spriteSheetName,
 	int _indexInSpriteSheet

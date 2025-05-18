@@ -151,7 +151,9 @@ public:		//	Exposed functions
 	//	Execute all draw calls and flush the draw queue.
 	void ExecuteDraws();
 
-
+	//	Here, the X and Y coordinates represent the anchor point for the SoftBatch.
+	//	In essence, all the positions given to the SoftBatch object at creation
+	//	are relative to the X and Y coordinates given here.
 	void Draw(
 		const SoftBatch* _batch,
 		float _xPosition,
@@ -171,8 +173,6 @@ public:		//	Exposed functions
 	);
 
 
-	//	Adds a draw call to the queue for _drawable at position {_xPosition, _yPosition} with
-	//	top left window corner as origin, with y-axis growing downwards.
 	void Draw(
 		const Drawable* _drawable,
 		float _xPosition,
