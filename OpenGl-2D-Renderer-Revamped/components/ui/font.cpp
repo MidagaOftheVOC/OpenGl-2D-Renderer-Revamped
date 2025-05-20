@@ -10,9 +10,10 @@ Font::Font(
 	m_FontName(_name)
 {}
 
+
 void Font::Init(
 	const std::u32string& _containedGlyphs,
-	int* _glyphOffsets,
+	unsigned short* _glyphOffsets,
 	int _glyphCount
 ) {
 	DEBUG_ASSERT(_glyphCount >= 0 && _glyphCount <= MAXIMUM_GLYPHS_PER_FONT, "Strange glyph count for Font [%s].", GetName().c_str());
@@ -22,14 +23,14 @@ void Font::Init(
 	m_GlyphIdentifier = _containedGlyphs;
 	m_GlyphCount = _glyphCount;
 
-	memcpy(m_GlyphOffsetsFromAdjecentGlyph, _glyphOffsets, _glyphCount * sizeof(int));
+	memcpy(m_GlyphOffsetsFromAdjecentGlyph, _glyphOffsets, _glyphCount * sizeof(unsigned short));
 }
 
 
 void Font::GetConsecutiveOffsetsFromFirstGlyph(
 	const std::u32string& _text,
-	std::vector<int>& OUT_preparedGlyphOffsets
-) {
+	std::vector<unsigned short>& OUT_preparedGlyphOffsets
+) const {
 	if (OUT_preparedGlyphOffsets.capacity() < _text.size()) {
 		DEBUG_LOG("Unprepared std::vector passed to Font [%s].", GetName().c_str());
 		OUT_preparedGlyphOffsets.reserve(_text.size());
@@ -42,8 +43,8 @@ void Font::GetConsecutiveOffsetsFromFirstGlyph(
 	for (size_t i = 1; i < VectorSize; i++) {
 		
 #ifdef DEBUG__CODE
-		int d_Result = GetOffsetForGlyph(_text[i]);
-		DEBUG_ASSERT(d_Result != -1, "Character [\\u%d] in Font [%s] not found.", _text[i], GetName().c_str());
+		unsigned short d_Result = GetOffsetForGlyph(_text[i]);
+		DEBUG_ASSERT(d_Result != -1, "Character [\\u%d] in Font [%s] not found.", (int)_text[i], GetName().c_str());
 		
 		TotalOffset += d_Result;
 #else
@@ -56,9 +57,9 @@ void Font::GetConsecutiveOffsetsFromFirstGlyph(
 }
 
 
-int Font::GetOffsetForGlyph(
+unsigned short Font::GetOffsetForGlyph(
 	char32_t _char
-) {
+) const {
 	for (size_t i = 0; i < m_GlyphIdentifier.size(); i++) {
 		if (_char == m_GlyphIdentifier[i]) return m_GlyphOffsetsFromAdjecentGlyph[i];
 	}
