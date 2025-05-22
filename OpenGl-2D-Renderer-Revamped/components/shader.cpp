@@ -96,7 +96,7 @@ Shader::Shader(
 
 
 const void Shader::UseShader() const {
-    DEBUG_ASSERT(m_ProgramID != 0, "Using uninitialised shader.")
+    DEBUG_ASSERT(m_ProgramID != 0, "Using uninitialised shader!")
     glUseProgram(m_ProgramID);
 }
 

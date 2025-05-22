@@ -88,11 +88,79 @@ void Renderer2D::ExecuteDraws() {
 	RenderStrictBatches();
 	RenderSoftBatches();
 
+	RenderText();
+
 
 	//	-- RENDERING ENDS	--	//
 
 	glfwSwapBuffers(GetWinHandle());
 	glfwPollEvents();
+}
+
+
+void Renderer2D::RenderText() {
+	std::vector<TextDrawCall>& Arr = m_TextArray;
+
+	//	1. Bind common Text-class VAO
+	//	2. Bind unique buffers
+	//	3. Uniforms and so on
+
+	size_t ArraySize = Arr.size();
+
+	if (ArraySize == 0) {
+		return;
+	}
+
+	Text::BindCommonVAO();
+
+	//	Get the common shader only used for text rendering
+	const Shader& Shader = GetTextShader();
+	Shader.UseShader();
+	Shader.SetMat4("u_View", GetCamera().GetViewMatrix());
+	Shader.SetMat4("u_Projection", GetCamera().GetProjectionMatrix());
+
+	//	Keep this for now, remove later when we reorganise the structures better
+	const SpriteSheet* LastUsedSpriteSheet = nullptr;
+
+	//	TODO: Refactor to use priority_queue, sort by Font* -> SpriteSheet*
+	for (size_t i = 0; i < ArraySize; i++) {
+
+		const TextDrawCall& DrawCall = Arr[i];
+
+		const Text* TextObject = DrawCall.GetTextPointer();
+		const Font* FontObject = TextObject->GetFont();
+		const SpriteSheet* SheetObject = FontObject->GetFontSheet();
+
+		const size_t CharInstances = TextObject->GetCharCount();
+
+		TextObject->BindUniqueBuffers();
+
+		if( SheetObject != LastUsedSpriteSheet)
+		{
+			//	TODO: start finding alternatives to this
+			glBindTexture(GL_TEXTURE_2D, SheetObject->GetTextureBufferID());
+			GetQuad().BufferTexCoords(SheetObject);
+
+			LastUsedSpriteSheet = SheetObject;
+		}
+		
+		
+		Shader.SetMat4("u_Model", glm::translate(glm::mat4(1.f), DrawCall.GetPositionVector()));
+
+		//	Sprite indices are passed already, so we need sprite dimensions sent
+		Shader.SetVec2("u_SpriteDimensions", SheetObject->GetSpriteDimensions());
+		Shader.SetInt("u_RowSpriteCount", SheetObject->GetSheetRowSpriteCount());
+
+		Shader.ApplyUniforms(DrawCall.GetAppliedUniforms());
+
+		CheckGLErrors();
+		glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr, CharInstances);
+		CheckGLErrors();
+	}
+
+	Text::UnbindCommonVAO();
+	glUseProgram(0);
+	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 
@@ -108,7 +176,7 @@ void Renderer2D::RenderSoftBatches() {
 
 		int InstanceCount = Soft->GetInstanceCount();
 
-		Soft->Bind();
+		Soft->Bind();	// unique, per-object VAO
 
 		glBindTexture(GL_TEXTURE_2D, Sheet->GetTextureBufferID());
 		GetQuad().BufferTexCoords(Sheet);
@@ -203,8 +271,6 @@ void Renderer2D::RenderDrawables() {
 		SheetCurrent = DrawcallCurrent.GetDrawablePointer()->GetAsociatedSpriteSheet();
 		ShaderCurrent = SheetCurrent->GetShader();
 
-		//const Shader* hui = GetShaderByName(ShaderCurrent->GetName().c_str());
-
 		DEBUG_ASSERT(SheetCurrent != nullptr, "SpriteSheet* set to nullptr when executing draw calls.\n\tDrawable object has initial index [%llu] in queue.", i);
 		DEBUG_ASSERT(ShaderCurrent != nullptr, "Shader* set to nullptr when executing draw calls.\n\t-- from SpriteSheet with name [%s]", SheetCurrent->GetName().c_str());
 
@@ -241,7 +307,7 @@ void Renderer2D::RenderDrawables() {
 
 #ifdef DEBUG__CODE
 	if(d_Print)
-	fprintf(stdout, "ExecuteDraws() stats for [%lld] DrawCall objects:\n\tSheet changes: %d\n\tShader changes: %d\n",
+	fprintf(stdout, "RenderDrawables() stats for [%lld] DrawCall objects:\n\tSheet changes: %d\n\tShader changes: %d\n",
 		DrawQueueOriginalSize, d_SheetChanges, d_ShaderChanges);
 #endif
 
@@ -291,12 +357,15 @@ bool Renderer2D::Init() {
 
 	m_InputController.SetTrackedKeystatesBitmask(
 		InputController::c_ArrowTrackBit |
-		InputController::c_LetterTrackBit
+		InputController::c_LetterTrackBit |
+		InputController::c_SpecialTrackBit
 	);
 	
 	//	Globals initialisation
 
 	g_StandardQuad.Init();
+
+	PerClassVAOinitialisationFunction();
 
 	return true;
 }
@@ -319,6 +388,15 @@ void Renderer2D::LoadShader(
 	const std::string& _locationShaderFile,
 	const std::string& _shaderName
 ) {
+	//	Special common shader used only by Text objects
+	if (!_shaderName.compare(c_SpecialTextShaderName)) {
+		m_TextRenderingShader = Shader(
+			_locationShaderFile,
+			_shaderName
+		);
+		return;
+	}
+
 	m_ShaderArray.emplace_back(
 		_locationShaderFile,
 		_shaderName
@@ -345,6 +423,7 @@ void Renderer2D::LoadSpriteSheet(
 SpriteSheet* Renderer2D::GetSpriteSheetByName(
 	const char* _spriteSheetName
 ) {
+	if (!_spriteSheetName) return nullptr;
 	size_t len = m_SpriteSheetArray.size();
 	for (size_t i = 0; i < len; i++) {
 		if (
@@ -360,6 +439,7 @@ SpriteSheet* Renderer2D::GetSpriteSheetByName(
 Shader* Renderer2D::GetShaderByName(
 	const char* _shaderName
 ) {
+	if (!_shaderName) return nullptr;
 	size_t len = m_ShaderArray.size();
 	for (size_t i = 0; i < len; i++) {
 		if (
@@ -421,6 +501,18 @@ void Renderer2D::StartLoadingProcess() {
 
 	for (size_t i = 0; i < m_SpriteSheetLoadQueue.size(); i++) {
 		SpriteSheetLoadingParameters& params = m_SpriteSheetLoadQueue[i];
+
+		if (!params.m_PreferredShaderName.compare(c_SpecialTextShaderName)) {
+			
+			LoadSpriteSheet(
+				std::string(params.m_LocationOfImage),
+				std::string(params.m_SheetName),
+				&GetTextShader(),
+				params.m_SpritesPerRow,
+				params.m_SpritesPerCol
+			);
+		}
+
 		LoadSpriteSheet(
 			std::string(params.m_LocationOfImage),
 			std::string(params.m_SheetName),
@@ -439,6 +531,31 @@ bool Renderer2D::IsRunning() const {
 }
 
 
+void Renderer2D::Draw(
+	const Text* _text,
+	float _xPosition,
+	float _yPosition,
+	float _zLayer,
+	UniformDataVector* _uniformArray
+) {
+	m_TextArray.emplace_back(
+		_text,
+		_xPosition,
+		_yPosition,
+		_zLayer,
+		_uniformArray
+	);
+}
+
+
+void Renderer2D::PerClassVAOinitialisationFunction() {
+
+
+	Font::InitialiseCommonFontSizeVBO(20);
+	Text::InitialiseCommonVAO();
+
+}
+
 
 
 bool Renderer2D::DrawCallComparator::operator()(const DrawableDrawCall& a, const DrawableDrawCall& b) const {
@@ -453,4 +570,6 @@ bool Renderer2D::DrawCallComparator::operator()(const DrawableDrawCall& a, const
 
 	return aS > bS;
 }
+
+
 

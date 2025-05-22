@@ -39,6 +39,17 @@ void StandardQuad::Bind() {
 	glBindVertexArray(m_VAO);
 }
 
+
+/*	
+
+	This function is a bit of a problem, as in it's not thread-safe.
+	Sometime in the future, this whole mechanism needs to be replaced.
+
+	Best idea for now is:
+	Add another data member to Renderer2D which holds UVRegions(or buffers with them)
+	and SpriteSheet instances hold pointers to them.
+
+*/
 bool StandardQuad::BufferTexCoords(
 	const SpriteSheet* _spriteSheet
 ) {

@@ -57,6 +57,29 @@ void SoftBatch::InitialiseBuffers(
 }
 
 
+//	TODO: implement
+
+void SoftBatch::UpdateSpriteIndexBuffer(
+	const int* _spriteIndexArray
+) {
+	
+}
+
+
+void SoftBatch::UpdateRotationsBuffer(
+	const float* _objectRotationsRad
+) {
+
+}
+
+
+void SoftBatch::UpdatePositionsBuffer(
+	const float* _pairsOfxyPositions
+) {
+
+}
+
+
 void SoftBatch::Bind() const {
 	glBindVertexArray(m_LocalBatchVAO);
 }

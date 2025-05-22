@@ -2,6 +2,9 @@
 
 
 
+unsigned int Font::s_CommonFontSizeVBO = 0;
+
+
 Font::Font(
 	const SpriteSheet* _initialisedSheet,
 	const std::string& _name
@@ -31,37 +34,77 @@ void Font::GetConsecutiveOffsetsFromFirstGlyph(
 	const std::u32string& _text,
 	std::vector<unsigned short>& OUT_preparedGlyphOffsets
 ) const {
-	if (OUT_preparedGlyphOffsets.capacity() < _text.size()) {
+	size_t VectorSize = OUT_preparedGlyphOffsets.size();
+
+	if (OUT_preparedGlyphOffsets.capacity() * 2 < _text.size()) {
 		DEBUG_LOG("Unprepared std::vector passed to Font [%s].", GetName().c_str());
-		OUT_preparedGlyphOffsets.reserve(_text.size());
+		OUT_preparedGlyphOffsets.resize(_text.size() * 2);
+		VectorSize = _text.size() * 2;
 	}
 
-	OUT_preparedGlyphOffsets[0] = 0;
-
 	int TotalOffset = 0;
-	size_t VectorSize = OUT_preparedGlyphOffsets.size();
-	for (size_t i = 1; i < VectorSize; i++) {
+	for (size_t i = 0; i < VectorSize; i += 2) {	// increment by 2
 		
+		OUT_preparedGlyphOffsets[i] = TotalOffset;
+		unsigned short GlyphIndex = -1;
+
 #ifdef DEBUG__CODE
-		unsigned short d_Result = GetOffsetForGlyph(_text[i]);
-		DEBUG_ASSERT(d_Result != -1, "Character [\\u%d] in Font [%s] not found.", (int)_text[i], GetName().c_str());
+		unsigned short d_Result = GetOffsetForGlyph(_text[i / 2], &GlyphIndex);
+		DEBUG_ASSERT(d_Result != unsigned(-1), "Character [\\u%d] in Font [%s] not found.", (int)_text[i], GetName().c_str());
 		
 		TotalOffset += d_Result;
 #else
-
-		TotalOffset += GetOffsetForGlyph(_text[i]);
-
+		TotalOffset += GetOffsetForGlyph(_text[i], &GlyphIndex);
 #endif
-		OUT_preparedGlyphOffsets[i] = TotalOffset;
+
+		OUT_preparedGlyphOffsets[i + 1] = GlyphIndex;
 	}
 }
 
 
 unsigned short Font::GetOffsetForGlyph(
-	char32_t _char
+	char32_t _char,
+	unsigned short* OUT_glyphIndexWithinSpriteSheet
 ) const {
 	for (size_t i = 0; i < m_GlyphIdentifier.size(); i++) {
-		if (_char == m_GlyphIdentifier[i]) return m_GlyphOffsetsFromAdjecentGlyph[i];
+		if (_char == m_GlyphIdentifier[i]) 
+		{
+			if (OUT_glyphIndexWithinSpriteSheet) {
+				*OUT_glyphIndexWithinSpriteSheet = i;
+			}
+			return m_GlyphOffsetsFromAdjecentGlyph[i];
+		}
 	}
 	return -1;
+}
+
+
+void Font::InitialiseCommonFontSizeVBO(
+	float _commonFontSize
+) {
+	
+	bool IsVBO = glIsVertexArray(s_CommonFontSizeVBO) == GL_TRUE;
+
+	if (IsVBO) {
+		DEBUG_ASSERT(0, "Reinitialising common static VBO for Font class.")
+		return;
+	}
+
+	float TempArray[] = {
+		0.f,				0.f,
+		0.f,				_commonFontSize,
+		_commonFontSize,	_commonFontSize,
+		_commonFontSize,	0.f
+	};
+
+	
+	glGenBuffers(1, &s_CommonFontSizeVBO);
+	glBindBuffer(GL_ARRAY_BUFFER, s_CommonFontSizeVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(TempArray), TempArray, GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+}
+
+
+unsigned int Font::GetCommonFontSizeVBO() {
+	return s_CommonFontSizeVBO;
 }

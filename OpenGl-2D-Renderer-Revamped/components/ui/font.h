@@ -47,11 +47,24 @@ public:
 		std::vector<unsigned short>& OUT_preparedGlyphOffsets
 	) const;
 
-private:
 
 	unsigned short GetOffsetForGlyph(
-		char32_t _char
+		char32_t _char,
+		unsigned short* OUT_glyphIndexWithinSpriteSheet = nullptr
 	) const;
+
+public:
+
+	static void InitialiseCommonFontSizeVBO(
+		float _commonFontSize
+	);
+
+
+	static unsigned int GetCommonFontSizeVBO();
+
+private:
+
+	static unsigned int s_CommonFontSizeVBO;
 
 public:
 

@@ -51,6 +51,19 @@ int main() {
 		2, 2
 	);
 
+
+	r.UploadShaderParameters(
+		"test\\res\\text.shader",
+		r.c_SpecialTextShaderName
+	);
+
+	r.UploadSpriteSheetParameters(
+		"test\\res\\test_cyrillic.png",
+		"test_font",
+		r.c_SpecialTextShaderName,
+		2, 2
+	);
+
 	
 	r.StartLoadingProcess();
 
@@ -68,7 +81,23 @@ int main() {
 
 	b.InitialiseBuffers(arr);
 
+	
+	Font f = Font(
+		r.GetSpriteSheetByName("test_font"),
+		"cyrillic"
+	);
 
+	unsigned short off[] = { 20, 20, 20, 20 };
+	f.Init(
+		U"абвг",
+		off,
+		4
+	);
+
+	Text t = Text(
+		&f,
+		U"аабвг"
+	);
 
 
 	SoftBatch s = SoftBatch(
@@ -103,8 +132,14 @@ int main() {
 
 		r.Draw(&s, 0, 0, 2, nullptr);
 
-		if (input.IsReleased(GLFW_KEY_A))
-			std::cout << "A\n";
+
+
+		r.Draw(&t, 300, 300, 2, nullptr);
+
+
+		if (input.IsReleased(GLFW_KEY_ESCAPE)) {
+			return 0;
+		}
 
 		r.ExecuteDraws();
 	}

@@ -17,6 +17,7 @@
 
 #include "components/uniform/uniform_data.h"
 
+#include "components/ui/text.h"
 
 
 
@@ -46,6 +47,9 @@ private:	//	Logical components
 	std::vector<SpriteSheet> m_SpriteSheetArray;
 	std::vector<Shader> m_ShaderArray;
 
+private:
+
+	Shader m_TextRenderingShader;
 
 private:	//	Structures for draw queue optimisation
 
@@ -123,7 +127,22 @@ private:	//	Structures for draw queue optimisation
 	std::vector<SoftBatchDrawCall> m_SoftBatchArray;
 
 
-private:
+	struct TextDrawCall : DrawCall {
+	private:
+		const Text* m_Text = nullptr;
+	public:
+		TextDrawCall(const Text* _text, float x, float y, float z, const UniformDataVector* _uniformDataArray)
+			:m_Text(_text), DrawCall(x, y, z, _uniformDataArray)
+		{}
+		const Text* GetTextPointer() const { return m_Text; }
+	};
+
+	std::vector<TextDrawCall> m_TextArray;
+
+private:	//	Methods to render queued Drawcalls
+
+	void RenderText();
+
 
 	void RenderDrawables();
 
@@ -148,7 +167,7 @@ public:		//	Exposed functions
 	bool Init();
 
 
-	//	Execute all draw calls and flush the draw queue.
+	//	Execute all draw calls.
 	void ExecuteDraws();
 
 	//	Here, the X and Y coordinates represent the anchor point for the SoftBatch.
@@ -182,6 +201,14 @@ public:		//	Exposed functions
 	);
 
 
+	void Draw(
+		const Text* _text,
+		float _xPosition,
+		float _yPosition,
+		float _zLayer,
+		UniformDataVector* _uniformArray
+	);
+
 	//	Returns a brand new Drawable object derived from an existing SpriteSheet object.
 	// 
 	//	!!! This, used anywhere else other than a loading process that exposes
@@ -194,6 +221,10 @@ public:		//	Exposed functions
 
 
 	bool IsRunning() const;
+
+public:		// Exposed constants
+
+	const char* c_SpecialTextShaderName = "SPECIAL_COMMON_TEXT_SHADER";
 
 public:		//	Loading functions, which append loading parameters to the queues.
 			//	All necessary resources must pass through those, after which we
@@ -218,8 +249,8 @@ public:		//	Loading functions, which append loading parameters to the queues.
 
 	void StartLoadingProcess();
 
-private:	//	The loading functions in this block begin the actual OpenGL
-			//	initialisation process, taking data from the load params queues.
+private:	//	Following functions executer the load params for shaders and
+			//	SpriteSheets and properly linking them.
 
 	struct ShaderLoadingParameters {
 		const std::string m_ShaderName;
@@ -271,6 +302,10 @@ private:	//	The loading functions in this block begin the actual OpenGL
 		int _spritesPerCol
 	);
 
+private:
+
+	void PerClassVAOinitialisationFunction();
+
 public:		// getters and setters, 
 
 	Shader* GetShaderByName(
@@ -288,6 +323,8 @@ public:		// getters and setters,
 	GLFWwindow*			GetWinHandle() const { return m_MainWindowHandle; }
 	Camera&				GetCamera() { return m_Camera; }
 	InputController&	GetInputController() { return m_InputController; }
+
+	Shader&				GetTextShader() { return m_TextRenderingShader; }
 
 };
 

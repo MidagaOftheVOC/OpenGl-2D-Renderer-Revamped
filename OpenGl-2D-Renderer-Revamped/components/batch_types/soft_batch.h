@@ -40,6 +40,21 @@ public:
 	);
 
 
+	void UpdateSpriteIndexBuffer(
+		const int* _spriteIndexArray
+	);
+
+
+	void UpdateRotationsBuffer(
+		const float* _objectRotationsRad
+	);
+
+
+	void UpdatePositionsBuffer(
+		const float* _pairsOfxyPositions
+	);
+
+
 	void Bind() const;
 
 
