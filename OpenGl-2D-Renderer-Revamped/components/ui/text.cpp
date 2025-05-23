@@ -1,4 +1,4 @@
-#include "text.h"
+﻿#include "text.h"
 
 
 unsigned int Text::s_VAO = 0;
@@ -11,9 +11,11 @@ Text::Text() {
 
 Text::Text(
 	const Font* _font,
-	const std::u32string& _string
+	const std::u32string& _string,
+	TextOptions _textOptions
 ) :
-	m_Font(_font)
+	m_Font(_font),
+	m_TextOptions(_textOptions)
 {
 	GenerateBuffers();
 	UpdateTextValue(_string);
@@ -71,7 +73,6 @@ void Text::RemoveCharacter(
 	char32_t _char
 ) {
 	m_TextContent.pop_back();
-	//UpdateVBO();
 }
 
 
@@ -83,7 +84,7 @@ void Text::UpdateVBO() {
 	if ((m_TextContent.size() * 2) > m_VBOlastReportedSize) {
 		//	text has more chars than can be stored in the VBO
 		//	therefore we allocate
-		int SizeOfDataToSend = m_TextContent.size() * sizeof(unsigned short) * 2;
+		size_t SizeOfDataToSend = m_TextContent.size() * sizeof(unsigned short) * 2;
 		glBufferData(GL_ARRAY_BUFFER, SizeOfDataToSend, m_OffsetsFromFirstGlyph.data(), GL_STATIC_DRAW);
 		m_VBOlastReportedSize = m_TextContent.size() * 2;
 	}
@@ -173,10 +174,111 @@ void Text::GenerateBuffers() {
 
 
 void Text::BindUniqueBuffers() const {
-
 	glVertexArrayVertexBuffer( s_VAO, 2, GetGlyphDataVBO(), 0, sizeof(unsigned short) * 2);
 	glVertexArrayVertexBuffer( s_VAO, 3, GetGlyphDataVBO(), sizeof(unsigned short) , sizeof(unsigned short) * 2);
-	CheckGLErrors();
+}
 
+
+void Text::SetWordWrapBound(
+	float _rightBound
+) {
+	m_TextOptions.m_LineLength = _rightBound;
+	//m_fRightWordWrapBound = _rightBound;
+}
+
+
+void Text::SetMaximumCharactersPerLine(
+	int _charsPerLine
+) {
+	m_MaximumCharsPerLine = _charsPerLine;
+}
+
+
+void Text::CalculateWordWraps() {
+
+	m_LineBreaks.clear();
+	m_LineLengths.clear();
+	if ( fEqual(m_TextOptions.m_LineLength, 0.f) ) {
+		return;		// no bounds, render in a line
+	}
+
+	/*const float SpaceGlyphWidth = GetFont()->GetOffsetForGlyph(' ');
+	const float RightBound = m_TextOptions.m_LineLength;
+
+	float TotalPassedLineWidth = 0.f;
+	float TotalLineWidthAfterLastSpace = 0.f;
+	int IndexOfLastSpace = 0;
+	bool LineHasSpace = false;*/
+
+	std::vector<int>& LineBreaks = m_LineBreaks;
+	std::vector<float>& LineLengths = m_LineLengths;
+
+	float TotalProccessedLinesLength = 0.f;
+	int TotalLinesProcessed = 0;
+	float CurrentLineLength = 0.f;
+
+	int IndexOfSpace = -1;
+	bool LineHasSpace = false;
+	float SavedBufferOffsetTillAfterLastSpaceOfCurrentLine = 0.f;
+
+	for (size_t i = 0; i < m_TextContent.size(); i++) {
+
+		char32_t Character = m_TextContent[i];
+
+		//float BufferOffsetForThisCharacter = GetTotalOffsetForCharAt(i);
+		float CurrentCharWidth = GetFont()->GetOffsetForGlyph(Character);
+		
+		CurrentLineLength += CurrentCharWidth;
+
+		if (Character == U' ') {
+			LineHasSpace = true;
+			IndexOfSpace = static_cast<int>(i);
+			SavedBufferOffsetTillAfterLastSpaceOfCurrentLine = CurrentLineLength;	// this is for LineLengths
+			continue;
+		}
+
+		if (CurrentLineLength > GetRightWordWrapBound()) {
+			//	we exceed bound
+			//	these line lengths need to be used by the buffer offsets
+
+
+			if(!LineHasSpace)	// no space in line => word is too long
+			{
+				//	so we include last char width
+				LineLengths.emplace_back(CurrentLineLength - CurrentCharWidth);
+				//	we line break after the last character of this line
+				LineBreaks.emplace_back(static_cast<int>(i));
+				//m_TextContent.insert(m_TextContent.begin() + i, '\t');
+
+				TotalProccessedLinesLength += CurrentLineLength;
+				CurrentLineLength = 0.f;
+				TotalLinesProcessed++;
+				//	important, fist wrapped char needs to be redone on the new line
+				i--;
+			}
+			else	//	space found, we wrap after it
+			{
+				LineLengths.emplace_back(SavedBufferOffsetTillAfterLastSpaceOfCurrentLine);
+
+				LineBreaks.emplace_back(static_cast<int>(IndexOfSpace));
+
+				CurrentLineLength = 0.f;
+				SavedBufferOffsetTillAfterLastSpaceOfCurrentLine = 0.f;
+				LineHasSpace = false;
+				i = IndexOfSpace;
+				IndexOfSpace = 0;
+			}
+		}
+	}
+
+}
+
+
+unsigned short Text::GetTotalOffsetForCharAt(
+	int _charIndex
+) {
+	DEBUG_ASSERT(_charIndex * 2 <= m_OffsetsFromFirstGlyph.size(),
+		"Indexing out of Glyph offsets array in Text object; std::u32string address [%p].", &m_TextContent);
+	return m_OffsetsFromFirstGlyph[_charIndex * 2];
 }
 

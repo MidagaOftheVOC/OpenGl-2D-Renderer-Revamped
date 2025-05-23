@@ -58,86 +58,65 @@ int main() {
 	);
 
 	r.UploadSpriteSheetParameters(
-		"test\\res\\test_cyrillic.png",
+		"test\\res\\cyrillic.png",
 		"test_font",
 		r.c_SpecialTextShaderName,
-		2, 2
+		9, 9
 	);
 
 	
 	r.StartLoadingProcess();
 
 
-	Drawable d = r.GenerateDrawable("test_sheet", 0);
-	Drawable c = r.GenerateDrawable("test_sheet", 1);
-	
-	UniformDataVector test;
-
-
-	StrictBatch b = StrictBatch(r.GetSpriteSheetByName("test_batch_sheet"), 4);
-
-	
-	int arr[] = {0, 1, 2 , 3};
-
-	b.InitialiseBuffers(arr);
-
-	
 	Font f = Font(
 		r.GetSpriteSheetByName("test_font"),
 		"cyrillic"
 	);
 
-	unsigned short off[] = { 20, 20, 20, 20 };
+	unsigned short off[] = { 
+		20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20,
+		20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20,
+		20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20,
+		20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20,
+		20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20,
+		20, 20, 20, 20, 20, 20 };
 	f.Init(
-		U"абвг",
+		U"абвгдежзийклмнопрстуфхцчшщъьюяѝ .,+-!?;:&><#/",
 		off,
-		4
+		50
 	);
+
+	TextOptions textoptions(20, 5);
 
 	Text t = Text(
 		&f,
-		U"аабвг"
+		U"здрастиииииии! всичките сте курви!",// всичките сте курви!",
+		textoptions
 	);
 
+	t.SetWordWrapBound(200);
 
-	SoftBatch s = SoftBatch(
-		r.GetSpriteSheetByName("test_sbatch"),
-		4
-	);
-
-	int indicies[] = { 0, 1, 2, 3 };
-
-	float rotations[] = { 1.f, 2.f, 3.f, 4.f };
-
-	float positions[] = {
-		400, 50,
-		400, 200,
-		600, 50,
-		600, 200
-	};
-
-	s.InitialiseBuffers(indicies, rotations, positions);
+	t.CalculateWordWraps();
 
 	InputController& input = r.GetInputController();
 
-	while (!r.IsRunning()) {
 
+	StrictBatch b = StrictBatch(r.GetSpriteSheetByName("test_batch_sheet"), 4);
+
+
+	int arr[] = { 0, 1, 2 , 3 };
+
+	b.InitialiseBuffers(arr);
+
+
+	while (!r.IsRunning()) {
 		input.CaptureKeystates();
 
-		r.Draw(&d, 100, 100, 2, nullptr);
-		r.Draw(&c, 200, 100, 2, nullptr);
-
-		//r.Draw(&b, 400, 400, 2, 2, nullptr);
-
-
-		r.Draw(&s, 0, 0, 2, nullptr);
-
-
+		r.Draw(&b, 300, 100, 2, 2, nullptr);
 
 		r.Draw(&t, 300, 300, 2, nullptr);
 
-
-		if (input.IsReleased(GLFW_KEY_ESCAPE)) {
+		if (input.IsPressed(GLFW_KEY_ESCAPE)) {
 			return 0;
 		}
 

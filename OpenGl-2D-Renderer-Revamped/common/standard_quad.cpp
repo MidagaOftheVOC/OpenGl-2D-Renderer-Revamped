@@ -103,3 +103,8 @@ void StandardQuad::BindTexUVbufferAt(
 	);
 }
 
+
+void StandardQuad::BindElementIndexArray() {
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_IndexBuffer);
+}
+

@@ -37,6 +37,8 @@ struct StandardQuad {
 	);
 
 
+	void BindElementIndexArray();
+
 public:
 
 	float  g_stdVertexCoordArray[8] = {

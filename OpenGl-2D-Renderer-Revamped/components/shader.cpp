@@ -103,6 +103,10 @@ const void Shader::UseShader() const {
 
 void Shader::InitialiseUniformLocationMap() {
 
+    m_ModelMatrixUniformLocation = glGetUniformLocation(GetShaderId(), "u_Model");
+    m_ViewMatrixUniformLocation = glGetUniformLocation(GetShaderId(), "u_View");
+    m_ProjectionMatrixUniformLocation = glGetUniformLocation(GetShaderId(), "u_Projection");
+
     unsigned int Program = GetShaderId();
     int LocationCount;
     glGetProgramiv(Program, GL_ACTIVE_UNIFORMS, &LocationCount);
@@ -116,11 +120,94 @@ void Shader::InitialiseUniformLocationMap() {
 
         glGetActiveUniform(Program, i, sizeof(UniName) - 1, &Length, &Size, &Type, UniName);
 
+        if (IsStandardUniform(UniName)) 
+            continue;
+
+        for (int j = 0; j < Length; j++) {
+            if (UniName[j] == '[') {
+                UniName[j] = '\0';
+                break;
+            }
+        }
+
         int Location = glGetUniformLocation(Program, UniName);
         DEBUG_ASSERT(Location != -1, "Uniform location is -1 in shader \"%s\".", GetName().c_str());
 
         m_UniformLocationMap[UniName] = { Location , Type };
     }
+}
+
+
+void Shader::SetStandardModel(
+    const glm::mat4& _model
+) const {
+    glUniformMatrix4fv(
+        m_ModelMatrixUniformLocation,
+        1,
+        GL_FALSE,
+        glm::value_ptr(_model)
+    );
+}
+
+
+void Shader::SetStandardView(
+    const glm::mat4& _view
+) const {
+    glUniformMatrix4fv(
+        m_ViewMatrixUniformLocation,
+        1,
+        GL_FALSE,
+        glm::value_ptr(_view)
+    );
+}
+
+
+void Shader::SetStandardProjection(
+    const glm::mat4& _projection
+) const {
+    glUniformMatrix4fv(
+        m_ProjectionMatrixUniformLocation,
+        1,
+        GL_FALSE,
+        glm::value_ptr(_projection)
+    );
+}
+
+
+bool Shader::IsStandardUniform(
+    const char* _uniformName
+) {
+    for (size_t i = 0; i < c_StandardUniformCount; i++) {
+        if (!c_StandardUniformNames[i].compare(_uniformName))
+            return true;
+    }
+    return false;
+}
+
+
+void Shader::SetIntArray(
+    const char* _uniformName,
+    const int* _array,
+    int _arraySize
+) const {
+    glUniform1iv(
+        GetUniformLocation(_uniformName),
+        _arraySize,
+        _array
+    );
+}
+
+
+void Shader::SetFloatArray(
+    const char* _uniformName,
+    const float* _array,
+    int _arraySize
+) const {
+    glUniform1fv(
+        GetUniformLocation(_uniformName),
+        _arraySize,
+        _array
+    );
 }
 
 

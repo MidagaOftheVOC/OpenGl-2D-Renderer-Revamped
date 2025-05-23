@@ -61,6 +61,52 @@ void CheckGLErrors(const char* context = "OpenGL");
 bool fEqual(float _val1, float _val2);
 
 
+struct GLdiagnostics {
+
+    static bool IsVertexBuffer(
+        unsigned int _bufferName,
+        bool true_if_printing_result = false
+    ) {
+
+        bool IsBuffer = glIsBuffer(_bufferName) == GL_TRUE;
+        
+        if (true_if_printing_result) {
+
+            if (IsBuffer) {
+                fprintf(stdout, "[%u] is a valid buffer.\n", _bufferName);
+            }
+            else {
+                fprintf(stdout, "[%u] is NOT a valid buffer.\n", _bufferName);
+            }
+        }
+
+        return IsBuffer;
+    }
+
+
+    static bool IsVertexArray(
+        unsigned int _vaoName,
+        bool true_if_printing_result = false
+    ) {
+
+        bool IsVAO = glIsVertexArray(_vaoName) == GL_TRUE;
+
+        if (true_if_printing_result) {
+
+            if (IsVAO) {
+                fprintf(stdout, "[%u] is a valid VAO.\n", _vaoName);
+            }
+            else {
+                fprintf(stdout, "[%u] is NOT a valid VAO.\n", _vaoName);
+            }
+        }
+
+        return IsVAO;
+    }
+
+};
+
+
 struct Random {
 
     static std::mt19937& engine() {
@@ -82,6 +128,7 @@ struct Random {
 
 };
 
+
 struct Profiler {
     using Clock = std::chrono::high_resolution_clock;
     using TimePoint = std::chrono::time_point<Clock>;
@@ -89,9 +136,11 @@ struct Profiler {
     static inline TimePoint s_Start;
     static inline TimePoint s_End;
 
+
     static void Start() {
         s_Start = Clock::now();
     }
+
 
     static float Stop() {
         s_End = Clock::now();
@@ -104,6 +153,7 @@ struct Profiler {
     static long long ElapsedMicroseconds() {
         return std::chrono::duration_cast<std::chrono::microseconds>(s_End - s_Start).count();
     }
+
 
     static double ElapsedMilliseconds() {
         return std::chrono::duration<double, std::milli>(s_End - s_Start).count();

@@ -42,16 +42,28 @@ public:
 	);
 
 	
-	void Bind() const;
-
-
-	void Unbind() const;
+	void BindUniqueBuffers() const;
 
 #ifdef DEBUG__CODE
 
 	std::string d_Name;
+	void DEBUG_SetName(const std::string& _name) { d_Name = _name; }
 
 #endif
+	
+private:
+
+	static unsigned int s_VAO;
+
+public:
+
+	static void InitialiseCommonVAO();
+
+
+	static void BindCommonVAO();
+
+
+	static void UnbindCommonVAO();
 
 public:
 

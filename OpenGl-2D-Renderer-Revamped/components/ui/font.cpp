@@ -70,7 +70,7 @@ unsigned short Font::GetOffsetForGlyph(
 		if (_char == m_GlyphIdentifier[i]) 
 		{
 			if (OUT_glyphIndexWithinSpriteSheet) {
-				*OUT_glyphIndexWithinSpriteSheet = i;
+				*OUT_glyphIndexWithinSpriteSheet = static_cast<unsigned short>(i);
 			}
 			return m_GlyphOffsetsFromAdjecentGlyph[i];
 		}

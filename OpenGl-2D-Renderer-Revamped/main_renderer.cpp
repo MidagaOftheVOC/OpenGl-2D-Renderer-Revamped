@@ -101,10 +101,6 @@ void Renderer2D::ExecuteDraws() {
 void Renderer2D::RenderText() {
 	std::vector<TextDrawCall>& Arr = m_TextArray;
 
-	//	1. Bind common Text-class VAO
-	//	2. Bind unique buffers
-	//	3. Uniforms and so on
-
 	size_t ArraySize = Arr.size();
 
 	if (ArraySize == 0) {
@@ -116,8 +112,8 @@ void Renderer2D::RenderText() {
 	//	Get the common shader only used for text rendering
 	const Shader& Shader = GetTextShader();
 	Shader.UseShader();
-	Shader.SetMat4("u_View", GetCamera().GetViewMatrix());
-	Shader.SetMat4("u_Projection", GetCamera().GetProjectionMatrix());
+	Shader.SetStandardView(GetCamera().GetViewMatrix());
+	Shader.SetStandardProjection(GetCamera().GetProjectionMatrix());
 
 	//	Keep this for now, remove later when we reorganise the structures better
 	const SpriteSheet* LastUsedSpriteSheet = nullptr;
@@ -128,13 +124,14 @@ void Renderer2D::RenderText() {
 		const TextDrawCall& DrawCall = Arr[i];
 
 		const Text* TextObject = DrawCall.GetTextPointer();
-		const Font* FontObject = TextObject->GetFont();
-		const SpriteSheet* SheetObject = FontObject->GetFontSheet();
+		const SpriteSheet* SheetObject = TextObject->GetFont()->GetFontSheet();
+		const TextOptions& OptionsObject = TextObject->GetTextOptions();
 
 		const size_t CharInstances = TextObject->GetCharCount();
+		const size_t LineBreakCount = TextObject->GetLineBreakCount();
 
 		TextObject->BindUniqueBuffers();
-
+		
 		if( SheetObject != LastUsedSpriteSheet)
 		{
 			//	TODO: start finding alternatives to this
@@ -145,19 +142,30 @@ void Renderer2D::RenderText() {
 		}
 		
 		
-		Shader.SetMat4("u_Model", glm::translate(glm::mat4(1.f), DrawCall.GetPositionVector()));
+		Shader.SetStandardModel(glm::translate(glm::mat4(1.f), DrawCall.GetPositionVector()));
 
 		//	Sprite indices are passed already, so we need sprite dimensions sent
 		Shader.SetVec2("u_SpriteDimensions", SheetObject->GetSpriteDimensions());
 		Shader.SetInt("u_RowSpriteCount", SheetObject->GetSheetRowSpriteCount());
 
+		//	Line breaks
+		Shader.SetInt("u_LineBreakCount", LineBreakCount);
+		Shader.SetIntArray("u_LineBreakArray", TextObject->GetLineBreakArray().data(), LineBreakCount);
+		Shader.SetFloatArray("u_LineLengths", TextObject->GetLineLengthsArray().data(), LineBreakCount);
+
+		Shader.SetFloat("u_LineMaximumLength", OptionsObject.m_LineLength);
+		Shader.SetFloat("u_CharacterHeight", OptionsObject.m_CharacterHeight);
+		Shader.SetFloat("u_SpacingBetweenLines", OptionsObject.m_SpacingBetweenLines);
+
+
 		Shader.ApplyUniforms(DrawCall.GetAppliedUniforms());
 
 		CheckGLErrors();
-		glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr, CharInstances);
+		glDrawElementsInstanced(GL_TRIANGLES, 6Ui64, GL_UNSIGNED_SHORT, nullptr, CharInstances);
 		CheckGLErrors();
 	}
 
+	m_TextArray.clear();
 	Text::UnbindCommonVAO();
 	glUseProgram(0);
 	glBindTexture(GL_TEXTURE_2D, 0);
@@ -182,9 +190,9 @@ void Renderer2D::RenderSoftBatches() {
 		GetQuad().BufferTexCoords(Sheet);
 
 		Shader->UseShader();
-		Shader->SetMat4("u_Model", glm::translate(glm::mat4(1.f), DrawCall.GetPositionVector()));
-		Shader->SetMat4("u_View", GetCamera().GetViewMatrix());
-		Shader->SetMat4("u_Projection", GetCamera().GetProjectionMatrix());
+		Shader->SetStandardModel(glm::translate(glm::mat4(1.f), DrawCall.GetPositionVector()));
+		Shader->SetStandardView(GetCamera().GetViewMatrix());
+		Shader->SetStandardProjection(GetCamera().GetProjectionMatrix());
 
 		Shader->SetInt("u_SheetRowSpriteCount", Sheet->GetSheetRowSpriteCount());
 		Shader->SetVec2("u_SpriteTexUVDimensions", Sheet->GetSpriteDimensions());
@@ -208,6 +216,8 @@ void Renderer2D::RenderStrictBatches() {
 
 	std::vector<StrictBatchDrawCall>& Arr = m_StrictBatchArray;
 
+	StrictBatch::BindCommonVAO();
+
 	for (size_t i = 0; i < Arr.size(); i++) {
 		const StrictBatchDrawCall& DrawCallCurrent = Arr[i];
 		
@@ -217,17 +227,18 @@ void Renderer2D::RenderStrictBatches() {
 
 		int InstanceCount = Strict->GetInstanceCount();
 
-		Strict->Bind();
-
 		// SHEET SET UP
 		glBindTexture(GL_TEXTURE_2D, SheetCurrent->GetTextureBufferID());
 		GetQuad().BufferTexCoords(SheetCurrent);
+		
+		Strict->BindUniqueBuffers();
+
 
 		// SHADER SET UP
 		ShaderCurrent->UseShader();
-		ShaderCurrent->SetMat4("u_Projection", m_Camera.GetProjectionMatrix());
-		ShaderCurrent->SetMat4("u_View", m_Camera.GetViewMatrix());
-		ShaderCurrent->SetMat4("u_Model", glm::translate(glm::mat4(1.f), DrawCallCurrent.GetPositionVector()));
+		ShaderCurrent->SetStandardModel(glm::translate(glm::mat4(1.f), DrawCallCurrent.GetPositionVector()));
+		ShaderCurrent->SetStandardView(m_Camera.GetViewMatrix());
+		ShaderCurrent->SetStandardProjection(m_Camera.GetProjectionMatrix());
 
 		ShaderCurrent->SetInt("u_SheetRowSpriteCount", SheetCurrent->GetSheetRowSpriteCount());
 		ShaderCurrent->SetVec2("u_SpriteTexUVDimensions", SheetCurrent->GetSpriteDimensions());
@@ -237,11 +248,13 @@ void Renderer2D::RenderStrictBatches() {
 
 		ShaderCurrent->ApplyUniforms(DrawCallCurrent.GetAppliedUniforms());
 
-
+		CheckGLErrors();
 		glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr, InstanceCount);
+		CheckGLErrors();
 
-		Strict->Unbind();
 	}
+
+	StrictBatch::UnbindCommonVAO();
 	Arr.clear();
 }
 
@@ -287,8 +300,8 @@ void Renderer2D::RenderDrawables() {
 		if (LastUsedShader != ShaderCurrent) {	//	SPRITESHEET CHANGE
 			LastUsedShader = ShaderCurrent;
 			ShaderCurrent->UseShader();
-			ShaderCurrent->SetMat4("u_Projection", m_Camera.GetProjectionMatrix());
-			ShaderCurrent->SetMat4("u_View", m_Camera.GetViewMatrix());
+			ShaderCurrent->SetStandardView(m_Camera.GetViewMatrix());
+			ShaderCurrent->SetStandardProjection(m_Camera.GetProjectionMatrix());
 
 #ifdef DEBUG__CODE
 			d_ShaderChanges++;
@@ -296,7 +309,7 @@ void Renderer2D::RenderDrawables() {
 		}
 
 		//	per-instance data, unskippable
-		ShaderCurrent->SetMat4("u_Model", glm::translate(glm::mat4(1.f), DrawcallCurrent.GetPositionVector()));
+		ShaderCurrent->SetStandardModel(glm::translate(glm::mat4(1.f), DrawcallCurrent.GetPositionVector()));
 		ShaderCurrent->SetVec2("u_SpriteOffsets",
 			SheetCurrent->GetCalculatedSpriteOffsets(DrawcallCurrent.GetDrawablePointer()->GetSpriteIndex()));
 
@@ -551,6 +564,7 @@ void Renderer2D::Draw(
 void Renderer2D::PerClassVAOinitialisationFunction() {
 
 
+	StrictBatch::InitialiseCommonVAO();
 	Font::InitialiseCommonFontSizeVBO(20);
 	Text::InitialiseCommonVAO();
 

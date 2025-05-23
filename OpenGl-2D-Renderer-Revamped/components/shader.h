@@ -41,6 +41,24 @@ private:    //  UniformName -> UniformLocation map + type
 
     void InitialiseUniformLocationMap();
 
+private:
+
+    int m_ModelMatrixUniformLocation = -100i32;
+    int m_ViewMatrixUniformLocation = -100i32;
+    int m_ProjectionMatrixUniformLocation = -100i32;
+
+    size_t c_StandardUniformCount = 3;
+    std::string c_StandardUniformNames[3] = {
+        "u_Model",
+        "u_View",
+        "u_Projection"
+    };
+
+
+    bool IsStandardUniform(
+        const char* _uniformName
+    );
+
 public:     
 
     Shader() {}
@@ -57,6 +75,35 @@ public:
     ) const;
 
 public:
+
+    void SetStandardModel(
+        const glm::mat4& _model
+    ) const;
+
+
+    void SetStandardView(
+        const glm::mat4& _view
+    ) const;
+
+
+    void SetStandardProjection(
+        const glm::mat4& _projection
+    ) const;
+
+
+    void SetIntArray(
+        const char* _uniformName,
+        const int* _array,
+        int _arraySize
+    ) const;
+
+
+    void SetFloatArray(
+        const char* _uniformName,
+        const float* _array,
+        int _arraySize
+    ) const;
+
 
     void SetMat4(
         const char* _uniformName,

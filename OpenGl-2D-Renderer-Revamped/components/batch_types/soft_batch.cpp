@@ -62,21 +62,27 @@ void SoftBatch::InitialiseBuffers(
 void SoftBatch::UpdateSpriteIndexBuffer(
 	const int* _spriteIndexArray
 ) {
-	
+	glBindBuffer(GL_ARRAY_BUFFER, m_SpriteIndexVBO);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(int) * m_InstanceCount, _spriteIndexArray);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
 
 void SoftBatch::UpdateRotationsBuffer(
 	const float* _objectRotationsRad
 ) {
-
+	glBindBuffer(GL_ARRAY_BUFFER, m_RotationsVBO);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float) * m_InstanceCount, _objectRotationsRad);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
 
 void SoftBatch::UpdatePositionsBuffer(
 	const float* _pairsOfxyPositions
 ) {
-
+	glBindBuffer(GL_ARRAY_BUFFER, m_PositionsVBO);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float) * 2 * m_InstanceCount, _pairsOfxyPositions);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
 
