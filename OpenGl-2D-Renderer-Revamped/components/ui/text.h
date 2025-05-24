@@ -8,14 +8,12 @@
 * a little more rules to rendering it.
 */
 
-/*
-TODO:	A staggering limitation has appeared, this Text
-		object is basically a line that can't wrap around.
-
-*/
 
 struct TextOptions {
 	float m_LineLength = 0.f;
+	//	TODO:
+	//	Allow for upper and lower cut-off bounds, if the text is within a textbox
+	//	and is scrolled too far down or up or something
 	float m_UpperBound = 0.f;
 	float m_LowerBound = 0.f;
 

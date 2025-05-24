@@ -116,6 +116,11 @@ int main() {
 
 		r.Draw(&t, 300, 300, 2, nullptr);
 
+		if (input.IsHeld(GLFW_KEY_RIGHT)) {
+			t.SetWordWrapBound(t.GetRightWordWrapBound() + .5f);
+			std::cout << "right pressed\n";
+		}
+
 		if (input.IsPressed(GLFW_KEY_ESCAPE)) {
 			return 0;
 		}

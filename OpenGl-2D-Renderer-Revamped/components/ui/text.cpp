@@ -28,6 +28,7 @@ void Text::UpdateTextValue(
 	m_TextContent = _stringToMove;
 	UpdateGlyphOffsets();
 	UpdateVBO();
+	CalculateWordWraps();
 }
 
 
@@ -37,6 +38,7 @@ void Text::UpdateTextValue(
 	m_TextContent = _stringToCopy;
 	UpdateGlyphOffsets();
 	UpdateVBO();
+	CalculateWordWraps();
 }
 
 
@@ -66,6 +68,7 @@ void Text::AppendCharacter(
 	}
 
 	m_TextContent += _char;
+	CalculateWordWraps();
 }
 
 
@@ -73,6 +76,7 @@ void Text::RemoveCharacter(
 	char32_t _char
 ) {
 	m_TextContent.pop_back();
+	CalculateWordWraps();
 }
 
 
@@ -183,7 +187,7 @@ void Text::SetWordWrapBound(
 	float _rightBound
 ) {
 	m_TextOptions.m_LineLength = _rightBound;
-	//m_fRightWordWrapBound = _rightBound;
+	CalculateWordWraps();
 }
 
 
