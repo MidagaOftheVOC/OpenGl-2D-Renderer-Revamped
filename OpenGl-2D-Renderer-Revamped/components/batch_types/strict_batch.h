@@ -18,7 +18,7 @@
 
 class StrictBatch {
 
-	unsigned int m_SpriteIndexVBO = 0;
+	unsigned int m_UVRegionVBO = 0;
 	unsigned int m_LocalBatchVAO = 0;
 
 	int m_InstanceCount = -1;
@@ -69,7 +69,7 @@ public:
 
 	int GetInstanceCount() const { return m_InstanceCount; }
 	const SpriteSheet* GetSheet() const { return m_SpriteSheet; }
-	unsigned int GetSpriteIndexVBO() const { return m_SpriteIndexVBO; }
+	unsigned int GetSpriteIndexVBO() const { return m_UVRegionVBO; }
 
 };
 

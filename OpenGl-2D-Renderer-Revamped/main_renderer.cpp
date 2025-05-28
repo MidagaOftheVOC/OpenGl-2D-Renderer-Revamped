@@ -78,8 +78,12 @@ void Renderer2D::ExecuteDraws() {
 	glClearColor(0.f, 0.f, 0.f, 1.f);
 
 #endif
-
-	glClear(GL_COLOR_BUFFER_BIT);
+	//TODO:
+	//	At some point, all of these queues and arrays will be abstracted away into
+	//	"scenes" or similar objects, where we don't have to add, remove, readd and
+	//  so on draw call objects, but just maintain them and add/remove on necessity.
+	//
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	
 	//	-- RENDERING STARTS --	//
 
@@ -175,6 +179,9 @@ void Renderer2D::RenderText() {
 void Renderer2D::RenderSoftBatches() {
 	std::vector<SoftBatchDrawCall>& Arr = m_SoftBatchArray;
 	
+	SoftBatch::BindCommonVAO();
+
+
 	for (size_t i = 0; i < Arr.size(); i++) {
 		const SoftBatchDrawCall& DrawCall = Arr[i];
 
@@ -184,7 +191,7 @@ void Renderer2D::RenderSoftBatches() {
 
 		int InstanceCount = Soft->GetInstanceCount();
 
-		Soft->Bind();	// unique, per-object VAO
+		Soft->BindUniqueBuffers();
 
 		glBindTexture(GL_TEXTURE_2D, Sheet->GetTextureBufferID());
 		GetQuad().BufferTexCoords(Sheet);
@@ -199,11 +206,18 @@ void Renderer2D::RenderSoftBatches() {
 
 		Shader->ApplyUniforms(DrawCall.GetAppliedUniforms());
 
-		
+#ifdef DEBUG__CODE
+		CheckGLErrors();
+#endif
+
 		glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr, InstanceCount);
 
-		Soft->Unbind();
+#ifdef DEBUG__CODE
+		CheckGLErrors();
+#endif
+
 	}
+	SoftBatch::UnbindCommonVAO();
 	Arr.clear();
 }
 
@@ -229,7 +243,6 @@ void Renderer2D::RenderStrictBatches() {
 
 		// SHEET SET UP
 		glBindTexture(GL_TEXTURE_2D, SheetCurrent->GetTextureBufferID());
-		GetQuad().BufferTexCoords(SheetCurrent);
 		
 		Strict->BindUniqueBuffers();
 
@@ -240,18 +253,20 @@ void Renderer2D::RenderStrictBatches() {
 		ShaderCurrent->SetStandardView(m_Camera.GetViewMatrix());
 		ShaderCurrent->SetStandardProjection(m_Camera.GetProjectionMatrix());
 
-		ShaderCurrent->SetInt("u_SheetRowSpriteCount", SheetCurrent->GetSheetRowSpriteCount());
-		ShaderCurrent->SetVec2("u_SpriteTexUVDimensions", SheetCurrent->GetSpriteDimensions());
-		
 		ShaderCurrent->SetInt("u_RowSpriteCount", DrawCallCurrent.GetRowSpriteCount());
 		ShaderCurrent->SetInt("u_SpriteSideLengthPx", GetQuad().m_StandardSpritePixelLength);
 
 		ShaderCurrent->ApplyUniforms(DrawCallCurrent.GetAppliedUniforms());
 
+#ifdef DEBUG__CODE
 		CheckGLErrors();
-		glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr, InstanceCount);
-		CheckGLErrors();
+#endif
 
+		glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr, InstanceCount);
+
+#ifdef DEBUG__CODE
+		CheckGLErrors();
+#endif
 	}
 
 	StrictBatch::UnbindCommonVAO();
@@ -356,6 +371,8 @@ bool Renderer2D::Init() {
 		std::cout << glewGetErrorString(glewReturnCode);
 		return false;
 	}
+
+	glEnable(GL_DEPTH_TEST);
 
 	//	Component initialisation
 
@@ -560,11 +577,14 @@ void Renderer2D::Draw(
 	);
 }
 
-
+//	TODO: Add some configuration file/structure to take data from
+//	so we avoid hardcoding shit like the font size.
 void Renderer2D::PerClassVAOinitialisationFunction() {
 
 
 	StrictBatch::InitialiseCommonVAO();
+	SoftBatch::InitialiseCommonVAO();
+
 	Font::InitialiseCommonFontSizeVBO(20);
 	Text::InitialiseCommonVAO();
 

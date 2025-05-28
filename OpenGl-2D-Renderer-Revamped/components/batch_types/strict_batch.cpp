@@ -10,7 +10,7 @@ StrictBatch::StrictBatch(
 	: m_SpriteSheet(_spriteSheet),
 	m_InstanceCount(_instanceCount)
 {
-	glCreateBuffers(1, &m_SpriteIndexVBO);
+	glCreateBuffers(1, &m_UVRegionVBO);
 }
 
 
@@ -30,12 +30,17 @@ void StrictBatch::InitialiseCommonVAO() {
 	glBindVertexArray(s_VAO);
 
 	g_StandardQuad.BindVertexBufferAt(0);
-	g_StandardQuad.BindTexUVbufferAt(1);
 	g_StandardQuad.BindElementIndexArray();
 
-	glBindVertexBuffer(2, 0, 0, 1 * sizeof(unsigned int));
+	glEnableVertexAttribArray(1);
+	glBindBuffer(GL_ARRAY_BUFFER, g_StandardQuad.GetUnmodifiedTextureUVBuffer());
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0);
+
+
+
+	glBindVertexBuffer(2, 0, 0, 4 * sizeof(float));
 	glEnableVertexAttribArray(2);
-	glVertexAttribIFormat(2, 1, GL_UNSIGNED_INT, 0);
+	glVertexAttribFormat(2, 4, GL_FLOAT, GL_FALSE, 0);
 	glVertexAttribBinding(2, 2);
 	glVertexBindingDivisor(2, 1);
 
@@ -46,19 +51,23 @@ void StrictBatch::InitialiseCommonVAO() {
 void StrictBatch::InitialiseBuffers(
 	int* _spriteIndexArray
 ) {
-	glNamedBufferData(m_SpriteIndexVBO, sizeof(unsigned int) * GetInstanceCount(), _spriteIndexArray, GL_DYNAMIC_DRAW);
+	std::vector<UVRegion> UVRegionArray;
+	GetSheet()->TransformIndicesToUVRegionArray(_spriteIndexArray, GetInstanceCount(), UVRegionArray);
+	glNamedBufferData(m_UVRegionVBO, sizeof(float) * 4 * GetInstanceCount(), UVRegionArray.data(), GL_DYNAMIC_DRAW);
 }
 
 
 void StrictBatch::UpdateBuffer(
 	int* _spriteIndexArray
 ) {
-	glNamedBufferSubData(m_SpriteIndexVBO, 0, sizeof(unsigned int) * GetInstanceCount(), _spriteIndexArray);
+	std::vector<UVRegion> UVRegionArray;
+	GetSheet()->TransformIndicesToUVRegionArray(_spriteIndexArray, GetInstanceCount(), UVRegionArray);
+	glNamedBufferSubData(m_UVRegionVBO, 0, sizeof(float) * 4 * GetInstanceCount(), UVRegionArray.data());
 }
 
 
 void StrictBatch::BindUniqueBuffers() const {
-	glVertexArrayVertexBuffer(s_VAO, 2, m_SpriteIndexVBO, 0, sizeof(unsigned int) * 1);
+	glVertexArrayVertexBuffer(s_VAO, 2, m_UVRegionVBO, 0, sizeof(float) * 4);
 }
 
 

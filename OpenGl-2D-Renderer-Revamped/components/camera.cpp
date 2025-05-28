@@ -20,7 +20,7 @@ void Camera::Initialisation(
 
 
 void Camera::UpdateViewMatrix() {	//						reminder:	from +Z to -Z
-	m_ViewMatrix = glm::translate(glm::mat4(1.f), glm::vec3(-m_Position, -1.f));
+	m_ViewMatrix = glm::translate(glm::mat4(1.f), glm::vec3(-m_Position, 0.f));
 }
 
 

@@ -41,6 +41,19 @@ struct StandardQuad {
 
 public:
 
+	unsigned int m_OriginalTextureUVBuffer = 0;
+
+
+	unsigned int GetUnmodifiedTextureUVBuffer() const { return m_OriginalTextureUVBuffer; }
+
+
+	void BindUnmodifiedTextureUVBuffer() const { glBindBuffer(GL_ARRAY_BUFFER, m_OriginalTextureUVBuffer); }
+
+
+	void UnbindUnmodifiedTextureUVBuffer() const { glBindBuffer(GL_ARRAY_BUFFER, 0); }
+
+public:
+
 	float  g_stdVertexCoordArray[8] = {
 		0,										0,
 		0,									(float)m_StandardSpritePixelLength,

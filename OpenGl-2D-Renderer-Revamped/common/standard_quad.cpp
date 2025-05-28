@@ -33,6 +33,12 @@ void StandardQuad::Init() {
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(g_stdIndexArray), g_stdIndexArray, GL_STATIC_DRAW);
 
 	glBindVertexArray(0);
+
+
+	glGenBuffers(1, &m_OriginalTextureUVBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, m_OriginalTextureUVBuffer);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(g_stdTexCoordArray), g_stdTexCoordArray, GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
 void StandardQuad::Bind() {

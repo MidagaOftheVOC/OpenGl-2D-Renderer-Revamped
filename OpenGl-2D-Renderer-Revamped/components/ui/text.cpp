@@ -173,7 +173,9 @@ void Text::GenerateBuffers() {
 		DEBUG_ASSERT(0, "Text object attempts regenerating its VBO. [%p]", this);
 		return;
 	}
-	glGenBuffers(1, &m_GlyphDataVBO);
+	//	FIXME: this shouldn't work but it does for some reason
+	//	Should be done with glCreateBuffers() instead. Oh well.
+	glGenBuffers(1, &m_GlyphDataVBO);	
 }
 
 

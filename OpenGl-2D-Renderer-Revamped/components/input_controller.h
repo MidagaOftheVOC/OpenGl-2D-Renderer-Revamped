@@ -107,6 +107,27 @@ public:
 		TrackingBit _trackingBitmask
 	);
 
+#if DEBUG__CODE
+
+	void	DEBUG_ForceHoldKeyState(GLuint _openglKeycode) {
+		m_RecentKeystateBitmask.set(_openglKeycode);
+		m_PreviousKeystateBitmask.set(_openglKeycode);
+	}
+
+	void	DEBUG_ForcePressKeyState(GLuint _openglKeycode) {
+		m_RecentKeystateBitmask.set(_openglKeycode);
+	}
+
+#else
+
+	inline void	DEBUG_ForceHoldKeyState(GLuint _openglKeycode) 
+	{}
+
+	inline void	DEBUG_ForcePressKeyState(GLuint _openglKeycode) 
+	{}
+
+#endif
+
 private:
 
 	bool AccessPreviousKeystateBitmask(

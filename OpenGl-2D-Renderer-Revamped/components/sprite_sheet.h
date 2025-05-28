@@ -12,20 +12,18 @@
 * 
 */
 
+
+#define _CRT_SECURE_NO_WARNINGS
+
 #include <string>
 #include <vector>
 
 #include "../common/common.h"
 
-
-
 #include "shader.h"
 
 
-
-
-
-struct UVRegion {
+struct alignas(float) UVRegion {
 
 	UVRegion() {}
 	//	  x		  y
@@ -37,8 +35,18 @@ struct UVRegion {
 		float _u1, float _v1
 	);
 
+	void* GetData() { return this; }
 	bool operator==(const UVRegion& other) const;
 
+};
+
+
+enum class SpriteSheetType {
+	NotInitialised = 0,
+	IndexBased,
+	DirectUV,
+
+	ErrorLoading
 };
 
 
@@ -59,6 +67,15 @@ class SpriteSheet {
 	unsigned int m_TextureBufferID = 0x7FFFFFFF;
 	const Shader* m_Shader = nullptr;
 
+private:
+
+	SpriteSheetType m_Type = SpriteSheetType::NotInitialised;
+
+private:
+
+	std::vector<UVRegion> m_UVregionsFromConfigFile;
+	std::vector<std::string> m_UVregionNamesFromConfigFile;
+
 public:
 
 	glm::vec2 GetCalculatedSpriteOffsets(
@@ -67,19 +84,65 @@ public:
 
 public:
 
+	/*
+		If loading a sheet by config file, values for
+		sprite counts per row and column will be ignored
+	*/
+
 	SpriteSheet(
-		const std::string& _locationRawImage,
+		const std::string& _locationOfImageOrConfigFile,
 		const std::string& _sheetName,
 		const Shader* _preferredShader,
-		int _spritesPerRow,
-		int _spritesPerCol
+		int _spritesPerRow_IGNORED_IF_LOADING_CONFIG_FILE,
+		int _spritesPerCol_IGNORED_IF_LOADING_CONFIG_FILE
 	);
 
 
 	SpriteSheet();
 
+
+	void TransformIndicesToUVRegionArray(
+		const int* _indexArray,
+		const int _indexArraySize,
+		std::vector<UVRegion>& OUT_uvRegionArray
+	) const;
+
+private:	//	Private getters 
+
+	const UVRegion* GetUVRegionArray() const { return m_UVregionsFromConfigFile.data(); }
+
+private:
+
+	const int c_StandardImageLoadingMethodReturnCode	= 1;
+	const int c_ConfigFileLoadingMethodReturnCode		= 2;
+	const int c_ErrorInLoadingMethodReturnCode			= -1;
+		
+
+	int DetermineLoadingMethodFromGivenPath(
+		const std::string& _pathFromConstructor
+	);
+
+
+	void ConfigurationPairLoadingMethod(
+		const char* _pathToConfigFile
+	);
+
+
+	void StandardImageLoadingMethod(
+		const char* _pathFromConstructor,
+		int _spritesPerRow,
+		int _spritesPerCol
+	);
+
+
+	void LoadImageInTexture(
+		const char* _pathToFile
+	);
+
 public:
 
+	const UVRegion* GetUVRegionByName ( const char* _assetName ) const;
+	SpriteSheetType GetType() const { return m_Type; }
 	glm::vec2 GetSpriteDimensions() const;
 	const UVRegion& GetSheetSpriteUVregion() const { return m_SpriteUniformUVs; }
 	const std::string& GetName() const;

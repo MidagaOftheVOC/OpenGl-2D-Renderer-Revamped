@@ -151,7 +151,10 @@
     <ClCompile Include="components\shader.cpp" />
     <ClCompile Include="components\sprite_sheet.cpp" />
     <ClCompile Include="components\ui\font.cpp" />
+    <ClCompile Include="components\ui\pane.cpp" />
     <ClCompile Include="components\ui\text.cpp" />
+    <ClCompile Include="components\ui\ui_manager.cpp" />
+    <ClCompile Include="components\ui\ui_primitive.cpp" />
     <ClCompile Include="components\uniform\uniform_data.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="main_renderer.cpp" />
@@ -167,7 +170,10 @@
     <ClInclude Include="components\shader.h" />
     <ClInclude Include="components\sprite_sheet.h" />
     <ClInclude Include="components\ui\font.h" />
+    <ClInclude Include="components\ui\pane.h" />
     <ClInclude Include="components\ui\text.h" />
+    <ClInclude Include="components\ui\ui_manager.h" />
+    <ClInclude Include="components\ui\ui_primitive.h" />
     <ClInclude Include="components\uniform\uniform_data.h" />
     <ClInclude Include="main_renderer.h" />
   </ItemGroup>

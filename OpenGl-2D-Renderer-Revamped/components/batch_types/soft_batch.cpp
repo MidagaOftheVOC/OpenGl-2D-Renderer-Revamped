@@ -1,99 +1,206 @@
 #include "soft_batch.h"
 
 
+unsigned int SoftBatch::s_VAO = 0;
+
+unsigned int SoftBatch::c_NotInitialisedErrorBit = 1 << 0;
+
+unsigned int SoftBatch::c_MaximumInstanceCountExceeded = 1 << 4;
+
+
 SoftBatch::SoftBatch(
 	const SpriteSheet* _spriteSheet,
 	int _instanceCount
 ):
 	m_SpriteSheet(_spriteSheet),
 	m_InstanceCount(_instanceCount)
-{}
-
-
-void SoftBatch::InitialiseBuffers(
-	const int* _spriteIndexArray,
-	const float* _objectRotationsRad,
-	const float* _pairsOfxyPositions
-) {
-
-	glGenVertexArrays(1, &m_LocalBatchVAO);
-	glBindVertexArray(m_LocalBatchVAO);
-
+{
 	unsigned int vbo[3];
+	glCreateBuffers(3, vbo);
 
-	glGenBuffers(3, vbo);
+	m_UVRegionsVBO = vbo[0];
+	m_RotationsVBO = vbo[1];
+	m_PositionsVBO = vbo[2];
+}
+
+
+SoftBatch::~SoftBatch() {
+	glDeleteBuffers(1, &m_UVRegionsVBO);
+	glDeleteBuffers(1, &m_RotationsVBO);
+	glDeleteBuffers(1, &m_PositionsVBO);
+}
+
+
+void SoftBatch::InitialiseCommonVAO() {
+	
+	if (GLdiagnostics::IsVertexArray(s_VAO)) {
+		DEBUG_ASSERT(0, "Attempt to reinitialise common SoftBatch VAO object.");
+		return;
+	}
+	
+	glGenVertexArrays(1, &s_VAO);
+	glBindVertexArray(s_VAO);
+	
 
 	g_StandardQuad.BindVertexBufferAt(0);
-	g_StandardQuad.BindTexUVbufferAt(1);
+
+	//	Unmodified Coordinate vertices for square quad.
+	glBindBuffer(GL_ARRAY_BUFFER, g_StandardQuad.GetUnmodifiedTextureUVBuffer());
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), static_cast<void*>(0));
+	glEnableVertexAttribArray(1);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, g_StandardQuad.m_IndexBuffer);
 
-
-	glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);	//	1 int / instance		- sprite index
-	glBufferData(GL_ARRAY_BUFFER, sizeof(int) * GetInstanceCount(), _spriteIndexArray, GL_DYNAMIC_DRAW);
+	//	UV regions for texture UVs
+	//	@2	4* floats / instance
+	glBindVertexBuffer(2, 0, 0, 4 * sizeof(float));
+	glVertexAttribFormat(2, 4, GL_FLOAT, GL_FALSE, 0);
 	glEnableVertexAttribArray(2);
-	glVertexAttribIPointer(2, 1, GL_INT, sizeof(int), static_cast<void*>(0));
-	glVertexAttribDivisor(2, 1);
+	glVertexAttribBinding(2, 2);
+	glVertexBindingDivisor(2, 1);
 
-	glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);	//	1 float / instance		- rotations
-	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * GetInstanceCount(), _objectRotationsRad, GL_DYNAMIC_DRAW);
+	//	Floats for radians, rotations per sprite
+	//	@3	1* float / instance
+	glBindVertexBuffer(3, 0, 0, 1 * sizeof(float));
+	glVertexAttribFormat(3, 1, GL_FLOAT, GL_FALSE, 0);
 	glEnableVertexAttribArray(3);
-	glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, sizeof(float), static_cast<void*>(0));
-	glVertexAttribDivisor(3, 1);
+	glVertexAttribBinding(3, 3);
+	glVertexBindingDivisor(3, 1);
 
-
-	glBindBuffer(GL_ARRAY_BUFFER, vbo[2]);	//	2 float / instance		- positions
-	glBufferData(GL_ARRAY_BUFFER, (sizeof(float) * 2) * GetInstanceCount(), _pairsOfxyPositions, GL_DYNAMIC_DRAW);
+	//	Pairs of floats for position offsets
+	//	@4 2* floats / instance
+	glBindVertexBuffer(4, 0, 0, 2 * sizeof(float));
+	glVertexAttribFormat(4, 2, GL_FLOAT, GL_FALSE, 0);
 	glEnableVertexAttribArray(4);
-	glVertexAttribPointer(4, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, static_cast<void*>(0));
-	glVertexAttribDivisor(4, 1);
+	glVertexAttribBinding(4, 4);
+	glVertexBindingDivisor(4, 1);
+
+
+	glBindVertexArray(0);
+}
+
+
+void SoftBatch::UpdateBuffers(
+	const int* _spriteIndices,
+	const float* _objectRotationsRad,
+	const float* _pairsOfxyPositions,
+	const size_t _arrayElementCount
+) {
+	SetInstanceCount(static_cast<unsigned int>(_arrayElementCount));
 	
+	std::vector<UVRegion> UVs;
+	UVRegion* UVArray = nullptr;
 
-	m_SpriteIndexVBO = vbo[0];
-	m_RotationsVBO = vbo[1];
-	m_PositionsVBO = vbo[2];
+	if (_spriteIndices) {
+		GetSheet()->TransformIndicesToUVRegionArray(_spriteIndices, _arrayElementCount, UVs);
+		UVArray = UVs.data();
+	}
+	
+	//	Update all, even with null data.
+	if ( m_Flags.CheckFlag(c_MaximumInstanceCountExceeded)) {
 
+		m_Flags.ClearFlag(c_MaximumInstanceCountExceeded);
+		
+		
+		
+
+		glNamedBufferData(GetUVRegionsVBO(), GetInstanceCount() * sizeof(UVRegion), UVArray, GL_DYNAMIC_DRAW);
+		glNamedBufferData(GetRotationsVBO(), GetInstanceCount() * sizeof(float), _objectRotationsRad, GL_DYNAMIC_DRAW);
+		glNamedBufferData(GetPositionsVBO(), GetInstanceCount() * 2 * sizeof(float), _pairsOfxyPositions, GL_DYNAMIC_DRAW);
+
+		return;
+	}
+
+	if(UVArray)				glNamedBufferSubData(GetUVRegionsVBO(), 0, GetInstanceCount() * sizeof(UVRegion), UVArray);
+	if(_objectRotationsRad)	glNamedBufferSubData(GetRotationsVBO(), 0, GetInstanceCount() * sizeof(float), _objectRotationsRad);
+	if(_arrayElementCount)	glNamedBufferSubData(GetPositionsVBO(), 0, GetInstanceCount() * 2 * sizeof(float), _pairsOfxyPositions);
+}
+
+
+bool SoftBatch::SetInstanceCount(
+	const int _newInstanceCount
+) {
+#ifdef DEBUG__CODE
+	DEBUG_ASSERT(_newInstanceCount > 0 && _newInstanceCount < 0x7fffffff, "SoftBatch setting invalid value for Instance count.");
+	DEBUG_WARN(_newInstanceCount == GetInstanceCount(), "Setting Instance count to the same number in SoftBatch with name [%s].", dm_BatchName.c_str());
+#endif
+
+	if (_newInstanceCount == m_InstanceCount) return true;
+	
+	if (_newInstanceCount < 0 || _newInstanceCount > 0x7fffffff) {
+		return false;
+	}
+
+	if (_newInstanceCount > m_MaximumBufferInstanceCount) {
+		m_Flags.SetFlag(c_MaximumInstanceCountExceeded);
+		m_MaximumBufferInstanceCount = _newInstanceCount;
+	}
+
+	m_InstanceCount = _newInstanceCount;
+	return true;
+}
+
+
+bool SoftBatch::UpdateUVRegionVBO(
+	const int* _spriteIndices,
+	const size_t _arrayElementCount
+) {
+	DEBUG_ASSERT(!m_Flags.CheckFlag(c_NotInitialisedErrorBit), "Attempting update of non-initialised buffer for SoftBatch with name [%s].", dm_BatchName.c_str());
+	
+	if (m_Flags.CheckFlag(c_MaximumInstanceCountExceeded) || _spriteIndices == nullptr) {
+		return false;
+	}
+
+	std::vector<UVRegion> UVs;
+	GetSheet()->TransformIndicesToUVRegionArray(_spriteIndices, _arrayElementCount, UVs);
+
+	glNamedBufferSubData(GetUVRegionsVBO(), 0, GetInstanceCount() * sizeof(UVRegion), UVs.data());
+	return true;
+}
+
+
+bool SoftBatch::UpdateRotationsBuffer(
+	const float* _objectRotationsRad,
+	const size_t _arrayElementCount
+) {
+	DEBUG_ASSERT(!m_Flags.CheckFlag(c_NotInitialisedErrorBit), "Attempting update of non-initialised buffer for SoftBatch with name [%s].", dm_BatchName.c_str());
+
+	if (m_Flags.CheckFlag(c_MaximumInstanceCountExceeded) || _objectRotationsRad == nullptr || _arrayElementCount >= GetInstanceCount()) {
+		return false;
+	}
+
+	glNamedBufferSubData(GetRotationsVBO(), 0, GetInstanceCount() * 1 * sizeof(float), _objectRotationsRad);
+	return true;
+}
+
+
+bool SoftBatch::UpdatePositionsBuffer(
+	const float* _pairsOfxyPositions,
+	const size_t _arrayElementCount
+) {
+	DEBUG_ASSERT(!m_Flags.CheckFlag(c_NotInitialisedErrorBit), "Attempting update of non-initialised buffer for SoftBatch with name [%s].", dm_BatchName.c_str());
+
+	if (m_Flags.CheckFlag(c_MaximumInstanceCountExceeded) || _pairsOfxyPositions == nullptr) {
+		return false;
+	}
+
+	glNamedBufferSubData(GetPositionsVBO(), 0, GetInstanceCount() * 2 * sizeof(float), _pairsOfxyPositions);
+	return true;
+}
+
+
+void SoftBatch::BindUniqueBuffers() const {
+	glBindVertexBuffer(2, GetUVRegionsVBO(), 0, sizeof(UVRegion));
+	glBindVertexBuffer(3, GetRotationsVBO(), 0, sizeof(float));
+	glBindVertexBuffer(4, GetPositionsVBO(), 0, sizeof(float) * 2);
+}
+
+
+void SoftBatch::BindCommonVAO(){
+	glBindVertexArray(s_VAO);
+}
+
+
+void SoftBatch::UnbindCommonVAO(){
 	glBindVertexArray(0);
 }
-
-
-//	TODO: implement
-
-void SoftBatch::UpdateSpriteIndexBuffer(
-	const int* _spriteIndexArray
-) {
-	glBindBuffer(GL_ARRAY_BUFFER, m_SpriteIndexVBO);
-	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(int) * m_InstanceCount, _spriteIndexArray);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-}
-
-
-void SoftBatch::UpdateRotationsBuffer(
-	const float* _objectRotationsRad
-) {
-	glBindBuffer(GL_ARRAY_BUFFER, m_RotationsVBO);
-	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float) * m_InstanceCount, _objectRotationsRad);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-}
-
-
-void SoftBatch::UpdatePositionsBuffer(
-	const float* _pairsOfxyPositions
-) {
-	glBindBuffer(GL_ARRAY_BUFFER, m_PositionsVBO);
-	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float) * 2 * m_InstanceCount, _pairsOfxyPositions);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-}
-
-
-void SoftBatch::Bind() const {
-	glBindVertexArray(m_LocalBatchVAO);
-}
-
-
-void SoftBatch::Unbind() const {
-	glBindVertexArray(0);
-}
-
-
-

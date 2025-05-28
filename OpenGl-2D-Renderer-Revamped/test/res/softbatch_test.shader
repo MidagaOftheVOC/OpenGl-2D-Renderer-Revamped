@@ -3,7 +3,7 @@
 
 layout(location = 0) in vec2 b_VertexBuffer;
 layout(location = 1) in vec2 b_TexBuffer;
-layout(location = 2) in int  b_SpriteIndicies;	// per-instance data
+layout(location = 2) in vec4 b_UVRegionBuffer;
 layout(location = 3) in float b_Rotations;
 layout(location = 4) in vec2 b_PositionsRelativeToModel;
 
@@ -11,12 +11,12 @@ uniform mat4 u_Model;
 uniform mat4 u_View;
 uniform mat4 u_Projection;
 
+//	possibly useless
 uniform int u_SheetRowSpriteCount;
 uniform vec2 u_SpriteTexUVDimensions;
 
 
 out vec2 v_TextureVertex;
-
 
 const vec2 PivotOffset = vec2(50, 50);
 
@@ -37,12 +37,10 @@ void main(){
 	
 
 	//	texture sprit indexing
-	vec2 PreparedInstanceTexUV;
-	PreparedInstanceTexUV.x  =  (int(b_SpriteIndicies % u_SheetRowSpriteCount));
-	PreparedInstanceTexUV.y  =  (int(b_SpriteIndicies / u_SheetRowSpriteCount));
-	PreparedInstanceTexUV   *=  u_SpriteTexUVDimensions;
+	vec2 MinUV = b_UVRegionBuffer.xy;
+	vec2 MaxUV = b_UVRegionBuffer.zw;
 
-	v_TextureVertex = PreparedInstanceTexUV + b_TexBuffer;
+	v_TextureVertex = mix(MinUV, MaxUV, b_TexBuffer);
 }
 
 

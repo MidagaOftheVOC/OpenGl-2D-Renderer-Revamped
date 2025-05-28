@@ -5,8 +5,8 @@
 #define GLEW_STATIC
 
 
-#define DEBUG__CODE            // use for debug-build-only code snippets
-#define DEBUG__ALLOW_ASSERTS
+#define DEBUG__CODE 1           // use for debug-build-only code snippets
+#define DEBUG__ALLOW_ASSERTS 1
 
 // -- END PROJECT SETTINGS -- //
 
@@ -30,8 +30,25 @@
 
 #define FLOAT_COMPARE_TOLERANCE 0.0001f
 
+#ifdef DEBUG__CODE
 
-#ifdef DEBUG__ALLOW_ASSERTS
+#define DEBUG__CODE__(__debug_variant, __release_variant)\
+__debug_variant
+
+
+#define BREAK_IF(cond_) if (cond_) __debugbreak();
+
+#else
+
+#define DEBUG__CODE__(__debug_variant, __release_variant)\
+__release_variant
+
+#endif
+
+
+//  Conditions changed to that so ASSERT macroes
+//  can freely use debug-only variables
+#if (DEBUG__ALLOW_ASSERTS && DEBUG__CODE)
 
 #define DEBUG_ASSERT(x_, msg_, ...) \
     if (!(x_)) { \
@@ -107,6 +124,51 @@ struct GLdiagnostics {
 };
 
 
+struct FlagTracker {
+    
+    FlagTracker(
+        const unsigned int _initFlags = 0
+    ) {
+        m_Flags |= _initFlags;
+    }
+
+    bool CheckFlag(
+        const unsigned int _flag
+    ) const {
+        return m_Flags & _flag;
+    }
+
+
+    void SetFlag(
+        const unsigned int _flag
+    ) {
+        m_Flags |= _flag;
+    }
+
+
+    void ClearFlag(
+        const unsigned int _flag
+    ) {
+        m_Flags &= ~_flag;
+    }
+
+
+    bool CheckAndClearFlag(
+        const unsigned int _flag
+    ) {
+        bool Result = CheckFlag(_flag);
+        ClearFlag(_flag);
+        return Result;
+    }
+
+
+private:
+
+    unsigned int m_Flags = 0;
+
+};
+
+
 struct Random {
 
     static std::mt19937& engine() {
@@ -141,12 +203,11 @@ struct Profiler {
         s_Start = Clock::now();
     }
 
-
+    
     static float Stop() {
         s_End = Clock::now();
         auto duration = std::chrono::duration_cast<std::chrono::microseconds>(s_End - s_Start).count();
-        float millis = static_cast<float>(duration);
-        return millis;
+        return static_cast<float>(duration) / 1000.f;
     }
 
 
