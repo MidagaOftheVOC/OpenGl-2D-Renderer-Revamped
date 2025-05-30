@@ -4,6 +4,7 @@
 #include "main_renderer.h"
 
 
+#include "test/test_snippets.h"
 
 int main() {
 
@@ -38,7 +39,7 @@ int main() {
 
 
 	r.UploadShaderParameters(
-		"test\\res\\softbatch_test.shader",
+		"test\\res\\sb_std.shader",
 		"soft_batch"
 	);
 
@@ -59,6 +60,20 @@ int main() {
 		"test\\res\\test.cfg",
 		"fb_sheet",
 		"fb_shader",
+		0, 0
+	);
+
+
+
+	r.UploadShaderParameters(
+		"test\\res\\sb_floating_quads.shader",
+		"sb_floating_quads"
+	);
+
+	r.UploadSpriteSheetParameters(
+		"test\\res\\test.cfg",
+		"sb_fq",
+		"sb_floating_quads",
 		0, 0
 	);
 
@@ -114,13 +129,10 @@ int main() {
 	);
 
 
+	SoftBatch fq = SoftBatch(r.GetSpriteSheetByName("sb_fq"), 4, SoftBatchType::FloatingQuad);
+	fq.InitialiseBuffers();
 
-
-	FreeBatch  free = FreeBatch(r.GetSpriteSheetByName("fb_sheet"), 4);
-
-	free.InitialiseBuffers();
-
-	free.UpdateBuffers(
+	fq.UpdateBuffers(
 		indices,
 		rotations,
 		PositionPais,
@@ -128,15 +140,19 @@ int main() {
 	);
 
 
+
+	StrictBatch strict = GetInitialisedStrictBatch(r.GetSpriteSheetByName("fox"));
+
 	while (!r.IsRunning()) {
 		input.CaptureKeystates();
 
+		r.Draw(&strict, 70, 70, 2, nullptr);
 
 		//r.Draw(&t, 300, 300, 2, nullptr);
 
 		//r.Draw(&soft, 100, 100, 2, nullptr);
 
-		r.Draw(&free, 300, 300, 2, nullptr);
+		//r.Draw(&fq, 100, 100, 3, nullptr);
 
 		if (input.IsHeld(GLFW_KEY_RIGHT)) {
 			t.SetWordWrapBound(t.GetRightWordWrapBound() + .5f);

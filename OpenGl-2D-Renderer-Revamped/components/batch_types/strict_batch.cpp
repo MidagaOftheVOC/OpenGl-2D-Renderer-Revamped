@@ -6,7 +6,7 @@ unsigned int StrictBatch::s_VAO = 0;
 
 
 StrictBatch::StrictBatch(
-	SpriteSheet* _spriteSheet,
+	const SpriteSheet* _spriteSheet,
 	int _instanceCount,
 	int _spriteCountPerRow
 ): 

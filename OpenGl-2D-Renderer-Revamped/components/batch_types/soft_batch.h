@@ -15,17 +15,27 @@
 *		- position
 */
 
+
+enum class SoftBatchType{
+	FixedQuad,
+	FloatingQuad
+};
+
 class SoftBatch : public BaseBatch{
 
 	unsigned int m_UVRegionsVBO = 0;
 	unsigned int m_RotationsVBO = 0;
 	unsigned int m_PositionsVBO = 0;
 
+
+	const SoftBatchType m_Type;
+
 public:
 
 	SoftBatch(
 		const SpriteSheet* _spriteSheet,
-		int _instanceCount
+		int _instanceCount,
+		SoftBatchType _type = SoftBatchType::FixedQuad
 	);
 
 
@@ -88,23 +98,6 @@ public:
 
 	void BindUniqueBuffers() const;
 
-#ifdef DEBUG__CODE
-
-	std::string dm_BatchName;
-	void DEBUG_SetName(
-		const char* _newName
-	) {
-		dm_BatchName = _newName;
-	}
-
-#else
-
-	inline void DEBUG_SetName(
-		const char* DEBUG_MODE_IS_DISABLED_newName
-	) {}
-
-#endif
-
 private:
 
 	static unsigned int s_VAO;
@@ -124,6 +117,8 @@ public:
 	unsigned int GetUVRegionsVBO() const { return m_UVRegionsVBO; }
 	unsigned int GetRotationsVBO() const { return m_RotationsVBO; }
 	unsigned int GetPositionsVBO() const { return m_PositionsVBO; }
+	SoftBatchType GetType() const { return m_Type; }
+
 
 	virtual ~SoftBatch() {}
 

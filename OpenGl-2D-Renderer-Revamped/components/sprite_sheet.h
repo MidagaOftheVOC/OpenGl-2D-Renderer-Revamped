@@ -151,6 +151,9 @@ public:
 	int GetSheetRowSpriteCount() const { return m_SpriteCountPerRow; }
 	unsigned int GetTextureBufferID() const { return m_TextureBufferID; }
 
+	const int GetSpriteSheetWidth() const { return m_SheetWidth; }
+	const int GetSpriteSheetHeight() const { return m_SheetHeight; }
+
 	void DestroyGLTextureObject();
 
 };

@@ -6,7 +6,7 @@ Drawable Renderer2D::GenerateDrawable(
 	const char* _spriteSheetName,
 	int _indexInSpriteSheet
 ) {
-	SpriteSheet* SheetOfTarget = GetSpriteSheetByName(_spriteSheetName);
+	const SpriteSheet* SheetOfTarget = GetSpriteSheetByName(_spriteSheetName);
 
 	DEBUG_ASSERT(SheetOfTarget != nullptr, "Indexing Drawable from non-existant SpriteSheet object or name.");
 
@@ -254,6 +254,11 @@ void Renderer2D::RenderSoftBatches() {
 		Shader->SetStandardView(GetCamera().GetViewMatrix());
 		Shader->SetStandardProjection(GetCamera().GetProjectionMatrix());
 
+		if (Soft->GetType() == SoftBatchType::FloatingQuad) {
+			Shader->SetFloat("u_TexWidth", static_cast<const int>(Sheet->GetSpriteSheetWidth()));
+			Shader->SetFloat("u_TexHeight", static_cast<const int>(Sheet->GetSpriteSheetHeight()));
+		}
+
 		Shader->ApplyUniforms(DrawCall.GetAppliedUniforms());
 
 #ifdef DEBUG__CODE
@@ -500,7 +505,7 @@ void Renderer2D::LoadSpriteSheet(
 	);
 }
 
-SpriteSheet* Renderer2D::GetSpriteSheetByName(
+const SpriteSheet* Renderer2D::GetSpriteSheetByName(
 	const char* _spriteSheetName
 ) {
 	if (!_spriteSheetName) return nullptr;
@@ -516,7 +521,7 @@ SpriteSheet* Renderer2D::GetSpriteSheetByName(
 	return nullptr;
 }
 
-Shader* Renderer2D::GetShaderByName(
+const Shader* Renderer2D::GetShaderByName(
 	const char* _shaderName
 ) {
 	if (!_shaderName) return nullptr;

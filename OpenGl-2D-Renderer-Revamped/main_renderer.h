@@ -213,6 +213,9 @@ public:		//	Exposed functions
 	//	!!! This, used anywhere else other than a loading process that exposes
 	//	all Drawable instances from each SpriteSheet, violates the Drawable doctrine
 	//	of being a one-for-all templates.
+	//
+	//	Note: To be frank, this is pretty shit. You're better off pooling things in 
+	//	soft batches with floating quads.
 	Drawable GenerateDrawable(
 		const char* _spriteSheetName,
 		int _indexInSpriteSheet
@@ -307,12 +310,12 @@ private:
 
 public:		// getters and setters, 
 
-	Shader* GetShaderByName(
+	const Shader* GetShaderByName(
 		const char* _shaderName
 	);
 
 
-	SpriteSheet* GetSpriteSheetByName(
+	const SpriteSheet* GetSpriteSheetByName(
 		const char* _spriteSheetName
 	);
 

@@ -24,7 +24,7 @@ class StrictBatch : public BaseBatch {
 public:
 
 	StrictBatch(
-		SpriteSheet* _spriteSheet,
+		const SpriteSheet* _spriteSheet,
 		int _instanceCount,
 		int _spriteCountPerRow
 	);

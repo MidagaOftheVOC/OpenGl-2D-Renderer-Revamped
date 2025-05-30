@@ -6,9 +6,11 @@ unsigned int SoftBatch::s_VAO = 0;
 
 SoftBatch::SoftBatch(
 	const SpriteSheet* _spriteSheet,
-	int _instanceCount
+	int _instanceCount,
+	SoftBatchType _type
 ):
-	BaseBatch(_spriteSheet, _instanceCount)
+	BaseBatch(_spriteSheet, _instanceCount),
+	m_Type(_type)
 {}
 
 
