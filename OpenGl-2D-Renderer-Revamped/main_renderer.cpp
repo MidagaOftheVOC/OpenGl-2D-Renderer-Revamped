@@ -49,11 +49,27 @@ void Renderer2D::Draw(
 
 
 void Renderer2D::Draw(
+	const FreeBatch* _batch,
+	float _xPosition,
+	float _yPosition,
+	float _zLayer,
+	UniformDataVector* _uniformArray
+) {
+	m_FreeBatchArray.emplace_back(
+		_batch,
+		_xPosition,
+		_yPosition,
+		_zLayer,
+		_uniformArray
+	);
+}
+
+
+void Renderer2D::Draw(
 	const StrictBatch* _batch,
 	float _initialXpos,
 	float _initialYpos,
 	float _zLayer,
-	int _rowSpriteCount,
 	UniformDataVector* _uniformArray
 ) {
 	m_StrictBatchArray.emplace_back(
@@ -61,8 +77,7 @@ void Renderer2D::Draw(
 		_initialXpos,
 		_initialYpos,
 		_zLayer,
-		_uniformArray,
-		_rowSpriteCount
+		_uniformArray
 	);
 }
 
@@ -91,6 +106,7 @@ void Renderer2D::ExecuteDraws() {
 	RenderDrawables();
 	RenderStrictBatches();
 	RenderSoftBatches();
+	RenderFreeBatches();
 
 	RenderText();
 
@@ -132,7 +148,7 @@ void Renderer2D::RenderText() {
 		const TextOptions& OptionsObject = TextObject->GetTextOptions();
 
 		const size_t CharInstances = TextObject->GetCharCount();
-		const size_t LineBreakCount = TextObject->GetLineBreakCount();
+		const int LineBreakCount = static_cast<int>(TextObject->GetLineBreakCount());
 
 		TextObject->BindUniqueBuffers();
 		
@@ -165,7 +181,7 @@ void Renderer2D::RenderText() {
 		Shader.ApplyUniforms(DrawCall.GetAppliedUniforms());
 
 		CheckGLErrors();
-		glDrawElementsInstanced(GL_TRIANGLES, 6Ui64, GL_UNSIGNED_SHORT, nullptr, CharInstances);
+		glDrawElementsInstanced(GL_TRIANGLES, 6Ui64, GL_UNSIGNED_SHORT, nullptr, static_cast<int>(CharInstances));
 		CheckGLErrors();
 	}
 
@@ -176,16 +192,53 @@ void Renderer2D::RenderText() {
 }
 
 
+void Renderer2D::RenderFreeBatches() {
+	std::vector<BatchDrawCall>& Arr = m_FreeBatchArray;
+
+	if (Arr.size() == 0) return;
+
+	FreeBatch::BindCommonVAO();
+
+	for (size_t i = 0; i < Arr.size(); i++) {
+		const BatchDrawCall& DrawCall = Arr[i];
+
+		const FreeBatch* Free = dynamic_cast<const FreeBatch*>(DrawCall.GetBaseBatchPointer());
+		const SpriteSheet* Sheet = Free->GetSheet();
+		const Shader* Shader = Sheet->GetShader();
+
+		int ElementsToDraw = Free->GetElementCount();
+
+
+		Free->BindUniqueBuffers();
+		glBindTexture(GL_TEXTURE_2D, Sheet->GetTextureBufferID());
+
+		Shader->UseShader();
+		Shader->SetStandardProjection(GetCamera().GetProjectionMatrix());
+		Shader->SetStandardView(GetCamera().GetViewMatrix());
+		Shader->SetStandardModel(glm::translate(glm::mat4(1.f), DrawCall.GetPositionVector()));
+
+
+		CheckGLErrors();
+		glDrawElements(GL_TRIANGLES, ElementsToDraw, GL_UNSIGNED_SHORT, 0);
+		CheckGLErrors();
+	}
+
+	FreeBatch::UnbindCommonVAO();
+	Arr.clear();
+
+}
+
+
 void Renderer2D::RenderSoftBatches() {
-	std::vector<SoftBatchDrawCall>& Arr = m_SoftBatchArray;
+	std::vector<BatchDrawCall>& Arr = m_SoftBatchArray;
 	
 	SoftBatch::BindCommonVAO();
 
 
 	for (size_t i = 0; i < Arr.size(); i++) {
-		const SoftBatchDrawCall& DrawCall = Arr[i];
+		const BatchDrawCall& DrawCall = Arr[i];
 
-		const SoftBatch* Soft = DrawCall.GetSoftBatchPointer();
+		const SoftBatch* Soft = dynamic_cast<const SoftBatch*>(DrawCall.GetBaseBatchPointer());
 		const SpriteSheet* Sheet = Soft->GetSheet();
 		const Shader* Shader = Sheet->GetShader();
 
@@ -200,9 +253,6 @@ void Renderer2D::RenderSoftBatches() {
 		Shader->SetStandardModel(glm::translate(glm::mat4(1.f), DrawCall.GetPositionVector()));
 		Shader->SetStandardView(GetCamera().GetViewMatrix());
 		Shader->SetStandardProjection(GetCamera().GetProjectionMatrix());
-
-		Shader->SetInt("u_SheetRowSpriteCount", Sheet->GetSheetRowSpriteCount());
-		Shader->SetVec2("u_SpriteTexUVDimensions", Sheet->GetSpriteDimensions());
 
 		Shader->ApplyUniforms(DrawCall.GetAppliedUniforms());
 
@@ -228,14 +278,14 @@ void Renderer2D::RenderStrictBatches() {
 	//	unique sprite sheets paired with unique shaders
 	//	there's not much point in trying to optimise this part
 
-	std::vector<StrictBatchDrawCall>& Arr = m_StrictBatchArray;
+	std::vector<BatchDrawCall>& Arr = m_StrictBatchArray;
 
 	StrictBatch::BindCommonVAO();
 
 	for (size_t i = 0; i < Arr.size(); i++) {
-		const StrictBatchDrawCall& DrawCallCurrent = Arr[i];
+		const BatchDrawCall& DrawCallCurrent = Arr[i];
 		
-		const StrictBatch* Strict = DrawCallCurrent.GetStrictBatchPointer();
+		const StrictBatch* Strict = dynamic_cast<const StrictBatch*>(DrawCallCurrent.GetBaseBatchPointer());
 		const SpriteSheet* SheetCurrent = Strict->GetSheet();
 		const Shader* ShaderCurrent = SheetCurrent->GetShader();
 
@@ -253,7 +303,7 @@ void Renderer2D::RenderStrictBatches() {
 		ShaderCurrent->SetStandardView(m_Camera.GetViewMatrix());
 		ShaderCurrent->SetStandardProjection(m_Camera.GetProjectionMatrix());
 
-		ShaderCurrent->SetInt("u_RowSpriteCount", DrawCallCurrent.GetRowSpriteCount());
+		ShaderCurrent->SetInt("u_RowSpriteCount", Strict->GetSpriteCountPerRow());
 		ShaderCurrent->SetInt("u_SpriteSideLengthPx", GetQuad().m_StandardSpritePixelLength);
 
 		ShaderCurrent->ApplyUniforms(DrawCallCurrent.GetAppliedUniforms());
@@ -584,6 +634,7 @@ void Renderer2D::PerClassVAOinitialisationFunction() {
 
 	StrictBatch::InitialiseCommonVAO();
 	SoftBatch::InitialiseCommonVAO();
+	FreeBatch::InitialiseCommonVAO();
 
 	Font::InitialiseCommonFontSizeVBO(20);
 	Text::InitialiseCommonVAO();

@@ -143,6 +143,8 @@
   <ItemGroup>
     <ClCompile Include="common\common.cpp" />
     <ClCompile Include="common\standard_quad.cpp" />
+    <ClCompile Include="components\batch_types\base_batch.cpp" />
+    <ClCompile Include="components\batch_types\free_batch.cpp" />
     <ClCompile Include="components\batch_types\soft_batch.cpp" />
     <ClCompile Include="components\batch_types\strict_batch.cpp" />
     <ClCompile Include="components\camera.cpp" />
@@ -155,13 +157,17 @@
     <ClCompile Include="components\ui\text.cpp" />
     <ClCompile Include="components\ui\ui_manager.cpp" />
     <ClCompile Include="components\ui\ui_primitive.cpp" />
+    <ClCompile Include="components\ui\window.cpp" />
     <ClCompile Include="components\uniform\uniform_data.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="main_renderer.cpp" />
+    <ClCompile Include="test\test_snippets.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="common\common.h" />
     <ClInclude Include="common\standard_quad.h" />
+    <ClInclude Include="components\batch_types\base_batch.h" />
+    <ClInclude Include="components\batch_types\free_batch.h" />
     <ClInclude Include="components\batch_types\soft_batch.h" />
     <ClInclude Include="components\batch_types\strict_batch.h" />
     <ClInclude Include="components\camera.h" />
@@ -174,6 +180,7 @@
     <ClInclude Include="components\ui\text.h" />
     <ClInclude Include="components\ui\ui_manager.h" />
     <ClInclude Include="components\ui\ui_primitive.h" />
+    <ClInclude Include="components\ui\window.h" />
     <ClInclude Include="components\uniform\uniform_data.h" />
     <ClInclude Include="main_renderer.h" />
   </ItemGroup>

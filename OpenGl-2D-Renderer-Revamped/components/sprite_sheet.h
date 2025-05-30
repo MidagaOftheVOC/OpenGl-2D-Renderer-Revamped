@@ -104,7 +104,8 @@ public:
 	void TransformIndicesToUVRegionArray(
 		const int* _indexArray,
 		const int _indexArraySize,
-		std::vector<UVRegion>& OUT_uvRegionArray
+		std::vector<UVRegion>& OUT_uvRegionArray,
+		std::vector<float>* OUT_vertexArray = nullptr
 	) const;
 
 private:	//	Private getters 

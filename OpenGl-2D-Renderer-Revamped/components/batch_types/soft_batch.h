@@ -3,6 +3,8 @@
 #include "../../common/common.h"
 #include "../../common/standard_quad.h"
 
+#include "base_batch.h"
+
 /*
 *	SoftBatch:	A batch for rendering many objects with looser 
 *				restrictions than the StrictBatch
@@ -13,28 +15,11 @@
 *		- position
 */
 
-class SoftBatch {
+class SoftBatch : public BaseBatch{
 
 	unsigned int m_UVRegionsVBO = 0;
 	unsigned int m_RotationsVBO = 0;
 	unsigned int m_PositionsVBO = 0;
-
-	const SpriteSheet* m_SpriteSheet = nullptr;
-
-
-	int m_InstanceCount = 0;
-	int m_MaximumBufferInstanceCount = 0;
-
-	
-	FlagTracker m_Flags = FlagTracker(c_MaximumInstanceCountExceeded);
-
-private:	//	Flags
-	
-	//	Errors
-	static unsigned int c_NotInitialisedErrorBit;
-	
-	//	Exceptions
-	static unsigned int c_MaximumInstanceCountExceeded;
 
 public:
 
@@ -43,9 +28,16 @@ public:
 		int _instanceCount
 	);
 
+
+	virtual void InitialiseBuffers();
+
+
+	virtual void DeleteBuffers();
+
 	/*
 		Either array element can be set to /nullptr/, in that case, it is not updated.
-
+		Same goes for _arrayElementCount, it it's 0, we assume no changes to the array
+		lengths have occured and continue as usual.
 
 		_arrayElementCount represents the element counts of all passed arrays,
 		if they're not equal, we get leaks or uninitialised memory.
@@ -63,7 +55,7 @@ public:
 		const int* _spriteIndices,
 		const float* _objectRotationsRad,
 		const float* _pairsOfxyPositions,
-		const size_t _arrayElementCount
+		const size_t _arrayElementCount = 0
 	);
 
 	
@@ -93,12 +85,6 @@ public:
 		const size_t _arrayElementCount = 0
 	);
 
-	//	Can raise the c_MaximumInstanceCountExceeded flag if _newInstanceCount 
-	//	exceeds the maximum instance count, which indicates buffer resizing is mandatory
-	bool SetInstanceCount(
-		const int _newInstanceCount
-	);
-
 
 	void BindUniqueBuffers() const;
 
@@ -119,10 +105,11 @@ public:
 
 #endif
 
-public:
+private:
 
 	static unsigned int s_VAO;
 
+public:
 
 	static void InitialiseCommonVAO();
 
@@ -134,13 +121,11 @@ public:
 
 public:
 
-	int GetInstanceCount() const { return m_InstanceCount; }
-	const SpriteSheet* GetSheet() const { return m_SpriteSheet; }
 	unsigned int GetUVRegionsVBO() const { return m_UVRegionsVBO; }
 	unsigned int GetRotationsVBO() const { return m_RotationsVBO; }
 	unsigned int GetPositionsVBO() const { return m_PositionsVBO; }
 
-	~SoftBatch();
+	virtual ~SoftBatch() {}
 
 };
 

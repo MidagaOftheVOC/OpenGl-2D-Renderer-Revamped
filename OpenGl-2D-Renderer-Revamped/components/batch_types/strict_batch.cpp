@@ -2,19 +2,27 @@
 #include "../../common/standard_quad.h"
 
 
+unsigned int StrictBatch::s_VAO = 0;
+
 
 StrictBatch::StrictBatch(
 	SpriteSheet* _spriteSheet,
-	int _instanceCount
-)
-	: m_SpriteSheet(_spriteSheet),
-	m_InstanceCount(_instanceCount)
-{
+	int _instanceCount,
+	int _spriteCountPerRow
+): 
+	BaseBatch(_spriteSheet, _instanceCount),
+	m_SpritesPerRow(_spriteCountPerRow)
+{}
+
+
+void StrictBatch::InitialiseBuffers() {
 	glCreateBuffers(1, &m_UVRegionVBO);
 }
 
 
-unsigned int StrictBatch::s_VAO = 0;
+void StrictBatch::DeleteBuffers() {
+	glDeleteBuffers(1, &m_UVRegionVBO);
+}
 
 
 void StrictBatch::InitialiseCommonVAO() {
@@ -48,23 +56,32 @@ void StrictBatch::InitialiseCommonVAO() {
 }
 
 
-void StrictBatch::InitialiseBuffers(
-	int* _spriteIndexArray
+void StrictBatch::SetSpriteCountPerRow(
+	int _spriteCountPerRow
 ) {
-	std::vector<UVRegion> UVRegionArray;
-	GetSheet()->TransformIndicesToUVRegionArray(_spriteIndexArray, GetInstanceCount(), UVRegionArray);
-	glNamedBufferData(m_UVRegionVBO, sizeof(float) * 4 * GetInstanceCount(), UVRegionArray.data(), GL_DYNAMIC_DRAW);
+	DEBUG_ASSERT(_spriteCountPerRow > 0, "Sprite count set to 0 or lower for StrictBatch with name [%s].", dm_BatchName.c_str());
+	m_SpritesPerRow = _spriteCountPerRow;
 }
 
 
 void StrictBatch::UpdateBuffer(
-	int* _spriteIndexArray
+	const int* _spriteIndexArray,
+	const size_t _arrayElementCount
 ) {
+	SetInstanceCount(static_cast<int>(_arrayElementCount));
+	
 	std::vector<UVRegion> UVRegionArray;
 	GetSheet()->TransformIndicesToUVRegionArray(_spriteIndexArray, GetInstanceCount(), UVRegionArray);
-	glNamedBufferSubData(m_UVRegionVBO, 0, sizeof(float) * 4 * GetInstanceCount(), UVRegionArray.data());
-}
 
+	if (m_Flags.CheckAndClearFlag(c_MaximumInstanceCountExceeded)) {
+
+		glNamedBufferData(m_UVRegionVBO, sizeof(UVRegion) * GetInstanceCount(), UVRegionArray.data(), GL_DYNAMIC_DRAW);
+
+		return;
+	}
+
+	glNamedBufferSubData(m_UVRegionVBO, 0, sizeof(UVRegion) * GetInstanceCount(), UVRegionArray.data());
+}
 
 void StrictBatch::BindUniqueBuffers() const {
 	glVertexArrayVertexBuffer(s_VAO, 2, m_UVRegionVBO, 0, sizeof(float) * 4);

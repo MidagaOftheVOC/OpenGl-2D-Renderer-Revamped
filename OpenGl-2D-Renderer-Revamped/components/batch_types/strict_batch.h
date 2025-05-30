@@ -3,7 +3,7 @@
 
 #include "../../common/common.h"
 
-#include "../sprite_sheet.h"
+#include "base_batch.h"
 
 /*
 *	StrictBatch:	A Batch for instanced rendering where all objects have
@@ -16,40 +16,38 @@
 *		-	only need world space position to draw
 */
 
-class StrictBatch {
+class StrictBatch : public BaseBatch {
 
 	unsigned int m_UVRegionVBO = 0;
-	unsigned int m_LocalBatchVAO = 0;
-
-	int m_InstanceCount = -1;
-	const SpriteSheet* m_SpriteSheet = nullptr;
+	int m_SpritesPerRow = 0;
 
 public:
 
 	StrictBatch(
 		SpriteSheet* _spriteSheet,
-		int _instanceCount
+		int _instanceCount,
+		int _spriteCountPerRow
 	);
 
 	
-	void InitialiseBuffers(
-		int* _spriteIndexArray
+	virtual void InitialiseBuffers();
+
+
+	virtual void DeleteBuffers();
+
+
+	void SetSpriteCountPerRow(
+		int _spriteCountPerRow
 	);
 
 
 	void UpdateBuffer(
-		int* _spriteIndexArray
+		const int* _spriteIndexArray,
+		const size_t _arrayElementCount
 	);
 
 	
 	void BindUniqueBuffers() const;
-
-#ifdef DEBUG__CODE
-
-	std::string d_Name;
-	void DEBUG_SetName(const std::string& _name) { d_Name = _name; }
-
-#endif
 	
 private:
 
@@ -67,9 +65,9 @@ public:
 
 public:
 
-	int GetInstanceCount() const { return m_InstanceCount; }
-	const SpriteSheet* GetSheet() const { return m_SpriteSheet; }
+	int GetSpriteCountPerRow() const { return m_SpritesPerRow; }
 	unsigned int GetSpriteIndexVBO() const { return m_UVRegionVBO; }
-
+	
+	virtual ~StrictBatch() {}
 };
 

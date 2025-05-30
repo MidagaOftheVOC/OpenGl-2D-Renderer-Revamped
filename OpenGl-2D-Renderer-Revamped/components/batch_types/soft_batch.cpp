@@ -3,18 +3,16 @@
 
 unsigned int SoftBatch::s_VAO = 0;
 
-unsigned int SoftBatch::c_NotInitialisedErrorBit = 1 << 0;
-
-unsigned int SoftBatch::c_MaximumInstanceCountExceeded = 1 << 4;
-
 
 SoftBatch::SoftBatch(
 	const SpriteSheet* _spriteSheet,
 	int _instanceCount
 ):
-	m_SpriteSheet(_spriteSheet),
-	m_InstanceCount(_instanceCount)
-{
+	BaseBatch(_spriteSheet, _instanceCount)
+{}
+
+
+void SoftBatch::InitialiseBuffers() {
 	unsigned int vbo[3];
 	glCreateBuffers(3, vbo);
 
@@ -24,7 +22,7 @@ SoftBatch::SoftBatch(
 }
 
 
-SoftBatch::~SoftBatch() {
+void SoftBatch::DeleteBuffers() {
 	glDeleteBuffers(1, &m_UVRegionsVBO);
 	glDeleteBuffers(1, &m_RotationsVBO);
 	glDeleteBuffers(1, &m_PositionsVBO);
@@ -92,7 +90,7 @@ void SoftBatch::UpdateBuffers(
 	UVRegion* UVArray = nullptr;
 
 	if (_spriteIndices) {
-		GetSheet()->TransformIndicesToUVRegionArray(_spriteIndices, _arrayElementCount, UVs);
+		GetSheet()->TransformIndicesToUVRegionArray(_spriteIndices, GetInstanceCount(), UVs);
 		UVArray = UVs.data();
 	}
 	
@@ -100,9 +98,6 @@ void SoftBatch::UpdateBuffers(
 	if ( m_Flags.CheckFlag(c_MaximumInstanceCountExceeded)) {
 
 		m_Flags.ClearFlag(c_MaximumInstanceCountExceeded);
-		
-		
-		
 
 		glNamedBufferData(GetUVRegionsVBO(), GetInstanceCount() * sizeof(UVRegion), UVArray, GL_DYNAMIC_DRAW);
 		glNamedBufferData(GetRotationsVBO(), GetInstanceCount() * sizeof(float), _objectRotationsRad, GL_DYNAMIC_DRAW);
@@ -113,31 +108,7 @@ void SoftBatch::UpdateBuffers(
 
 	if(UVArray)				glNamedBufferSubData(GetUVRegionsVBO(), 0, GetInstanceCount() * sizeof(UVRegion), UVArray);
 	if(_objectRotationsRad)	glNamedBufferSubData(GetRotationsVBO(), 0, GetInstanceCount() * sizeof(float), _objectRotationsRad);
-	if(_arrayElementCount)	glNamedBufferSubData(GetPositionsVBO(), 0, GetInstanceCount() * 2 * sizeof(float), _pairsOfxyPositions);
-}
-
-
-bool SoftBatch::SetInstanceCount(
-	const int _newInstanceCount
-) {
-#ifdef DEBUG__CODE
-	DEBUG_ASSERT(_newInstanceCount > 0 && _newInstanceCount < 0x7fffffff, "SoftBatch setting invalid value for Instance count.");
-	DEBUG_WARN(_newInstanceCount == GetInstanceCount(), "Setting Instance count to the same number in SoftBatch with name [%s].", dm_BatchName.c_str());
-#endif
-
-	if (_newInstanceCount == m_InstanceCount) return true;
-	
-	if (_newInstanceCount < 0 || _newInstanceCount > 0x7fffffff) {
-		return false;
-	}
-
-	if (_newInstanceCount > m_MaximumBufferInstanceCount) {
-		m_Flags.SetFlag(c_MaximumInstanceCountExceeded);
-		m_MaximumBufferInstanceCount = _newInstanceCount;
-	}
-
-	m_InstanceCount = _newInstanceCount;
-	return true;
+	if(_pairsOfxyPositions)	glNamedBufferSubData(GetPositionsVBO(), 0, GetInstanceCount() * 2 * sizeof(float), _pairsOfxyPositions);
 }
 
 
@@ -145,14 +116,14 @@ bool SoftBatch::UpdateUVRegionVBO(
 	const int* _spriteIndices,
 	const size_t _arrayElementCount
 ) {
-	DEBUG_ASSERT(!m_Flags.CheckFlag(c_NotInitialisedErrorBit), "Attempting update of non-initialised buffer for SoftBatch with name [%s].", dm_BatchName.c_str());
+	DEBUG_ASSERT(!m_Flags.CheckFlag(c_NotInitialised), "Attempting update of non-initialised buffer for SoftBatch with name [%s].", dm_BatchName.c_str());
 	
-	if (m_Flags.CheckFlag(c_MaximumInstanceCountExceeded) || _spriteIndices == nullptr) {
+	if (m_Flags.CheckFlag(c_MaximumInstanceCountExceeded) || _spriteIndices == nullptr || _arrayElementCount >= GetInstanceCount()) {
 		return false;
 	}
 
 	std::vector<UVRegion> UVs;
-	GetSheet()->TransformIndicesToUVRegionArray(_spriteIndices, _arrayElementCount, UVs);
+	GetSheet()->TransformIndicesToUVRegionArray(_spriteIndices, GetInstanceCount(), UVs);
 
 	glNamedBufferSubData(GetUVRegionsVBO(), 0, GetInstanceCount() * sizeof(UVRegion), UVs.data());
 	return true;
@@ -163,7 +134,7 @@ bool SoftBatch::UpdateRotationsBuffer(
 	const float* _objectRotationsRad,
 	const size_t _arrayElementCount
 ) {
-	DEBUG_ASSERT(!m_Flags.CheckFlag(c_NotInitialisedErrorBit), "Attempting update of non-initialised buffer for SoftBatch with name [%s].", dm_BatchName.c_str());
+	DEBUG_ASSERT(!m_Flags.CheckFlag(c_NotInitialised), "Attempting update of non-initialised buffer for SoftBatch with name [%s].", dm_BatchName.c_str());
 
 	if (m_Flags.CheckFlag(c_MaximumInstanceCountExceeded) || _objectRotationsRad == nullptr || _arrayElementCount >= GetInstanceCount()) {
 		return false;
@@ -178,9 +149,9 @@ bool SoftBatch::UpdatePositionsBuffer(
 	const float* _pairsOfxyPositions,
 	const size_t _arrayElementCount
 ) {
-	DEBUG_ASSERT(!m_Flags.CheckFlag(c_NotInitialisedErrorBit), "Attempting update of non-initialised buffer for SoftBatch with name [%s].", dm_BatchName.c_str());
+	DEBUG_ASSERT(!m_Flags.CheckFlag(c_NotInitialised), "Attempting update of non-initialised buffer for SoftBatch with name [%s].", dm_BatchName.c_str());
 
-	if (m_Flags.CheckFlag(c_MaximumInstanceCountExceeded) || _pairsOfxyPositions == nullptr) {
+	if (m_Flags.CheckFlag(c_MaximumInstanceCountExceeded) || _pairsOfxyPositions == nullptr || _arrayElementCount >= GetInstanceCount()) {
 		return false;
 	}
 

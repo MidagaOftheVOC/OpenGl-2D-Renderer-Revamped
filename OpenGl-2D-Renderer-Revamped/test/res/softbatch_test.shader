@@ -11,13 +11,9 @@ uniform mat4 u_Model;
 uniform mat4 u_View;
 uniform mat4 u_Projection;
 
-//	possibly useless
-uniform int u_SheetRowSpriteCount;
-uniform vec2 u_SpriteTexUVDimensions;
-
 
 out vec2 v_TextureVertex;
-
+	
 const vec2 PivotOffset = vec2(50, 50);
 
 void main(){
@@ -32,7 +28,7 @@ void main(){
 	);
 
 	vec2 WorldPosition = b_PositionsRelativeToModel + RotatedPosition;
-
+	
 	gl_Position = u_Projection * u_View * u_Model * vec4(WorldPosition, 0.f, 1.f);
 	
 

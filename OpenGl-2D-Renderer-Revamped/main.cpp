@@ -26,7 +26,7 @@ int main() {
 
 	r.UploadSpriteSheetParameters(
 		"test\\res\\test.cfg",
-		"test_batch_sheet",
+		"fox",
 		"strict_batch",
 		0, 0
 	);
@@ -37,18 +37,31 @@ int main() {
 	);
 
 
-
-	r.UploadSpriteSheetParameters(
-		"test\\res\\test.cfg",
-		"softbatch_sheet",
-		"soft_batch",
-		0, 0
-	);
-
 	r.UploadShaderParameters(
 		"test\\res\\softbatch_test.shader",
 		"soft_batch"
 	);
+
+	r.UploadSpriteSheetParameters(
+		"test\\res\\test.cfg",
+		"soft_sheet",
+		"soft_batch",
+		0, 0
+	);
+
+
+	r.UploadShaderParameters(
+		"test\\res\\free_batch.shader",
+		"fb_shader"
+	);
+
+	r.UploadSpriteSheetParameters(
+		"test\\res\\test.cfg",
+		"fb_sheet",
+		"fb_shader",
+		0, 0
+	);
+
 
 	
 	r.StartLoadingProcess();
@@ -85,21 +98,13 @@ int main() {
 	InputController& input = r.GetInputController();
 
 
-	StrictBatch b = StrictBatch(r.GetSpriteSheetByName("test_batch_sheet"), 4);
-
-	int arr[] = { 0, 0, 0, 0};
-
-	b.InitialiseBuffers(arr);
-
-
-
-
 	int indices[] = { 0, 0, 0, 0 };
 	float rotations[] = {0.f, 1.f, 2.f, 3.f};
 	float PositionPais[] = { 20.f, 20.f, 120.f, 120.f, 220.f, 220.f, 320.f, 320.f };
 
 	
-	SoftBatch soft = SoftBatch(r.GetSpriteSheetByName("softbatch_sheet"), 4);
+	SoftBatch soft = SoftBatch(r.GetSpriteSheetByName("soft_sheet"), 4);
+	soft.InitialiseBuffers();
 
 	soft.UpdateBuffers(
 		indices,
@@ -109,17 +114,29 @@ int main() {
 	);
 
 
-	float zOfText = 2.f;
+
+
+	FreeBatch  free = FreeBatch(r.GetSpriteSheetByName("fb_sheet"), 4);
+
+	free.InitialiseBuffers();
+
+	free.UpdateBuffers(
+		indices,
+		rotations,
+		PositionPais,
+		4
+	);
+
 
 	while (!r.IsRunning()) {
 		input.CaptureKeystates();
 
-		r.Draw(&b, 300, 100, 2, 2, nullptr);
 
-		r.Draw(&t, 300, 300, zOfText, nullptr);
+		//r.Draw(&t, 300, 300, 2, nullptr);
 
-		r.Draw(&soft, 0, 0, 2, nullptr);
+		//r.Draw(&soft, 100, 100, 2, nullptr);
 
+		r.Draw(&free, 300, 300, 2, nullptr);
 
 		if (input.IsHeld(GLFW_KEY_RIGHT)) {
 			t.SetWordWrapBound(t.GetRightWordWrapBound() + .5f);
@@ -130,19 +147,6 @@ int main() {
 			return 0;
 		}
 
-		if (input.IsHeld(GLFW_KEY_UP))
-		{
-			std::cout << "up\n";
-			zOfText += 0.05f;
-		}
-
-		if (input.IsHeld(GLFW_KEY_DOWN))
-		{
-			std::cout << "down\n";
-			zOfText -= 0.05f;
-		}
-
-		std::cout << zOfText << std::endl;
 
 		r.ExecuteDraws();
 	}

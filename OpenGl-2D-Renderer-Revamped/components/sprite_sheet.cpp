@@ -56,7 +56,8 @@ SpriteSheet::SpriteSheet(
 void SpriteSheet::TransformIndicesToUVRegionArray(
 	const int* _indexArray,
 	const int _indexArraySize,
-	std::vector<UVRegion>& OUT_uvRegionArray
+	std::vector<UVRegion>& OUT_uvRegionArray,
+	std::vector<float>* OUT_vertexArray
 ) const {
 
 	DEBUG_ASSERT(_indexArray != nullptr, "Nullptr sent to TransformIndicesToUVregionArray() in sprite sheet with name [%s].", GetName().c_str());
@@ -71,6 +72,7 @@ void SpriteSheet::TransformIndicesToUVRegionArray(
 
 	OUT_uvRegionArray.resize(_indexArraySize);
 
+	if (OUT_vertexArray) OUT_vertexArray->resize(_indexArraySize * 8);
 
 	const UVRegion* UVRegionArray = GetUVRegionArray();
 	for (size_t i = 0; i < static_cast<int>(_indexArraySize); i++) {
@@ -80,7 +82,42 @@ void SpriteSheet::TransformIndicesToUVRegionArray(
 		DEBUG_ASSERT(SpriteIndex < m_UVregionsFromConfigFile.size(), "Indexing out of bounds in UVRegion array in sprite sheet with name [%s].", GetName().c_str());
 
 		OUT_uvRegionArray[i] = UVRegionArray[SpriteIndex];
+		
+		if (OUT_vertexArray) {
+
+			float* VertexArray = OUT_vertexArray->data() + i * 8;
+
+			float 
+				u0 = UVRegionArray[SpriteIndex].u0,
+				v0 = UVRegionArray[SpriteIndex].v0,
+				u1 = UVRegionArray[SpriteIndex].u1,
+				v1 = UVRegionArray[SpriteIndex].v1;
+
+			u0 *=  m_SheetWidth;
+			u1 *=  m_SheetWidth;
+
+			v0 *=  m_SheetHeight;
+			v1 *=  m_SheetHeight;
+
+			float width = u1 - u0;
+			float height = v1 - v0;
+
+			float left =  - width / 2;
+			float right = width / 2;
+			float top = - height / 2;
+			float bottom = height / 2;
+
+			VertexArray[0] = left;		//1
+			VertexArray[1] = top;
+			VertexArray[2] = left;		//2
+			VertexArray[3] = bottom;
+			VertexArray[4] = right;	//3
+			VertexArray[5] = bottom;
+			VertexArray[6] = right;	//4
+			VertexArray[7] = top;
+		}
 	}
+
 }
 
 

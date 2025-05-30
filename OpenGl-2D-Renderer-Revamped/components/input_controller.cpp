@@ -131,7 +131,6 @@ void InputController::AddIndicesToTrackedKeystatesBitmask(
 ) {
 	for (int i = 0; i < _indexElementCount; i++) {
 		m_TrackedKeystatesBitmask.set( _indexArray[i] );
-		std::cout << "Setting: " << _indexArray[i] << std::endl;
 	}
 }
 

@@ -14,6 +14,7 @@
 
 #include "components/batch_types/strict_batch.h"
 #include "components/batch_types/soft_batch.h"
+#include "components/batch_types/free_batch.h"
 
 #include "components/uniform/uniform_data.h"
 
@@ -97,34 +98,21 @@ private:	//	Structures for draw queue optimisation
 	std::priority_queue<DrawableDrawCall, std::vector<DrawableDrawCall>, DrawCallComparator> m_DrawCallQueue;
 
 	
-	struct StrictBatchDrawCall : DrawCall {
+	struct BatchDrawCall: DrawCall {
 	private:
-		const StrictBatch* m_Strict = nullptr;
-		const int m_RowSpriteCount;
+		const BaseBatch* m_Base = nullptr;
 	public:
-		StrictBatchDrawCall(const StrictBatch* _strictBatch, float x, float y, float z, const UniformDataVector* _uniformDataArray, int _rowCount)
-			: m_Strict(_strictBatch), m_RowSpriteCount(_rowCount), DrawCall(x, y, z, _uniformDataArray)
+		BatchDrawCall(const BaseBatch* _softBatch, float x, float y, float z, const UniformDataVector* _uniformDataArray)
+			: m_Base(_softBatch), DrawCall(x, y, z, _uniformDataArray)
 		{}
-		const StrictBatch* GetStrictBatchPointer() const { return m_Strict; }
-		const int GetRowSpriteCount() const { return m_RowSpriteCount; }
+		//	RECAST AS APPROPRIATE
+		const BaseBatch* GetBaseBatchPointer() const { return m_Base; }
 	};
 
-	
-	std::vector<StrictBatchDrawCall> m_StrictBatchArray;
+	std::vector<BatchDrawCall> m_StrictBatchArray;
+	std::vector<BatchDrawCall> m_SoftBatchArray;
+	std::vector<BatchDrawCall> m_FreeBatchArray;
 
-
-	struct SoftBatchDrawCall : DrawCall {
-	private:
-		const SoftBatch* m_Soft = nullptr;
-	public:
-		SoftBatchDrawCall(const SoftBatch* _softBatch, float x, float y, float z, const UniformDataVector* _uniformDataArray)
-			: m_Soft(_softBatch), DrawCall(x, y, z, _uniformDataArray)
-		{}
-		const SoftBatch* GetSoftBatchPointer() const { return m_Soft; }
-	};
-
-
-	std::vector<SoftBatchDrawCall> m_SoftBatchArray;
 
 
 	struct TextDrawCall : DrawCall {
@@ -151,6 +139,9 @@ private:	//	Methods to render queued Drawcalls
 
 
 	void RenderSoftBatches();
+
+
+	void RenderFreeBatches();
 
 public:		//	Exposed functions
 	
@@ -183,11 +174,19 @@ public:		//	Exposed functions
 
 
 	void Draw(
+		const FreeBatch* _batch,
+		float _xPosition,
+		float _yPosition,
+		float _zLayer,
+		UniformDataVector* _uniformArray
+	);
+
+
+	void Draw(
 		const StrictBatch* _batch,
 		float _initialXpos,
 		float _initialYpos,
 		float _zLayer,
-		int _rowSpriteCount,
 		UniformDataVector* _uniformArray
 	);
 
