@@ -6,6 +6,15 @@
 #include <fstream>
 #include <filesystem>
 
+
+static std::pair<const char*, int> ParameterValues[] = {
+	{"repeat", GL_REPEAT},
+	{"mirrored_repeat", GL_MIRRORED_REPEAT},
+	{"clamp_to_edge", GL_CLAMP_TO_EDGE},
+	{"clamp_to_border", GL_CLAMP_TO_BORDER}
+};
+
+
 glm::vec2 SpriteSheet::GetSpriteDimensions() const {
 	return { m_SpriteUniformUVs.u1, m_SpriteUniformUVs.v1 };
 }
@@ -74,7 +83,7 @@ void SpriteSheet::TransformIndicesToUVRegionArray(
 
 	if (OUT_vertexArray) OUT_vertexArray->resize(_indexArraySize * 8);
 
-	const UVRegion* UVRegionArray = GetUVRegionArray();
+	const UVRegion* UVRegionArray = GetUVRegionArray().data();
 	for (size_t i = 0; i < static_cast<int>(_indexArraySize); i++) {
 		
 		const int SpriteIndex = _indexArray[i];
@@ -186,15 +195,28 @@ void SpriteSheet::ConfigurationPairLoadingMethod(
 	std::string TextureImagePath = Line.substr(
 		FirstSlash + 1,
 		LastSlash - FirstSlash - 1
-		);
+	);
 
 	LoadImageInTexture(TextureImagePath.c_str());
+
+
+	std::getline(File, Line);
+
+	InterpretTextureParametersString(Line.substr(Line.find('\"') + 1, Line.rfind('\"') - Line.find('\"') - 1));
+
+
+
+
 
 	std::string AssetName;
 	AssetName.resize(100, '\0');
 	while (std::getline(File, Line)) {
 
 		if (Line.empty()) continue;
+
+		DEBUG_ASSERT(Line.length() > 1, "[%s]> Strange line found inside configuration file.", _pathToConfigFile);
+
+		if (!Line.substr(0, 2).compare("//")) continue;
 
 
 		if (sscanf(Line.c_str(), "[%100[^]]]", AssetName.data()) == 1) {
@@ -256,10 +278,7 @@ void SpriteSheet::LoadImageInTexture(
 	glGenTextures(1, &m_TextureBufferID);
 	glBindTexture(GL_TEXTURE_2D, m_TextureBufferID);
 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	void SetTextureParametersToGL();
 
 	GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_SheetWidth, m_SheetHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, imageData));
 
@@ -267,6 +286,98 @@ void SpriteSheet::LoadImageInTexture(
 
 	stbi_image_free(imageData);
 	glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+
+void SpriteSheet::SetTextureParametersToGL() {
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, _vertical);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, _horizontal);
+
+	const TextureParamsDataStruct& Params = GetTexParams();
+
+	if (Params.S_WrapMode == -1) {
+		// just in case
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	}
+	else glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, Params.S_WrapMode);
+
+	if (Params.T_WrapMode == -1) {
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	}
+	else glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, Params.T_WrapMode);
+
+
+
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+}
+
+
+void SpriteSheet::InterpretTextureParametersString(
+	const std::string& _texParamsLine
+) {
+	//	params="S__wrapmode__T_wrapmode__+something else in the future+"
+	//	params="S repeat T repeat"
+	//	Spaces ignored, parameters after S/T related to those dimensions
+
+	enum class Attributes {
+		S_WrapMode = 1,
+		T_WrapMode = 2,
+
+		Nothing = -1
+	};
+
+	Attributes BoundAttribute = Attributes::Nothing;
+	
+	TextureParamsDataStruct& Params = m_TexParams;
+
+	for (size_t i = 0; i < _texParamsLine.size(); i++) {
+		char Character = _texParamsLine[i];
+
+		if (Character == 'S') {
+			BoundAttribute = Attributes::S_WrapMode;
+			continue;
+		}
+
+		if (Character == 'T') {
+			BoundAttribute = Attributes::T_WrapMode;
+			continue;
+		}
+
+		if (Character == ' ') {
+			continue;
+		}
+
+		// At this point, we should be @ first char of a parameter value
+
+		DEBUG_ASSERT(BoundAttribute != Attributes::Nothing, "No attribute to apply parameters to in config file for sheet [%s].", GetName().c_str());
+
+		bool ParamValueIsFound = false;
+		for (size_t j = 0; j < sizeof(ParameterValues) / sizeof(std::pair<const char*, int>) && !ParamValueIsFound; j++) {
+			size_t ParamNameLength = strlen(ParameterValues[j].first);	// doesn't include \0
+			if (_texParamsLine.size() < i + ParamNameLength) continue;
+
+			//	case insensitive cmp
+			if (!memcmp(_texParamsLine.data() + i, ParameterValues[j].first, ParamNameLength)) {
+				if (BoundAttribute == Attributes::S_WrapMode) {
+					Params.S_WrapMode = ParameterValues[j].second;
+				}
+
+				if (BoundAttribute == Attributes::T_WrapMode) {
+					Params.T_WrapMode = ParameterValues[j].second;
+				}
+
+				ParamValueIsFound = true;
+				i += ParamNameLength - 1;	// accoutn for i++ from for loop
+			}
+		}
+
+		if (ParamValueIsFound) continue;
+
+		DEBUG_ASSERT(0, "Strange parameter value passed to sheet [%s]", GetName().c_str());
+		return;
+	}
 }
 
 

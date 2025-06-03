@@ -14,8 +14,11 @@
 static StrictBatch GetInitialisedStrictBatch(
 	const SpriteSheet* _sheet
 ) {
-	StrictBatch self(_sheet, 4, 2);
-	
+	StrictBatch self(4, 2);
+	self.AddSheetToBatch(
+		_sheet
+	);
+
 	self.InitialiseBuffers();
 
 	int arr[4] = { 0 };

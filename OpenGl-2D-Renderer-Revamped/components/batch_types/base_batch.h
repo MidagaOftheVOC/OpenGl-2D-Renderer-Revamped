@@ -11,7 +11,7 @@
 class BaseBatch {
 protected:
 	
-	const SpriteSheet* m_SpriteSheet = nullptr;
+	std::vector<const SpriteSheet*> m_SpriteSheets;
 	
 	int m_InstanceCount = 0;
 	int m_BufferedInstanceCount = 0;
@@ -30,8 +30,15 @@ protected:	//	Flags
 public:
 
 	BaseBatch(
-		const SpriteSheet* _spriteSheet,
 		int _instanceCount
+	);
+
+
+	virtual void ActivateTextures() const;
+
+
+	void AddSheetToBatch(
+		const SpriteSheet* _spriteSheet
 	);
 
 
@@ -69,8 +76,12 @@ public:
 
 public:
 
-	const SpriteSheet* GetSheet() const { return m_SpriteSheet; }
+	//const std::vector<const SpriteSheet*> GetSpriteSheets() const { return m_SpriteSheets; }
 	const int GetInstanceCount() const { return m_InstanceCount; }
+
+
+	const SpriteSheet* GetSpecialSheetPointer() const;
+
 
 	virtual ~BaseBatch() {}
 

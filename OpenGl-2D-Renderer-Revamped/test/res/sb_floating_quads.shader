@@ -3,9 +3,18 @@
 
 layout(location = 0) in vec2 b_VertexBuffer;
 layout(location = 1) in vec2 b_TexBuffer;
-layout(location = 2) in vec4 b_UVRegionBuffer;
+layout(location = 2) in uint b_SpriteIndexBuffer;
 layout(location = 3) in float b_Rotations;
 layout(location = 4) in vec2 b_PositionsRelativeToModel;
+
+
+layout(std140) uniform UVRegions {
+	vec4 u_UVRegions[512];
+};
+
+layout(std140) uniform SheetOffsets {
+	int u_SheetOffsets[128];
+};
 
 uniform mat4 u_Model;
 uniform mat4 u_View;
@@ -23,12 +32,17 @@ void main(){
 	float sine = sin(b_Rotations);
 	float cosine = cos(b_Rotations);
 
-	vec2 MinUV = b_UVRegionBuffer.xy;
-	vec2 MaxUV = b_UVRegionBuffer.zw;
+	int SheetIndex = int( b_SpriteIndexBuffer >> 9);
+	int SpriteIndex = int ( b_SpriteIndexBuffer & 0x01FFu);
+
+	vec4 UVRegion = u_UVRegions[u_SheetOffsets[SheetIndex] + SpriteIndex];
+
+	vec2 MinUV = UVRegion.xy;
+	vec2 MaxUV = UVRegion.zw;
 
 	vec2 TextureDimensions = vec2(u_TexWidth, u_TexHeight);
 	
-	vec2 Vert = (mix(MinUV, MaxUV, b_TexBuffer) - b_UVRegionBuffer.xy) * TextureDimensions ;
+	vec2 Vert = (mix(MinUV, MaxUV, b_TexBuffer) - UVRegion.xy) * TextureDimensions ;
 	
 	
 	vec2 PointOfRotation = Vert - (MaxUV - MinUV) * TextureDimensions / 2;

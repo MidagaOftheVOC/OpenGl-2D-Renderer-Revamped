@@ -11,13 +11,39 @@ unsigned int BaseBatch::c_MaximumInstanceCountExceeded =	1 << 16;
 
 
 BaseBatch::BaseBatch(
-	const SpriteSheet* _spriteSheet,
 	int _instanceCount
-) :
-	m_SpriteSheet(_spriteSheet)
-{
+) {
 	SetInstanceCount(_instanceCount);
 }
+
+
+void BaseBatch::ActivateTextures() const {
+	if (m_SpriteSheets.empty()) return;
+
+	const Shader* Shader = m_SpriteSheets[0]->GetShader();
+	std::vector<int> TexUnits;
+
+	
+	for (size_t i = 0; i < m_SpriteSheets.size(); i++) {
+		glActiveTexture(GL_TEXTURE0 + i);
+		glBindTexture(GL_TEXTURE_2D, m_SpriteSheets[i]->GetTextureBufferID());
+		TexUnits.push_back(static_cast<int>(i));
+	}
+	Shader->SetIntArray("u_Texture", TexUnits.data(), static_cast<const int>(TexUnits.size()));
+}
+
+
+void BaseBatch::AddSheetToBatch(
+	const SpriteSheet* _spriteSheet
+) {
+
+	DEBUG_ASSERT(_spriteSheet != nullptr, "Null pointers passed to batch method for adding sheets.");
+
+	m_SpriteSheets.emplace_back(
+		_spriteSheet
+	);
+}
+
 
 bool BaseBatch::SetInstanceCount(
 	int _newInstanceCount
@@ -40,4 +66,11 @@ bool BaseBatch::SetInstanceCount(
 
 	m_InstanceCount = _newInstanceCount;
 	return true;
+}
+
+
+const SpriteSheet* BaseBatch::GetSpecialSheetPointer() const {
+	DEBUG_ASSERT(m_SpriteSheets.size() > 0, "Batch has empty Sheet container.");
+
+	return m_SpriteSheets[0];
 }

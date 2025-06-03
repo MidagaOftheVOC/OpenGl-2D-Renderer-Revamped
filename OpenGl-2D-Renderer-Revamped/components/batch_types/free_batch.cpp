@@ -7,10 +7,9 @@ unsigned int FreeBatch::s_EBO = 0;
 unsigned int FreeBatch::s_BufferedInstanceCount = 0;
 
 FreeBatch::FreeBatch(
-	const SpriteSheet* _spriteSheet,
 	int _instanceCount
 ) :
-	BaseBatch(_spriteSheet, _instanceCount)
+	BaseBatch(_instanceCount)
 {}
 
 
@@ -95,7 +94,7 @@ void FreeBatch::UpdateBuffers(
 	UVRegion* UVArray = nullptr;
 
 	if (_spriteIndices) {
-		GetSheet()->TransformIndicesToUVRegionArray(_spriteIndices, GetInstanceCount(), UVs, &Vertices);
+		//GetSheet()->TransformIndicesToUVRegionArray(_spriteIndices, GetInstanceCount(), UVs, &Vertices);
 		VertexArray = Vertices.data();
 		UVArray = UVs.data();
 	}

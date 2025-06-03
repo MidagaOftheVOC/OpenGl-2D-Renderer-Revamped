@@ -106,7 +106,7 @@ void Renderer2D::ExecuteDraws() {
 	RenderDrawables();
 	RenderStrictBatches();
 	RenderSoftBatches();
-	RenderFreeBatches();
+	//RenderFreeBatches();
 
 	RenderText();
 
@@ -203,7 +203,7 @@ void Renderer2D::RenderFreeBatches() {
 		const BatchDrawCall& DrawCall = Arr[i];
 
 		const FreeBatch* Free = dynamic_cast<const FreeBatch*>(DrawCall.GetBaseBatchPointer());
-		const SpriteSheet* Sheet = Free->GetSheet();
+		const SpriteSheet* Sheet = Free->GetSpecialSheetPointer();
 		const Shader* Shader = Sheet->GetShader();
 
 		int ElementsToDraw = Free->GetElementCount();
@@ -239,25 +239,26 @@ void Renderer2D::RenderSoftBatches() {
 		const BatchDrawCall& DrawCall = Arr[i];
 
 		const SoftBatch* Soft = dynamic_cast<const SoftBatch*>(DrawCall.GetBaseBatchPointer());
-		const SpriteSheet* Sheet = Soft->GetSheet();
+		const SpriteSheet* Sheet = Soft->GetSpecialSheetPointer();
 		const Shader* Shader = Sheet->GetShader();
 
 		int InstanceCount = Soft->GetInstanceCount();
 
 		Soft->BindUniqueBuffers();
 
-		glBindTexture(GL_TEXTURE_2D, Sheet->GetTextureBufferID());
-		GetQuad().BufferTexCoords(Sheet);
-
 		Shader->UseShader();
 		Shader->SetStandardModel(glm::translate(glm::mat4(1.f), DrawCall.GetPositionVector()));
 		Shader->SetStandardView(GetCamera().GetViewMatrix());
 		Shader->SetStandardProjection(GetCamera().GetProjectionMatrix());
+		
+		Soft->ActivateTextures();
 
 		if (Soft->GetType() == SoftBatchType::FloatingQuad) {
 			Shader->SetFloat("u_TexWidth", static_cast<const int>(Sheet->GetSpriteSheetWidth()));
 			Shader->SetFloat("u_TexHeight", static_cast<const int>(Sheet->GetSpriteSheetHeight()));
 		}
+
+		Soft->BindUBOs();
 
 		Shader->ApplyUniforms(DrawCall.GetAppliedUniforms());
 
@@ -291,7 +292,7 @@ void Renderer2D::RenderStrictBatches() {
 		const BatchDrawCall& DrawCallCurrent = Arr[i];
 		
 		const StrictBatch* Strict = dynamic_cast<const StrictBatch*>(DrawCallCurrent.GetBaseBatchPointer());
-		const SpriteSheet* SheetCurrent = Strict->GetSheet();
+		const SpriteSheet* SheetCurrent = Strict->GetSpecialSheetPointer();
 		const Shader* ShaderCurrent = SheetCurrent->GetShader();
 
 		int InstanceCount = Strict->GetInstanceCount();
@@ -301,12 +302,13 @@ void Renderer2D::RenderStrictBatches() {
 		
 		Strict->BindUniqueBuffers();
 
-
 		// SHADER SET UP
 		ShaderCurrent->UseShader();
 		ShaderCurrent->SetStandardModel(glm::translate(glm::mat4(1.f), DrawCallCurrent.GetPositionVector()));
 		ShaderCurrent->SetStandardView(m_Camera.GetViewMatrix());
 		ShaderCurrent->SetStandardProjection(m_Camera.GetProjectionMatrix());
+
+		Strict->ActivateTextures();
 
 		ShaderCurrent->SetInt("u_RowSpriteCount", Strict->GetSpriteCountPerRow());
 		ShaderCurrent->SetInt("u_SpriteSideLengthPx", GetQuad().m_StandardSpritePixelLength);

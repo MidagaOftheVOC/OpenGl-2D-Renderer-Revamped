@@ -6,11 +6,10 @@ unsigned int StrictBatch::s_VAO = 0;
 
 
 StrictBatch::StrictBatch(
-	const SpriteSheet* _spriteSheet,
 	int _instanceCount,
 	int _spriteCountPerRow
 ): 
-	BaseBatch(_spriteSheet, _instanceCount),
+	BaseBatch(_instanceCount),
 	m_SpritesPerRow(_spriteCountPerRow)
 {}
 
@@ -71,7 +70,7 @@ void StrictBatch::UpdateBuffer(
 	SetInstanceCount(static_cast<int>(_arrayElementCount));
 	
 	std::vector<UVRegion> UVRegionArray;
-	GetSheet()->TransformIndicesToUVRegionArray(_spriteIndexArray, GetInstanceCount(), UVRegionArray);
+	GetSpecialSheetPointer()->TransformIndicesToUVRegionArray(_spriteIndexArray, GetInstanceCount(), UVRegionArray);
 
 	if (m_Flags.CheckAndClearFlag(c_MaximumInstanceCountExceeded)) {
 

@@ -113,31 +113,42 @@ int main() {
 	InputController& input = r.GetInputController();
 
 
-	int indices[] = { 0, 0, 0, 0 };
+	const unsigned short indices[] = { 0, 0, 0, 0 };
 	float rotations[] = {0.f, 1.f, 2.f, 3.f};
 	float PositionPais[] = { 20.f, 20.f, 120.f, 120.f, 220.f, 220.f, 320.f, 320.f };
 
 	
-	SoftBatch soft = SoftBatch(r.GetSpriteSheetByName("soft_sheet"), 4);
+	SoftBatch soft = SoftBatch(4);
 	soft.InitialiseBuffers();
+	soft.AddSheetToBatch(
+		r.GetSpriteSheetByName("soft_sheet")
+	);
 
 	soft.UpdateBuffers(
-		indices,
+		nullptr,
 		rotations,
 		PositionPais,
 		4
 	);
 
+	soft.UpdateSpriteIndexVBO(indices, 0, 4);
 
-	SoftBatch fq = SoftBatch(r.GetSpriteSheetByName("sb_fq"), 4, SoftBatchType::FloatingQuad);
+
+	SoftBatch fq = SoftBatch(4, SoftBatchType::FloatingQuad);
 	fq.InitialiseBuffers();
+	fq.AddSheetToBatch(
+		r.GetSpriteSheetByName("sb_fq")
+	);
 
 	fq.UpdateBuffers(
-		indices,
+		nullptr,
 		rotations,
 		PositionPais,
 		4
 	);
+
+	fq.UpdateSpriteIndexVBO(indices, 0, 4);
+
 
 
 
@@ -148,11 +159,11 @@ int main() {
 
 		r.Draw(&strict, 70, 70, 2, nullptr);
 
-		//r.Draw(&t, 300, 300, 2, nullptr);
+		r.Draw(&t, 300, 300, 2, nullptr);
 
 		//r.Draw(&soft, 100, 100, 2, nullptr);
 
-		//r.Draw(&fq, 100, 100, 3, nullptr);
+		r.Draw(&fq, 100, 100, 3, nullptr);
 
 		if (input.IsHeld(GLFW_KEY_RIGHT)) {
 			t.SetWordWrapBound(t.GetRightWordWrapBound() + .5f);

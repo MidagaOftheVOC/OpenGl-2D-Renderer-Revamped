@@ -50,6 +50,12 @@ enum class SpriteSheetType {
 };
 
 
+struct TextureParamsDataStruct {
+	int S_WrapMode = -1;
+	int T_WrapMode = -1;
+};
+
+
 class SpriteSheet {
 
 	int m_SheetWidth = -1;
@@ -70,6 +76,7 @@ class SpriteSheet {
 private:
 
 	SpriteSheetType m_Type = SpriteSheetType::NotInitialised;
+	TextureParamsDataStruct m_TexParams;
 
 private:
 
@@ -110,7 +117,7 @@ public:
 
 private:	//	Private getters 
 
-	const UVRegion* GetUVRegionArray() const { return m_UVregionsFromConfigFile.data(); }
+	//const UVRegion* GetUVRegionArray() const { return m_UVregionsFromConfigFile.data(); }
 
 private:
 
@@ -140,6 +147,14 @@ private:
 		const char* _pathToFile
 	);
 
+
+	void InterpretTextureParametersString(
+		const std::string& _texParamsLine
+	);
+
+
+	void SetTextureParametersToGL();
+
 public:
 
 	const UVRegion* GetUVRegionByName ( const char* _assetName ) const;
@@ -150,6 +165,11 @@ public:
 	const Shader* GetShader() const { return m_Shader; }
 	int GetSheetRowSpriteCount() const { return m_SpriteCountPerRow; }
 	unsigned int GetTextureBufferID() const { return m_TextureBufferID; }
+	const TextureParamsDataStruct& GetTexParams() const { return m_TexParams; }
+
+	const std::vector<UVRegion>& GetUVRegionArray() const { return m_UVregionsFromConfigFile; }
+
+	const int GetContainedSpriteCount() const { return static_cast<int>(m_UVregionsFromConfigFile.size()); }
 
 	const int GetSpriteSheetWidth() const { return m_SheetWidth; }
 	const int GetSpriteSheetHeight() const { return m_SheetHeight; }

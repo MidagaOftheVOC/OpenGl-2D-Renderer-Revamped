@@ -23,17 +23,18 @@ enum class SoftBatchType{
 
 class SoftBatch : public BaseBatch{
 
-	unsigned int m_UVRegionsVBO = 0;
+	unsigned int m_SpriteIndexVBO = 0;
 	unsigned int m_RotationsVBO = 0;
 	unsigned int m_PositionsVBO = 0;
 
+	unsigned int m_SheetUVRegionsUBO = 0;
+	unsigned int m_SheetIndexOffsetsUBO = 0;
 
 	const SoftBatchType m_Type;
 
 public:
 
 	SoftBatch(
-		const SpriteSheet* _spriteSheet,
 		int _instanceCount,
 		SoftBatchType _type = SoftBatchType::FixedQuad
 	);
@@ -62,7 +63,7 @@ public:
 		seperately call the associated Update...Buffer().
 	*/
 	void UpdateBuffers(
-		const int* _spriteIndices,
+		const unsigned short* _spriteIndices,
 		const float* _objectRotationsRad,
 		const float* _pairsOfxyPositions,
 		const size_t _arrayElementCount = 0
@@ -72,8 +73,9 @@ public:
 	//	Updates the UVRegions' VBO.
 	//	Returns:	[false], if _spriteIndices is null OR c_MaximumInstanceCountExceeded is raised OR _arrayElementCount >= m_InstanceCount
 	//				[true], otherwise
-	bool UpdateUVRegionVBO(
-		const int* _spriteIndices,
+	bool UpdateSpriteIndexVBO(
+		const unsigned short* _spriteIndices,
+		const int _sheetIndex,
 		const size_t _arrayElementCount = 0
 	);
 
@@ -96,6 +98,12 @@ public:
 	);
 
 
+	void BufferUBOs();
+
+
+	void BindUBOs() const;
+
+
 	void BindUniqueBuffers() const;
 
 private:
@@ -114,7 +122,7 @@ public:
 
 public:
 
-	unsigned int GetUVRegionsVBO() const { return m_UVRegionsVBO; }
+	unsigned int GetSpriteIndexVBO() const { return m_SpriteIndexVBO; }
 	unsigned int GetRotationsVBO() const { return m_RotationsVBO; }
 	unsigned int GetPositionsVBO() const { return m_PositionsVBO; }
 	SoftBatchType GetType() const { return m_Type; }

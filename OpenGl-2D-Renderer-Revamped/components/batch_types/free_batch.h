@@ -25,7 +25,6 @@ class FreeBatch : public BaseBatch {
 public:
 
 	FreeBatch(
-		const SpriteSheet* _spriteSheet,
 		int _instanceCount
 	);
 
