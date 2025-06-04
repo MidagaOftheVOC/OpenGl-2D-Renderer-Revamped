@@ -1,5 +1,5 @@
 #shader vertex
-#version 330 core
+#version 430 core
 
 layout(location = 0) in vec2 b_VertexBuffer;
 layout(location = 1) in vec2 b_TexBuffer;
@@ -8,12 +8,12 @@ layout(location = 3) in float b_Rotations;
 layout(location = 4) in vec2 b_PositionsRelativeToModel;
 
 
-layout(std140) uniform UVRegions {
-	vec4 u_UVRegions[512];
+layout(std140, binding = 0) uniform ubo_UVRegions {
+    vec4 u_UVRegions[512];
 };
 
-layout(std140) uniform SheetOffsets {
-	int u_SheetOffsets[128];
+layout(std140, binding = 1) uniform ubo_SheetOffsets {
+    int u_SheetOffsets[128];
 };
 
 uniform mat4 u_Model;
@@ -22,7 +22,7 @@ uniform mat4 u_Projection;
 
 
 out vec2 v_TextureVertex;
-
+flat out uint v_SheetIndex;
 
 uniform float u_TexWidth;
 uniform float u_TexHeight;
@@ -32,10 +32,17 @@ void main(){
 	float sine = sin(b_Rotations);
 	float cosine = cos(b_Rotations);
 
-	int SheetIndex = int( b_SpriteIndexBuffer >> 9);
-	int SpriteIndex = int ( b_SpriteIndexBuffer & 0x01FFu);
+	uint SheetIndex  = uint( b_SpriteIndexBuffer >> 9);
+	uint SpriteIndex = uint ( b_SpriteIndexBuffer & 0x01FFu);
+	v_SheetIndex = SheetIndex;
 
-	vec4 UVRegion = u_UVRegions[u_SheetOffsets[SheetIndex] + SpriteIndex];
+
+	int TotalOffset = 0;
+	for(int i = 0; i < SheetIndex; i ++){
+		TotalOffset += u_SheetOffsets[i];
+	}
+
+	vec4 UVRegion = u_UVRegions[TotalOffset + SpriteIndex];
 
 	vec2 MinUV = UVRegion.xy;
 	vec2 MaxUV = UVRegion.zw;
@@ -65,12 +72,14 @@ void main(){
 in vec2 v_TextureVertex;
 
 
-uniform sampler2D u_Texture;
+uniform sampler2D u_Texture[32];
 
+
+flat in uint v_SheetIndex;
 
 out vec4 o_FragColour;
 
 void main(){
-	o_FragColour = texture(u_Texture, v_TextureVertex);
+	o_FragColour = texture(u_Texture[v_SheetIndex], v_TextureVertex);
 }
 

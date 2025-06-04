@@ -91,6 +91,7 @@ Shader::Shader(
 {
     ShaderProgramSources src = ParseShader(_locationShaderFile);
     m_ProgramID = CreateShader(src.VertexSource, src.FragmentSource);
+    InitialiseUniformBlockLocationMap();
     InitialiseUniformLocationMap();
 }
 
@@ -98,6 +99,43 @@ Shader::Shader(
 const void Shader::UseShader() const {
     DEBUG_ASSERT(m_ProgramID != 0, "Using uninitialised shader!")
     glUseProgram(m_ProgramID);
+}
+
+
+void Shader::InitialiseUniformBlockLocationMap() {
+    unsigned int Program = GetShaderId();
+    int LocationCount = 0;
+    glGetProgramiv(Program, GL_ACTIVE_UNIFORM_BLOCKS, &LocationCount);
+
+
+    for (int i = 0; i < LocationCount; i++) {
+        char BlockName[100] = { 0 };
+
+        int Length = -1;
+
+        glGetActiveUniformBlockName(Program, i, sizeof(BlockName), &Length, BlockName);
+
+        if (Length == -1)
+            continue;
+
+        m_UniformBlockLocationMap[BlockName] = glGetUniformBlockIndex(Program, BlockName);
+
+    }
+}
+
+
+bool Shader::IsUniformBlock(
+    const char* _uniformBlockName
+) {
+
+    for (int i = 0; i < m_UniformBlockLocationMap.size(); i++) {
+        auto Iterator = m_UniformBlockLocationMap.find(_uniformBlockName);
+
+        if (Iterator != m_UniformBlockLocationMap.end()) {
+            return true;
+        }
+    }
+    return false;
 }
 
 
@@ -130,11 +168,35 @@ void Shader::InitialiseUniformLocationMap() {
             }
         }
 
+        if (!strcmp(UniName, "u_Texture")) {
+            int a = 1;
+            a++;
+        }
+
+        int BlockIndex;
+        glGetActiveUniformsiv(Program, 1, (GLuint*)&i, GL_UNIFORM_BLOCK_INDEX, &BlockIndex);
+
+        if (BlockIndex != -1)
+            continue;
+
         int Location = glGetUniformLocation(Program, UniName);
+
+
         DEBUG_ASSERT(Location != -1, "Uniform location is -1 in shader \"%s\".", GetName().c_str());
 
         m_UniformLocationMap[UniName] = { Location , Type };
     }
+}
+
+
+unsigned int Shader::GetUniformBlockLocation(
+    const char* _uniformBlockName
+) const {
+    auto Iterator = m_UniformBlockLocationMap.find(_uniformBlockName);
+    if (Iterator != m_UniformBlockLocationMap.end()) {
+        return Iterator->second;
+    }
+    return 0;
 }
 
 
@@ -190,11 +252,13 @@ void Shader::SetIntArray(
     const int* _array,
     int _arraySize
 ) const {
+  //  CheckGLErrors();
     glUniform1iv(
         GetUniformLocation(_uniformName),
         _arraySize,
         _array
     );
+//    CheckGLErrors();
 }
 
 

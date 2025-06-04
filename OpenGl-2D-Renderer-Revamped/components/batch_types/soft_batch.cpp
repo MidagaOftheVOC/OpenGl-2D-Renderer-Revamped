@@ -33,10 +33,12 @@ void SoftBatch::DeleteBuffers() {
 	glDeleteBuffers(1, &m_RotationsVBO);
 	glDeleteBuffers(1, &m_PositionsVBO);
 	glDeleteBuffers(1, &m_SheetUVRegionsUBO);
+	glDeleteBuffers(1, &m_SheetIndexOffsetsUBO);
 }
 
 
 void SoftBatch::BufferUBOs() {
+	if (m_SpriteSheets.empty()) return;
 	glBindBuffer(GL_UNIFORM_BUFFER, m_SheetUVRegionsUBO);
 
 	std::vector<UVRegion> UVs;
@@ -48,15 +50,33 @@ void SoftBatch::BufferUBOs() {
 	glBufferData(GL_UNIFORM_BUFFER, UVs.size() * sizeof(UVRegion), UVs.data(), GL_STATIC_DRAW);
 
 
+	struct alignas(16) PaddedInteger {
+		int value;
+		PaddedInteger(int _val) : value(_val) {}
+	};
+
 	glBindBuffer(GL_UNIFORM_BUFFER, m_SheetIndexOffsetsUBO);
-	std::vector<int> Offsets;
+	std::vector<PaddedInteger> Offsets;
 	for (size_t i = 0; i < m_SpriteSheets.size(); i++) {
 		Offsets.emplace_back(static_cast<int>(m_SpriteSheets[i]->GetContainedSpriteCount()));
 	}
 
-	glBufferData(GL_UNIFORM_BUFFER, Offsets.size() * sizeof(int), Offsets.data(), GL_STATIC_DRAW);
+	glBufferData(GL_UNIFORM_BUFFER, Offsets.size() * sizeof(PaddedInteger), Offsets.data(), GL_STATIC_DRAW);
 
 	glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+	const Shader* ShaderObject = GetSpecialSheetPointer()->GetShader();
+
+
+	unsigned int Program = ShaderObject->GetShaderId();
+	unsigned int asdf1111  = ShaderObject->GetUniformBlockLocation("ubo_UVRegions");
+
+	unsigned int asdf2222 = ShaderObject->GetUniformBlockLocation("ubo_SheetOffsets");
+
+	CheckGLErrors();
+	glUniformBlockBinding(Program, asdf1111, 0);
+	glUniformBlockBinding(Program, asdf2222, 1);
+	CheckGLErrors();
 }
 
 
@@ -123,17 +143,10 @@ void SoftBatch::UpdateBuffers(
 ) {
 	SetInstanceCount(static_cast<unsigned int>(_arrayElementCount));
 	
-	/*std::vector<UVRegion> UVs;
-	UVRegion* UVArray = nullptr;
-
-	if (_spriteIndices) {
-		GetSpecialSheetPointer()->TransformIndicesToUVRegionArray(_spriteIndices, GetInstanceCount(), UVs);
-		UVArray = UVs.data();
-	}*/
-	
 	//	Update all, even with null data.
 	if ( m_Flags.CheckFlag(c_MaximumInstanceCountExceeded)) {
 
+		m_Flags.ClearFlag(c_NotInitialised);
 		m_Flags.ClearFlag(c_MaximumInstanceCountExceeded);
 
 		glNamedBufferData(GetSpriteIndexVBO(), GetInstanceCount() * sizeof(unsigned short), _spriteIndices, GL_DYNAMIC_DRAW);
@@ -143,43 +156,62 @@ void SoftBatch::UpdateBuffers(
 		return;
 	}
 
-	
 	UpdateRotationsBuffer(_objectRotationsRad, _arrayElementCount);
 	UpdatePositionsBuffer(_pairsOfxyPositions, _arrayElementCount);
 }
 
 
+bool SoftBatch::PackIndicesTogether(
+	const unsigned short* _spriteIndices,
+	const unsigned short* _sheetIndices,
+	const size_t _arrayElementCount,
+	unsigned short* OUT_finishedArray
+) const {
+
+	if (!_spriteIndices || !_sheetIndices || !OUT_finishedArray || _arrayElementCount > GetInstanceCount()) return false;
+
+	for (size_t i = 0; i < _arrayElementCount; i++) {
+		
+		unsigned short Self = 0;
+
+		if (_sheetIndices[i])
+
+		Self |= _sheetIndices[i] << 9;
+		Self |= _spriteIndices[i];
+
+		OUT_finishedArray[i] = Self;
+	}
+	return true;
+}
+
+
 bool SoftBatch::UpdateSpriteIndexVBO(
 	const unsigned short* _spriteIndices,
-	const int _sheetIndex,
+	const unsigned short* _sheetIndices,
 	const size_t _arrayElementCount
 ) {
 	DEBUG_ASSERT(!m_Flags.CheckFlag(c_NotInitialised), "Attempting update of non-initialised buffer for SoftBatch with name [%s].", dm_BatchName.c_str());
 	
-	if (m_Flags.CheckFlag(c_MaximumInstanceCountExceeded) || _spriteIndices == nullptr || _arrayElementCount >= GetInstanceCount()) {
+	if (m_Flags.CheckFlag(c_MaximumInstanceCountExceeded) || _spriteIndices == nullptr || _arrayElementCount > GetInstanceCount()) {
 		return false;
 	}
 
 
-	DEBUG_ASSERT(_sheetIndex < 128, "Indexing beyond maximum allowed sprite sheets per batch.");
+	/*DEBUG_ASSERT(_sheetIndex < 128, "Indexing beyond maximum allowed sprite sheets per batch.");
 	if (_sheetIndex >= m_SpriteSheets.size()) {
 		DEBUG_ASSERT(0, "No sheet with index [%d] in batch with name [%s]. Highest index is [%s]!", _sheetIndex, dm_BatchName.c_str(), static_cast<int>(m_SpriteSheets.size()));
 		return false;
-	}
+	}*/
 
 	std::vector<unsigned short> TemporaryBuffer;
 	TemporaryBuffer.resize(_arrayElementCount);
 
-	for (size_t i = 0; i < _arrayElementCount; i++) {
-		unsigned short Index = 0;
-
-		DEBUG_ASSERT(_spriteIndices[i] < 512, "Indexing beyond maximum allowed sprites per sheet.");
-
-		Index |= _sheetIndex << 9;
-		Index |= _spriteIndices[i];
-
-		TemporaryBuffer[i] = Index;
-	}
+	PackIndicesTogether(
+		_spriteIndices,
+		_sheetIndices,
+		_arrayElementCount,
+		TemporaryBuffer.data()
+	);
 
 	glNamedBufferSubData(GetSpriteIndexVBO(), 0, GetInstanceCount() * sizeof(unsigned short), TemporaryBuffer.data());
 	return true;
@@ -192,7 +224,7 @@ bool SoftBatch::UpdateRotationsBuffer(
 ) {
 	DEBUG_ASSERT(!m_Flags.CheckFlag(c_NotInitialised), "Attempting update of non-initialised buffer for SoftBatch with name [%s].", dm_BatchName.c_str());
 
-	if (m_Flags.CheckFlag(c_MaximumInstanceCountExceeded) || _objectRotationsRad == nullptr || _arrayElementCount >= GetInstanceCount()) {
+	if (m_Flags.CheckFlag(c_MaximumInstanceCountExceeded) || _objectRotationsRad == nullptr || _arrayElementCount > GetInstanceCount()) {
 		return false;
 	}
 
@@ -207,7 +239,7 @@ bool SoftBatch::UpdatePositionsBuffer(
 ) {
 	DEBUG_ASSERT(!m_Flags.CheckFlag(c_NotInitialised), "Attempting update of non-initialised buffer for SoftBatch with name [%s].", dm_BatchName.c_str());
 
-	if (m_Flags.CheckFlag(c_MaximumInstanceCountExceeded) || _pairsOfxyPositions == nullptr || _arrayElementCount >= GetInstanceCount()) {
+	if (m_Flags.CheckFlag(c_MaximumInstanceCountExceeded) || _pairsOfxyPositions == nullptr || _arrayElementCount > GetInstanceCount()) {
 		return false;
 	}
 

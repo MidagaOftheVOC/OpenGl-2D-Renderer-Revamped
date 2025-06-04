@@ -29,7 +29,9 @@ void BaseBatch::ActivateTextures() const {
 		glBindTexture(GL_TEXTURE_2D, m_SpriteSheets[i]->GetTextureBufferID());
 		TexUnits.push_back(static_cast<int>(i));
 	}
+	CheckGLErrors();
 	Shader->SetIntArray("u_Texture", TexUnits.data(), static_cast<const int>(TexUnits.size()));
+	CheckGLErrors();
 }
 
 

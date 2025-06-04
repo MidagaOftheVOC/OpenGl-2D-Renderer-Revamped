@@ -83,6 +83,9 @@ public:
 	const SpriteSheet* GetSpecialSheetPointer() const;
 
 
+	const size_t GetSheetCount() const { return m_SpriteSheets.size(); }
+
+
 	virtual ~BaseBatch() {}
 
 };

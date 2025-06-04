@@ -41,6 +41,18 @@ private:    //  UniformName -> UniformLocation map + type
 
     void InitialiseUniformLocationMap();
 
+
+    std::unordered_map<std::string, unsigned int> m_UniformBlockLocationMap;
+
+
+    void InitialiseUniformBlockLocationMap();
+
+
+    bool IsUniformBlock(
+        const char* _uniformBlockName
+    );
+
+
 private:
 
     int m_ModelMatrixUniformLocation = -100i32;
@@ -72,6 +84,11 @@ public:
 
     void ApplyUniforms(
         const UniformDataVector* _uniformArray
+    ) const;
+
+
+    unsigned int GetUniformBlockLocation(
+        const char* _uniformBlockName
     ) const;
 
 public:

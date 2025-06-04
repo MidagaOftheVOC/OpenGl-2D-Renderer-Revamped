@@ -250,7 +250,7 @@ void Renderer2D::RenderSoftBatches() {
 		Shader->SetStandardModel(glm::translate(glm::mat4(1.f), DrawCall.GetPositionVector()));
 		Shader->SetStandardView(GetCamera().GetViewMatrix());
 		Shader->SetStandardProjection(GetCamera().GetProjectionMatrix());
-		
+
 		Soft->ActivateTextures();
 
 		if (Soft->GetType() == SoftBatchType::FloatingQuad) {
@@ -308,7 +308,9 @@ void Renderer2D::RenderStrictBatches() {
 		ShaderCurrent->SetStandardView(m_Camera.GetViewMatrix());
 		ShaderCurrent->SetStandardProjection(m_Camera.GetProjectionMatrix());
 
+		CheckGLErrors();
 		Strict->ActivateTextures();
+		CheckGLErrors();
 
 		ShaderCurrent->SetInt("u_RowSpriteCount", Strict->GetSpriteCountPerRow());
 		ShaderCurrent->SetInt("u_SpriteSideLengthPx", GetQuad().m_StandardSpritePixelLength);

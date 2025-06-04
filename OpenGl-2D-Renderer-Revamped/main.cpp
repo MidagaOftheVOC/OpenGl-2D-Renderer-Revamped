@@ -77,6 +77,13 @@ int main() {
 		0, 0
 	);
 
+	r.UploadSpriteSheetParameters(
+		"test\\res\\panda.cfg",
+		"sb_panda",
+		"sb_floating_quads",
+		0, 0
+	);
+
 
 	
 	r.StartLoadingProcess();
@@ -117,28 +124,38 @@ int main() {
 	float rotations[] = {0.f, 1.f, 2.f, 3.f};
 	float PositionPais[] = { 20.f, 20.f, 120.f, 120.f, 220.f, 220.f, 320.f, 320.f };
 
-	
-	SoftBatch soft = SoftBatch(4);
-	soft.InitialiseBuffers();
-	soft.AddSheetToBatch(
-		r.GetSpriteSheetByName("soft_sheet")
-	);
+	//
+	//SoftBatch soft = SoftBatch(4);
+	//soft.InitialiseBuffers();
+	//soft.AddSheetToBatch(
+	//	r.GetSpriteSheetByName("soft_sheet")
+	//);
 
-	soft.UpdateBuffers(
-		nullptr,
-		rotations,
-		PositionPais,
-		4
-	);
+	//soft.UpdateBuffers(
+	//	nullptr,
+	//	rotations,
+	//	PositionPais,
+	//	4
+	//);
 
-	soft.UpdateSpriteIndexVBO(indices, 0, 4);
+	//soft.BufferUBOs();
+
+	//soft.UpdateSpriteIndexVBO(indices, 0, 4);
+
+	const SpriteSheet* SB_normal = r.GetSpriteSheetByName("sb_fq");
+	const SpriteSheet* SB_panda = r.GetSpriteSheetByName("sb_panda");
 
 
 	SoftBatch fq = SoftBatch(4, SoftBatchType::FloatingQuad);
 	fq.InitialiseBuffers();
 	fq.AddSheetToBatch(
-		r.GetSpriteSheetByName("sb_fq")
+		SB_normal
 	);
+
+	fq.AddSheetToBatch(
+		SB_panda
+	);
+	fq.BufferUBOs();
 
 	fq.UpdateBuffers(
 		nullptr,
@@ -147,7 +164,12 @@ int main() {
 		4
 	);
 
-	fq.UpdateSpriteIndexVBO(indices, 0, 4);
+
+
+	unsigned short sprites[] = { 0, 0, 0, 0 };
+	unsigned short sheets[] = { 0, 0, 1, 1 };
+
+	fq.UpdateSpriteIndexVBO(sprites, sheets, 4);
 
 
 
@@ -157,9 +179,9 @@ int main() {
 	while (!r.IsRunning()) {
 		input.CaptureKeystates();
 
-		r.Draw(&strict, 70, 70, 2, nullptr);
+		//r.Draw(&strict, 70, 70, 2, nullptr);
 
-		r.Draw(&t, 300, 300, 2, nullptr);
+		//r.Draw(&t, 300, 300, 2, nullptr);
 
 		//r.Draw(&soft, 100, 100, 2, nullptr);
 

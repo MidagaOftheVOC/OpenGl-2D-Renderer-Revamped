@@ -75,7 +75,7 @@ public:
 	//				[true], otherwise
 	bool UpdateSpriteIndexVBO(
 		const unsigned short* _spriteIndices,
-		const int _sheetIndex,
+		const unsigned short* _sheetIndices,
 		const size_t _arrayElementCount = 0
 	);
 
@@ -105,6 +105,14 @@ public:
 
 
 	void BindUniqueBuffers() const;
+
+
+	bool PackIndicesTogether(
+		const unsigned short* _spriteIndices,
+		const unsigned short* _sheetIndices,
+		const size_t _arrayElementCount,
+		unsigned short* OUT_finishedArray
+	) const;
 
 private:
 
