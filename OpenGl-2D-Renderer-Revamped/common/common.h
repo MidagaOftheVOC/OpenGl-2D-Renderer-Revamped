@@ -1,5 +1,16 @@
 #pragma once
 
+/*
+File for storing common utilities.
+These include:
+    - marcos for debugging, logging and assertions
+    - profiler
+    - collection of debugging functions for OpenGL
+    - Flag class, with 32 possible flags
+
+*/
+
+
 // -- PROJECT SETTINGS -- //
 
 #define GLEW_STATIC

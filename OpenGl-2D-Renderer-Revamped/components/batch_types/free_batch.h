@@ -6,12 +6,9 @@
 #include "base_batch.h"
 
 /*
-
-	FreeBatch represents batched objects, whose texture pixel proportions
-	match their vertices' coordinates. Pretty much everything is permitted
-
-
-
+TODO:
+This batch rendering technique will be repurposed use custom quad coord 
+vertices per instance. It'd be very useful for future UI developments.
 */
 
 
@@ -68,32 +65,6 @@ public:
 
 
 	void BindUniqueBuffers() const;
-
-#if DEBUG__CODE
-
-	std::string dm_BatchName;
-
-	void SetName(const char* _name) { dm_BatchName = _name; }
-
-#else
-
-	inline void SetName(Const char* _name) {}
-
-#endif
-
-
-private:
-
-	static unsigned int s_EBO;
-	static unsigned int s_BufferedInstanceCount;
-
-	
-	static unsigned int GetEBO() { return s_EBO; }
-
-
-	static void ResizeEBO(
-		unsigned int _newSize
-	);
 
 private:
 

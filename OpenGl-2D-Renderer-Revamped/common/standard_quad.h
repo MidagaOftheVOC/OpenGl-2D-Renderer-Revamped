@@ -2,6 +2,11 @@
 
 #include "../components/sprite_sheet.h"
 
+/*
+This is a global structure, meant to hold common data
+such as standard quad vertices, indices and similar.
+
+*/
 struct StandardQuad {
 
 	int m_StandardSpritePixelLength = 100;

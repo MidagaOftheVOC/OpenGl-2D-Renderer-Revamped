@@ -55,9 +55,8 @@ bool BaseBatch::SetInstanceCount(
 
 
 	if (_newInstanceCount == m_InstanceCount) return true;
-	if (_newInstanceCount == 0) return true;
 
-	if (_newInstanceCount < 0 || _newInstanceCount > 0x7fffffff) {
+	if (_newInstanceCount <= 0 || _newInstanceCount > 0x7fffffff) {
 		return false;
 	}
 
@@ -75,4 +74,28 @@ const SpriteSheet* BaseBatch::GetSpecialSheetPointer() const {
 	DEBUG_ASSERT(m_SpriteSheets.size() > 0, "Batch has empty Sheet container.");
 
 	return m_SpriteSheets[0];
+}
+
+
+bool BaseBatch::PackIndicesTogether(
+	const unsigned short* _spriteIndices,
+	const unsigned short* _sheetIndices,
+	const size_t _arrayElementCount,
+	unsigned short* OUT_finishedArray
+) const {
+
+	if (!_spriteIndices || !_sheetIndices || !OUT_finishedArray || _arrayElementCount > GetBufferedInstanceCount()) return false;
+
+	for (size_t i = 0; i < _arrayElementCount; i++) {
+
+		unsigned short Self = 0;
+
+		if (_sheetIndices[i])
+
+			Self |= _sheetIndices[i] << 9;
+		Self |= _spriteIndices[i];
+
+		OUT_finishedArray[i] = Self;
+	}
+	return true;
 }

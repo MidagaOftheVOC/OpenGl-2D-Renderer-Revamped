@@ -161,30 +161,6 @@ void SoftBatch::UpdateBuffers(
 }
 
 
-bool SoftBatch::PackIndicesTogether(
-	const unsigned short* _spriteIndices,
-	const unsigned short* _sheetIndices,
-	const size_t _arrayElementCount,
-	unsigned short* OUT_finishedArray
-) const {
-
-	if (!_spriteIndices || !_sheetIndices || !OUT_finishedArray || _arrayElementCount > GetInstanceCount()) return false;
-
-	for (size_t i = 0; i < _arrayElementCount; i++) {
-		
-		unsigned short Self = 0;
-
-		if (_sheetIndices[i])
-
-		Self |= _sheetIndices[i] << 9;
-		Self |= _spriteIndices[i];
-
-		OUT_finishedArray[i] = Self;
-	}
-	return true;
-}
-
-
 bool SoftBatch::UpdateSpriteIndexVBO(
 	const unsigned short* _spriteIndices,
 	const unsigned short* _sheetIndices,
@@ -192,16 +168,9 @@ bool SoftBatch::UpdateSpriteIndexVBO(
 ) {
 	DEBUG_ASSERT(!m_Flags.CheckFlag(c_NotInitialised), "Attempting update of non-initialised buffer for SoftBatch with name [%s].", dm_BatchName.c_str());
 	
-	if (m_Flags.CheckFlag(c_MaximumInstanceCountExceeded) || _spriteIndices == nullptr || _arrayElementCount > GetInstanceCount()) {
+	if (m_Flags.CheckFlag(c_MaximumInstanceCountExceeded) || _spriteIndices == nullptr || _arrayElementCount > GetBufferedInstanceCount()) {
 		return false;
 	}
-
-
-	/*DEBUG_ASSERT(_sheetIndex < 128, "Indexing beyond maximum allowed sprite sheets per batch.");
-	if (_sheetIndex >= m_SpriteSheets.size()) {
-		DEBUG_ASSERT(0, "No sheet with index [%d] in batch with name [%s]. Highest index is [%s]!", _sheetIndex, dm_BatchName.c_str(), static_cast<int>(m_SpriteSheets.size()));
-		return false;
-	}*/
 
 	std::vector<unsigned short> TemporaryBuffer;
 	TemporaryBuffer.resize(_arrayElementCount);
@@ -224,7 +193,7 @@ bool SoftBatch::UpdateRotationsBuffer(
 ) {
 	DEBUG_ASSERT(!m_Flags.CheckFlag(c_NotInitialised), "Attempting update of non-initialised buffer for SoftBatch with name [%s].", dm_BatchName.c_str());
 
-	if (m_Flags.CheckFlag(c_MaximumInstanceCountExceeded) || _objectRotationsRad == nullptr || _arrayElementCount > GetInstanceCount()) {
+	if (m_Flags.CheckFlag(c_MaximumInstanceCountExceeded) || _objectRotationsRad == nullptr || _arrayElementCount > GetBufferedInstanceCount()) {
 		return false;
 	}
 
@@ -239,7 +208,7 @@ bool SoftBatch::UpdatePositionsBuffer(
 ) {
 	DEBUG_ASSERT(!m_Flags.CheckFlag(c_NotInitialised), "Attempting update of non-initialised buffer for SoftBatch with name [%s].", dm_BatchName.c_str());
 
-	if (m_Flags.CheckFlag(c_MaximumInstanceCountExceeded) || _pairsOfxyPositions == nullptr || _arrayElementCount > GetInstanceCount()) {
+	if (m_Flags.CheckFlag(c_MaximumInstanceCountExceeded) || _pairsOfxyPositions == nullptr || _arrayElementCount > GetBufferedInstanceCount()) {
 		return false;
 	}
 

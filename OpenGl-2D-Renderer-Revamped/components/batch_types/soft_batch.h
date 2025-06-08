@@ -13,6 +13,8 @@
 *		- sprite UVs
 *		- rotation
 *		- position
+*		- optional, if type is set to FloatingQuad, the quad's vertices will be 
+*		  altered to match the sampled UV region from the texture
 */
 
 
@@ -57,10 +59,11 @@ public:
 		If the max instance count is exceeded, we resize the buffers
 		! AND ONLY THE NON-NULLPTR ARRAYS WILL BE BUFFERED TO THE GPU !
 
-		This means, if call UpdateBuffers(arr1, null, arr3, _count) and _count exceeds the maximum,
+		This means, if call UpdateBuffers(arr1, 0, arr3, _count) and _count exceeds the maximum,
 		all buffers will be resized, but at the resizing process, only VBOs for
-		arr1 and arr3 will have data, VBO of arr2 will remain uninitialised and you'll have to
-		seperately call the associated Update...Buffer().
+		arr1 and arr3 will have data, VBO of arr2 will remain with memory, initialised with a
+		default value(usually 0s), until it's rebuffered with the proper
+		Update...VBO() function.
 	*/
 	void UpdateBuffers(
 		const unsigned short* _spriteIndices,
@@ -71,7 +74,7 @@ public:
 
 	
 	//	Updates the UVRegions' VBO.
-	//	Returns:	[false], if _spriteIndices is null OR c_MaximumInstanceCountExceeded is raised OR _arrayElementCount >= m_InstanceCount
+	//	Returns:	[false], if _spriteIndices is null OR c_MaximumInstanceCountExceeded is raised OR _arrayElementCount > m_BufferedInstanceCount
 	//				[true], otherwise
 	bool UpdateSpriteIndexVBO(
 		const unsigned short* _spriteIndices,
@@ -81,7 +84,7 @@ public:
 
 
 	//	Updates the Rotations' VBO.
-	//	Returns:	[false], if _objectRotationsRad is null OR c_MaximumInstanceCountExceeded is raised OR _arrayElementCount >= m_InstanceCount
+	//	Returns:	[false], if _objectRotationsRad is null OR c_MaximumInstanceCountExceeded is raised OR _arrayElementCount > m_BufferedInstanceCount
 	//				[true], otherwise
 	bool UpdateRotationsBuffer(
 		const float* _objectRotationsRad,
@@ -90,7 +93,7 @@ public:
 
 
 	//	Updates the Positions' VBO.
-	//	Returns:	[false], if _pairsOfxyPositions is null OR c_MaximumInstanceCountExceeded is raised OR _arrayElementCount >= m_InstanceCount
+	//	Returns:	[false], if _pairsOfxyPositions is null OR c_MaximumInstanceCountExceeded is raised OR _arrayElementCount > m_BufferedInstanceCount
 	//				[true], otherwise
 	bool UpdatePositionsBuffer(
 		const float* _pairsOfxyPositions,
@@ -98,21 +101,17 @@ public:
 	);
 
 
+	//	This must be called after all SpriteSheet objects have been added to the batch.
+	//
+	//	It buffers the UBOs with the texture data necessary for rendering.
 	void BufferUBOs();
 
 
+	//	Binds the UBOs. Use after Shader::UseShader() has been called in the render loop.
 	void BindUBOs() const;
 
 
 	void BindUniqueBuffers() const;
-
-
-	bool PackIndicesTogether(
-		const unsigned short* _spriteIndices,
-		const unsigned short* _sheetIndices,
-		const size_t _arrayElementCount,
-		unsigned short* OUT_finishedArray
-	) const;
 
 private:
 
