@@ -7,7 +7,6 @@
 
 //	Common batch methods and data
 
-
 class BaseBatch {
 protected:
 	
@@ -27,6 +26,11 @@ protected:	//	Flags
 	//	Exceptions
 	static unsigned int c_MaximumInstanceCountExceeded;
 
+protected:	//	UBOs
+
+	unsigned int m_SheetUVRegionsUBO = 0;
+	unsigned int m_SheetIndexOffsetsUBO = 0;
+
 public:
 
 	BaseBatch(
@@ -34,7 +38,15 @@ public:
 	);
 
 
-	virtual void ActivateTextures() const;
+	void BindUBOs() const;
+
+
+	void BufferUBOs();
+
+
+	virtual void ActivateTextures(
+		const char* _sampler2DArrayUniformName
+	) const;
 
 
 	//	Add a SpriteSheet* to this batch. It will be used in every

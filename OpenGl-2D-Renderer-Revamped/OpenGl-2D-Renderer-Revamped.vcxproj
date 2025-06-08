@@ -144,6 +144,7 @@
     <ClCompile Include="common\common.cpp" />
     <ClCompile Include="common\standard_quad.cpp" />
     <ClCompile Include="components\batch_types\base_batch.cpp" />
+    <ClCompile Include="components\batch_types\batch_instance_primitives.cpp" />
     <ClCompile Include="components\batch_types\free_batch.cpp" />
     <ClCompile Include="components\batch_types\soft_batch.cpp" />
     <ClCompile Include="components\batch_types\strict_batch.cpp" />
@@ -167,6 +168,7 @@
     <ClInclude Include="common\common.h" />
     <ClInclude Include="common\standard_quad.h" />
     <ClInclude Include="components\batch_types\base_batch.h" />
+    <ClInclude Include="components\batch_types\batch_instance_primitives.h" />
     <ClInclude Include="components\batch_types\free_batch.h" />
     <ClInclude Include="components\batch_types\soft_batch.h" />
     <ClInclude Include="components\batch_types\strict_batch.h" />

@@ -37,55 +37,6 @@ void SoftBatch::DeleteBuffers() {
 }
 
 
-void SoftBatch::BufferUBOs() {
-	if (m_SpriteSheets.empty()) return;
-	glBindBuffer(GL_UNIFORM_BUFFER, m_SheetUVRegionsUBO);
-
-	std::vector<UVRegion> UVs;
-	for (const auto& sheet : m_SpriteSheets) {
-		const auto& arr = sheet->GetUVRegionArray();
-		UVs.insert(UVs.end(), arr.begin(), arr.end());
-	}
-
-	glBufferData(GL_UNIFORM_BUFFER, UVs.size() * sizeof(UVRegion), UVs.data(), GL_STATIC_DRAW);
-
-
-	struct alignas(16) PaddedInteger {
-		int value;
-		PaddedInteger(int _val) : value(_val) {}
-	};
-
-	glBindBuffer(GL_UNIFORM_BUFFER, m_SheetIndexOffsetsUBO);
-	std::vector<PaddedInteger> Offsets;
-	for (size_t i = 0; i < m_SpriteSheets.size(); i++) {
-		Offsets.emplace_back(static_cast<int>(m_SpriteSheets[i]->GetContainedSpriteCount()));
-	}
-
-	glBufferData(GL_UNIFORM_BUFFER, Offsets.size() * sizeof(PaddedInteger), Offsets.data(), GL_STATIC_DRAW);
-
-	glBindBuffer(GL_UNIFORM_BUFFER, 0);
-
-	const Shader* ShaderObject = GetSpecialSheetPointer()->GetShader();
-
-
-	unsigned int Program = ShaderObject->GetShaderId();
-	unsigned int asdf1111  = ShaderObject->GetUniformBlockLocation("ubo_UVRegions");
-
-	unsigned int asdf2222 = ShaderObject->GetUniformBlockLocation("ubo_SheetOffsets");
-
-	CheckGLErrors();
-	glUniformBlockBinding(Program, asdf1111, 0);
-	glUniformBlockBinding(Program, asdf2222, 1);
-	CheckGLErrors();
-}
-
-
-void SoftBatch::BindUBOs() const {
-	glBindBufferBase(GL_UNIFORM_BUFFER, 0, m_SheetUVRegionsUBO);       
-	glBindBufferBase(GL_UNIFORM_BUFFER, 1, m_SheetIndexOffsetsUBO);    
-}
-
-
 void SoftBatch::InitialiseCommonVAO() {
 	
 	if (GLdiagnostics::IsVertexArray(s_VAO)) {

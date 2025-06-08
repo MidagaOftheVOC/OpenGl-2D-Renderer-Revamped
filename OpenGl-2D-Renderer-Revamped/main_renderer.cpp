@@ -85,6 +85,7 @@ void Renderer2D::Draw(
 void Renderer2D::ExecuteDraws() {
 
 #ifdef DEBUG__CODE
+
 	// easily recognisable when some sprite is black or at all drawn
 	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 
@@ -93,6 +94,7 @@ void Renderer2D::ExecuteDraws() {
 	glClearColor(0.f, 0.f, 0.f, 1.f);
 
 #endif
+
 	//TODO:
 	//	At some point, all of these queues and arrays will be abstracted away into
 	//	"scenes" or similar objects, where we don't have to add, remove, readd and
@@ -106,7 +108,7 @@ void Renderer2D::ExecuteDraws() {
 	RenderDrawables();
 	RenderStrictBatches();
 	RenderSoftBatches();
-	//RenderFreeBatches();
+	RenderFreeBatches();
 
 	RenderText();
 
@@ -200,32 +202,36 @@ void Renderer2D::RenderFreeBatches() {
 	FreeBatch::BindCommonVAO();
 
 	for (size_t i = 0; i < Arr.size(); i++) {
-		const BatchDrawCall& DrawCall = Arr[i];
 
-		const FreeBatch* Free = dynamic_cast<const FreeBatch*>(DrawCall.GetBaseBatchPointer());
-		const SpriteSheet* Sheet = Free->GetSpecialSheetPointer();
-		const Shader* Shader = Sheet->GetShader();
+		const BatchDrawCall BatchDrawCallObject = Arr[i];
 
-		int ElementsToDraw = Free->GetElementCount();
+		//	down cast to proper pointer
+		const FreeBatch* Free = dynamic_cast<const FreeBatch*>(BatchDrawCallObject.GetBaseBatchPointer());
+		const Shader* ShaderObject = Free->GetSpecialSheetPointer()->GetShader();
 
+		int InstanceCount = Free->GetInstanceCount();
 
 		Free->BindUniqueBuffers();
-		glBindTexture(GL_TEXTURE_2D, Sheet->GetTextureBufferID());
 
-		Shader->UseShader();
-		Shader->SetStandardProjection(GetCamera().GetProjectionMatrix());
-		Shader->SetStandardView(GetCamera().GetViewMatrix());
-		Shader->SetStandardModel(glm::translate(glm::mat4(1.f), DrawCall.GetPositionVector()));
+		ShaderObject->UseShader();
+		ShaderObject->SetStandardModel(glm::translate(glm::mat4(1.f), BatchDrawCallObject.GetPositionVector()));
+		ShaderObject->SetStandardView(GetCamera().GetViewMatrix());
+		ShaderObject->SetStandardProjection(GetCamera().GetProjectionMatrix());
 
+		ShaderObject->ApplyUniforms(BatchDrawCallObject.GetAppliedUniforms());
+
+		Free->ActivateTextures("u_Textures");
+		Free->BindUBOs();
+		
 
 		CheckGLErrors();
-		glDrawElements(GL_TRIANGLES, ElementsToDraw, GL_UNSIGNED_SHORT, 0);
+		glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr, InstanceCount);
 		CheckGLErrors();
+
 	}
 
 	FreeBatch::UnbindCommonVAO();
 	Arr.clear();
-
 }
 
 
@@ -251,7 +257,7 @@ void Renderer2D::RenderSoftBatches() {
 		Shader->SetStandardView(GetCamera().GetViewMatrix());
 		Shader->SetStandardProjection(GetCamera().GetProjectionMatrix());
 
-		Soft->ActivateTextures();
+		Soft->ActivateTextures("u_Textures");
 
 		if (Soft->GetType() == SoftBatchType::FloatingQuad) {
 			Shader->SetFloat("u_TexWidth", static_cast<const int>(Sheet->GetSpriteSheetWidth()));
@@ -309,7 +315,7 @@ void Renderer2D::RenderStrictBatches() {
 		ShaderCurrent->SetStandardProjection(m_Camera.GetProjectionMatrix());
 
 		CheckGLErrors();
-		Strict->ActivateTextures();
+		Strict->ActivateTextures("u_Texture");
 		CheckGLErrors();
 
 		ShaderCurrent->SetInt("u_RowSpriteCount", Strict->GetSpriteCountPerRow());
@@ -473,6 +479,7 @@ Renderer2D::Renderer2D(
 	m_StandardQuad(g_StandardQuad)
 {}
 
+
 void Renderer2D::LoadShader(
 	const std::string& _locationShaderFile,
 	const std::string& _shaderName
@@ -509,6 +516,7 @@ void Renderer2D::LoadSpriteSheet(
 	);
 }
 
+
 const SpriteSheet* Renderer2D::GetSpriteSheetByName(
 	const char* _spriteSheetName
 ) {
@@ -524,6 +532,7 @@ const SpriteSheet* Renderer2D::GetSpriteSheetByName(
 	DEBUG_WARN(0, "GetSpriteSheetByName() for name [%s] returned nullptr.", _spriteSheetName);
 	return nullptr;
 }
+
 
 const Shader* Renderer2D::GetShaderByName(
 	const char* _shaderName
@@ -549,6 +558,7 @@ void Renderer2D::UploadShaderParameters(
 	m_ShaderLoadQueue.emplace_back(_location, _shaderName);
 }
 
+
 void Renderer2D::UploadSpriteSheetParameters(
 	const char* _locationRawImage,
 	const char* _sheetName,
@@ -564,6 +574,7 @@ void Renderer2D::UploadSpriteSheetParameters(
 		_spritesPerCol
 	);
 }
+
 
 void Renderer2D::StartLoadingProcess() {
 
@@ -636,10 +647,12 @@ void Renderer2D::Draw(
 	);
 }
 
+
 //	TODO: Add some configuration file/structure to take data from
-//	so we avoid hardcoding shit like the font size.
+//	some file so we avoid hardcoding shit like the font size.
 void Renderer2D::PerClassVAOinitialisationFunction() {
 
+	SpriteInformation::InitialiseMasks();
 
 	StrictBatch::InitialiseCommonVAO();
 	SoftBatch::InitialiseCommonVAO();
@@ -649,7 +662,6 @@ void Renderer2D::PerClassVAOinitialisationFunction() {
 	Text::InitialiseCommonVAO();
 
 }
-
 
 
 bool Renderer2D::DrawCallComparator::operator()(const DrawableDrawCall& a, const DrawableDrawCall& b) const {

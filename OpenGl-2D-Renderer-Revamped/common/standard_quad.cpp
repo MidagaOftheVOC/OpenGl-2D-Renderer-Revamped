@@ -114,3 +114,13 @@ void StandardQuad::BindElementIndexArray() {
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_IndexBuffer);
 }
 
+
+void StandardQuad::BindUnmodifiedStandardQuadBufferAt(
+	int _index
+) const {
+	glBindBuffer(GL_ARRAY_BUFFER, m_OriginalStandardQuadBuffer);
+	glEnableVertexAttribArray(_index);
+
+}
+
+

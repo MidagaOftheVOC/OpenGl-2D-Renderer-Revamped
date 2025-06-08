@@ -78,6 +78,9 @@
     <ClCompile Include="test\test_snippets.h">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="components\batch_types\batch_instance_primitives.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="main_renderer.h">
@@ -135,6 +138,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="components\batch_types\base_batch.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="components\batch_types\batch_instance_primitives.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -3,6 +3,7 @@
 
 #include "main_renderer.h"
 
+#include "components/batch_types/batch_instance_primitives.h"
 
 #include "test/test_snippets.h"
 
@@ -86,6 +87,27 @@ int main() {
 
 
 	
+
+	r.UploadShaderParameters(
+		"test\\res\\fb_std.shader",
+		"fd_std"
+	);
+
+	r.UploadSpriteSheetParameters(
+		"test\\res\\test.cfg",
+		"fd_std1",
+		"fd_std",
+		0, 0
+	);
+
+	r.UploadSpriteSheetParameters(
+		"test\\res\\panda.cfg",
+		"fd_std2",
+		"fd_std",
+		0, 0
+	);
+
+	
 	r.StartLoadingProcess();
 
 
@@ -124,24 +146,6 @@ int main() {
 	float rotations[] = {0.f, 1.f, 2.f, 3.f};
 	float PositionPais[] = { 20.f, 20.f, 120.f, 120.f, 220.f, 220.f, 320.f, 320.f };
 
-	//
-	//SoftBatch soft = SoftBatch(4);
-	//soft.InitialiseBuffers();
-	//soft.AddSheetToBatch(
-	//	r.GetSpriteSheetByName("soft_sheet")
-	//);
-
-	//soft.UpdateBuffers(
-	//	nullptr,
-	//	rotations,
-	//	PositionPais,
-	//	4
-	//);
-
-	//soft.BufferUBOs();
-
-	//soft.UpdateSpriteIndexVBO(indices, 0, 4);
-
 	const SpriteSheet* SB_normal = r.GetSpriteSheetByName("sb_fq");
 	const SpriteSheet* SB_panda = r.GetSpriteSheetByName("sb_panda");
 
@@ -171,7 +175,24 @@ int main() {
 
 	fq.UpdateSpriteIndexVBO(sprites, sheets, 4);
 
+	const SpriteSheet* FB_normal = r.GetSpriteSheetByName("fd_std1");
+	const SpriteSheet* FB_panda = r.GetSpriteSheetByName("fd_std2");
 
+	FreeBatch free = FreeBatch(4);
+	free.InitialiseBuffers();
+	
+	free.AddSheetToBatch(FB_normal);
+	free.AddSheetToBatch(FB_panda);
+
+	free.BufferUBOs();
+
+	SpriteInformation SI[4] = {
+		{0, 0}, {0, 0}, {1, 0}, {1, 0}
+	};
+
+	float dims[] = { 50.f, 50.f, 100.f, 100.f, 200.f, 200.f, 150.f, 150.f};
+
+	free.UpdateBuffers(SI, rotations, PositionPais, dims, 4);
 
 
 	StrictBatch strict = GetInitialisedStrictBatch(r.GetSpriteSheetByName("fox"));
@@ -186,6 +207,8 @@ int main() {
 		//r.Draw(&soft, 100, 100, 2, nullptr);
 
 		r.Draw(&fq, 100, 100, 3, nullptr);
+
+		r.Draw(&free, 800, 400, 2, nullptr);
 
 		if (input.IsHeld(GLFW_KEY_RIGHT)) {
 			t.SetWordWrapBound(t.GetRightWordWrapBound() + .5f);

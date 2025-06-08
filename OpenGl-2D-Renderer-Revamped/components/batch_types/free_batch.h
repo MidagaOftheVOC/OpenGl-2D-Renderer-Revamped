@@ -4,6 +4,7 @@
 #include "../../common/standard_quad.h"
 
 #include "base_batch.h"
+#include "batch_instance_primitives.h"
 
 /*
 TODO:
@@ -14,8 +15,8 @@ vertices per instance. It'd be very useful for future UI developments.
 
 class FreeBatch : public BaseBatch {
 
-	unsigned int m_VertexVBO = 0;
-	unsigned int m_UVRegionVBO = 0;
+	unsigned int m_VertexDimensionsVBO = 0;
+	unsigned int m_SpriteInformationVBO = 0;
 	unsigned int m_RotationsVBO = 0;
 	unsigned int m_PositionsVBO = 0;
 
@@ -33,9 +34,10 @@ public:
 
 
 	void UpdateBuffers(
-		const int* _spriteIndices,
+		const SpriteInformation* _spriteInformation,
 		const float* _rotationsArray,
 		const float* _pairsOfXYpositions,
+		const float* _pairsOfXYdimensions,
 		const size_t _arrayElementCount = 0
 	);
 
@@ -82,8 +84,8 @@ public:
 
 public:
 
-	unsigned int GetVertexVBO() const { return m_VertexVBO; } 
-	unsigned int GetUVRegionVBO() const { return m_UVRegionVBO; }
+	unsigned int GetVertexDimensionsVBO() const { return m_VertexDimensionsVBO; }
+	unsigned int GetUVRegionVBO() const { return m_SpriteInformationVBO; }
 	unsigned int GetRotationsVBO() const { return m_RotationsVBO; }
 	unsigned int GetPositionsVBO() const { return m_PositionsVBO; }
 

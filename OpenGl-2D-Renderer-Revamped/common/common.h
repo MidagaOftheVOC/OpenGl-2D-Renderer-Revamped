@@ -91,7 +91,7 @@ bool fEqual(float _val1, float _val2);
 
 struct GLdiagnostics {
 
-    static bool IsVertexBuffer(
+    static bool IsBuffer(
         unsigned int _bufferName,
         bool true_if_printing_result = false
     ) {

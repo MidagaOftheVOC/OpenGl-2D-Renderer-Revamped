@@ -196,6 +196,7 @@ unsigned int Shader::GetUniformBlockLocation(
     if (Iterator != m_UniformBlockLocationMap.end()) {
         return Iterator->second;
     }
+    DEBUG_LOG("Uniform block [%s] in Shader [%s] not found.", GetName().c_str(), _uniformBlockName);
     return 0;
 }
 
@@ -252,13 +253,11 @@ void Shader::SetIntArray(
     const int* _array,
     int _arraySize
 ) const {
-  //  CheckGLErrors();
     glUniform1iv(
         GetUniformLocation(_uniformName),
         _arraySize,
         _array
     );
-//    CheckGLErrors();
 }
 
 
@@ -333,7 +332,7 @@ int Shader::GetUniformLocation(
         return Iterator->second.location;
     }
 
-    DEBUG_WARN(1, "Shader [%s] can't find uniform with name [%s].", GetName().c_str(), _uniformName);
+    DEBUG_WARN(0, "Shader [%s] can't find uniform with name [%s].", GetName().c_str(), _uniformName);
     return -1;
 }
 

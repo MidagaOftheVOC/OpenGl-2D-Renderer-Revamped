@@ -29,8 +29,6 @@ class SoftBatch : public BaseBatch{
 	unsigned int m_RotationsVBO = 0;
 	unsigned int m_PositionsVBO = 0;
 
-	unsigned int m_SheetUVRegionsUBO = 0;
-	unsigned int m_SheetIndexOffsetsUBO = 0;
 
 	const SoftBatchType m_Type;
 
@@ -99,16 +97,6 @@ public:
 		const float* _pairsOfxyPositions,
 		const size_t _arrayElementCount = 0
 	);
-
-
-	//	This must be called after all SpriteSheet objects have been added to the batch.
-	//
-	//	It buffers the UBOs with the texture data necessary for rendering.
-	void BufferUBOs();
-
-
-	//	Binds the UBOs. Use after Shader::UseShader() has been called in the render loop.
-	void BindUBOs() const;
 
 
 	void BindUniqueBuffers() const;

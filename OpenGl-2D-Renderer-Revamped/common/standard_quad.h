@@ -47,16 +47,16 @@ struct StandardQuad {
 public:
 
 	unsigned int m_OriginalTextureUVBuffer = 0;
-
-
 	unsigned int GetUnmodifiedTextureUVBuffer() const { return m_OriginalTextureUVBuffer; }
-
-
 	void BindUnmodifiedTextureUVBuffer() const { glBindBuffer(GL_ARRAY_BUFFER, m_OriginalTextureUVBuffer); }
 
 
-	void UnbindUnmodifiedTextureUVBuffer() const { glBindBuffer(GL_ARRAY_BUFFER, 0); }
+	unsigned int m_OriginalStandardQuadBuffer = 0;
+	unsigned int GetUnmodifiedStandardQuadBuffer() const { return m_OriginalStandardQuadBuffer; }
+	void BindUnmodifiedStandardQuadBufferAt(int _index) const;
 
+
+	
 public:
 
 	float  g_stdVertexCoordArray[8] = {
