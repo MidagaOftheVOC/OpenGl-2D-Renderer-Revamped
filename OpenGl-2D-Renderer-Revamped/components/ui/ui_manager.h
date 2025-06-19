@@ -5,10 +5,23 @@
 #include "../../common/standard_quad.h"
 
 
-#include "../batch_types/soft_batch.h"
+#include "../batch_types/free_batch.h"
 
 
-class UImanager {
+#include "window.h"
+
+
+class Renderer2D;
+
+
+struct PaneSupplementDataStruct {
+	float m_Rotations[9] = { 0.f };
+	SpriteInformation m_SpriteInformation[9];
+};
+
+
+
+class UIManager {
 
 	//	From the renderer-assigned usable Z space
 	//	This here tells us where we can and cannot draw UI elements
@@ -21,8 +34,39 @@ class UImanager {
 	float m_CalculatedWindowZlayerStep = 0.f;
 	float m_CalculatedPrimitiveZlayerStep = 0.f;
 
+
+	Renderer2D* m_MainRenderer = nullptr;
+
+private:
+
+	FreeBatch m_PaneBatch;
+	void SendPaneBatchesToRenderer();
+
+private:
+
+	std::vector<Window> m_WindowArray;
+
 public:
 
+	UIManager(
+		Renderer2D* _renderer
+	);
 
+
+	//	Iterate over the Window objects.
+	void RenderAllActiveWindows(
+
+	);
+
+
+	//	Adds window to the GUI
+	void AddWindow(
+		Window _window
+	);
+	
+
+	void RemoveWindow(
+		ID _windowID
+	);
 
 };

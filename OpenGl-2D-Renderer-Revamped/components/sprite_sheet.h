@@ -108,6 +108,7 @@ public:
 	SpriteSheet();
 
 
+	//	!!!		ABANDONED	  !!!
 	void TransformIndicesToUVRegionArray(
 		const int* _indexArray,
 		const int _indexArraySize,

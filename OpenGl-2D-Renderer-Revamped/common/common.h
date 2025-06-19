@@ -84,6 +84,12 @@ __release_variant
 #endif
 
 
+typedef unsigned int ID;
+
+
+
+
+
 void CheckGLErrors(const char* context = "OpenGL");
 
 bool fEqual(float _val1, float _val2);

@@ -8,10 +8,10 @@
 
 
 static std::pair<const char*, int> ParameterValues[] = {
-	{"repeat", GL_REPEAT},
-	{"mirrored_repeat", GL_MIRRORED_REPEAT},
-	{"clamp_to_edge", GL_CLAMP_TO_EDGE},
-	{"clamp_to_border", GL_CLAMP_TO_BORDER}
+	{"repeat",				GL_REPEAT},
+	{"mirrored_repeat",		GL_MIRRORED_REPEAT},
+	{"clamp_to_edge",		GL_CLAMP_TO_EDGE},
+	{"clamp_to_border",		GL_CLAMP_TO_BORDER}
 };
 
 
@@ -133,7 +133,6 @@ void SpriteSheet::TransformIndicesToUVRegionArray(
 int SpriteSheet::DetermineLoadingMethodFromGivenPath(
 	const std::string& _pathFromConstructor
 ) {
-
 	std::string FileExtention;
 
 	
@@ -161,7 +160,7 @@ int SpriteSheet::DetermineLoadingMethodFromGivenPath(
 		m_Type = SpriteSheetType::DirectUV;
 		return c_ConfigFileLoadingMethodReturnCode;
 	}
-
+	
 	m_Type = SpriteSheetType::ErrorLoading;
 	return c_ErrorInLoadingMethodReturnCode;
 }
@@ -204,10 +203,6 @@ void SpriteSheet::ConfigurationPairLoadingMethod(
 
 	InterpretTextureParametersString(Line.substr(Line.find('\"') + 1, Line.rfind('\"') - Line.find('\"') - 1));
 
-
-
-
-
 	std::string AssetName;
 	AssetName.resize(100, '\0');
 	while (std::getline(File, Line)) {
@@ -246,6 +241,9 @@ void SpriteSheet::StandardImageLoadingMethod(
 
 	m_SpriteCountPerRow = _spritesPerRow;
 	m_SpriteCountPerCol = _spritesPerCol;
+
+	m_TexParams.S_WrapMode = GL_REPEAT;
+	m_TexParams.T_WrapMode = GL_REPEAT;
 
 	LoadImageInTexture(_pathFromConstructor);
 

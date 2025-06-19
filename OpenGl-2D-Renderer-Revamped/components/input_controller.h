@@ -22,7 +22,8 @@ class InputController {
 	
 private:
 
-	//	TODO: Implement range skips to minimise checks
+	//	TODO:	Implement range skips to minimise checks
+	//	TODO:	Implement mouse coordinate tracking
 
 	std::bitset<MAXIMUM_BITSET_SIZE> m_TrackedKeystatesBitmask;
 

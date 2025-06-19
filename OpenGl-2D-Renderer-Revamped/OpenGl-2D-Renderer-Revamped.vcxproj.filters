@@ -54,9 +54,6 @@
     <ClCompile Include="components\ui\font.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="components\ui\pane.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="components\ui\text.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -117,9 +114,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="components\ui\font.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="components\ui\pane.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="components\ui\text.h">

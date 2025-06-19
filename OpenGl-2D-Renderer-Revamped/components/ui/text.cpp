@@ -208,13 +208,6 @@ void Text::CalculateWordWraps() {
 		return;		// no bounds, render in a line
 	}
 
-	/*const float SpaceGlyphWidth = GetFont()->GetOffsetForGlyph(' ');
-	const float RightBound = m_TextOptions.m_LineLength;
-
-	float TotalPassedLineWidth = 0.f;
-	float TotalLineWidthAfterLastSpace = 0.f;
-	int IndexOfLastSpace = 0;
-	bool LineHasSpace = false;*/
 
 	std::vector<int>& LineBreaks = m_LineBreaks;
 	std::vector<float>& LineLengths = m_LineLengths;
@@ -276,7 +269,6 @@ void Text::CalculateWordWraps() {
 			}
 		}
 	}
-
 }
 
 

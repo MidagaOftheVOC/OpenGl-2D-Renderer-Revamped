@@ -137,6 +137,12 @@ int main() {
 		textoptions
 	);
 
+	Text text = Text(
+		&f,
+		U"здравейте, дами и господа!",
+		textoptions
+	);
+
 	t.SetWordWrapBound(200);
 
 	InputController& input = r.GetInputController();
@@ -200,15 +206,11 @@ int main() {
 	while (!r.IsRunning()) {
 		input.CaptureKeystates();
 
-		//r.Draw(&strict, 70, 70, 2, nullptr);
-
-		//r.Draw(&t, 300, 300, 2, nullptr);
-
-		//r.Draw(&soft, 100, 100, 2, nullptr);
-
-		r.Draw(&fq, 100, 100, 3, nullptr);
-
+		//r.Draw(&fq, 100, 100, 3, nullptr);
 		r.Draw(&free, 800, 400, 2, nullptr);
+
+		r.Draw(&t, 300, 300, 2, nullptr);
+		r.Draw(&text, 300, 500, 2, nullptr);
 
 		if (input.IsHeld(GLFW_KEY_RIGHT)) {
 			t.SetWordWrapBound(t.GetRightWordWrapBound() + .5f);

@@ -17,27 +17,38 @@
 
 class Window {
 
-	const Window* m_Parent = nullptr;
+	ID m_WindowsID;
+
+
+	const ID m_Paren = 0;
 
 
 	//	Relative to top left corner of screen
 	glm::vec2 m_WindowPosition = glm::vec2(0.f, 0.f);
 
-private:	// PRIMITIVE DATA
 
+	glm::vec2 m_WindowDimensions = glm::vec2(200.f, 80.f);
 
+private:	// UI PRIMITIVE DATA
+
+	bool m_HasPane = true;
+	Pane m_WindowPane;
 
 
 
 public:
 
 	Window(
-
+		const ID _id
 	);
 
 
-
 	
+public:
+
+
+
+	const Pane& GetPane() const { return m_WindowPane; }
 
 };
 

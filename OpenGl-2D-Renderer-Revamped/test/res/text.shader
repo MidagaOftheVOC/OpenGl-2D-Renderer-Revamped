@@ -19,7 +19,7 @@ uniform int u_RowSpriteCount;
 uniform int u_LineBreakCount;
 uniform int u_LineBreakArray[64];
 
-uniform float u_LineMaximumLength;
+//uniform float u_LineMaximumLength;
 uniform float u_LineLengths[64];
 
 

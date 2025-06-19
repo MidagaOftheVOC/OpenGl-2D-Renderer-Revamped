@@ -6,25 +6,16 @@
 #include "../../common/standard_quad.h"
 
 
+#include "../batch_types/batch_instance_primitives.h"
+
+
 
 /*
 
 Abstract class for all graphical primitives.
 
-TODO:
-
-Further modifications to the SpriteSheet needed, so we can make ones
-with GL_REPEAT for a tex param for some use cases, I guess.
-
 */
 
-enum class UIPrimitiveType{
-	None = 0,
-	Pane,
-	Label,
-	Button,
-	Input
-};
 
 struct UI_Primitive {
 
@@ -34,38 +25,91 @@ private:
 
 protected:
 
-	//	void* GetStringManager();
+	glm::vec2 m_Dimensions;
+
+
+	//	Drawcalls will be made to the upper left corner of the window object
+	//	therefore primitives require offset from that point.
+	glm::vec2 m_PositionRelativeToWindow;
 
 public:
 
 	UI_Primitive(
-		UIPrimitiveType _type,
-		UVRegion _rectangleBorders
+		glm::vec2 _dimensions,
+		glm::vec2 _relativeToWindow
 	);
 
-	UIPrimitiveType m_Type = UIPrimitiveType::None;
-	
-	
-	glm::vec2 m_PositionRelativeToWindow = glm::vec2(0.f, 0.f);
-	float m_Width = 0.f;
-	float m_Height = 0.f;
 
-
+	
 
 };
 
 
 
 
+/*
 
-struct Pane : UI_Primitive {
+Pane:
+Graphical primitive which must represetn a rectangle split in 9 segments.
+
++-+----------+-+
+|0|    4     |1|
++-+----------+-+
+| |          | |
+|6|    8     |7|
+| |          | |
++-+----------+-+
+|2|    5     |3|
++-+----------+-+
+
+Corners of the pane are squares.
+Middle and centrail borders are rectangles.
+In total:
+-4 unique shapes
+-3 unique lengths
+
+*/
+struct Pane : public UI_Primitive {
+private:
+
+	float m_PositionPairArray[18] = { 0 };
+	float m_DimensionPairArray[18] = { 0 };
 
 
+	uint32_t m_IndexOfSupplementRenderingData = 0;
 
+	
+
+	float m_CornerSidePx = 20.f;
+
+public:
 
 	Pane(
-		UVRegion _rectangle
+		glm::vec2 _dimensions
 	);
+
+
+	//	This function outputs vertex coord data for the FreeBatch object.
+	//	SpriteInformation data will be added by the UI manager immediately after.
+	//	This is made to avoid unnecessary complication while allowing the UI managre to set
+	//	custom indices for the corners, sides, and so on.
+	//
+	//	Output for this function:
+	//
+	void Record (
+		std::vector<float>& OUT_batchPairsOfXYdimensions,
+		std::vector<float>& OUT_batchPairsOfXYpositions,
+		size_t _indexOfFirstElement
+	) const;
+
+
+	void UpdateArrays();
+
+
+public:
+
+
+	void SetIndexOfSupplementRenderingData(uint32_t _index);
 
 };
 

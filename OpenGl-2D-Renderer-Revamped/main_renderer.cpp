@@ -109,6 +109,12 @@ void Renderer2D::ExecuteDraws() {
 	RenderStrictBatches();
 	RenderSoftBatches();
 	RenderFreeBatches();
+	
+
+
+	glBindBufferBase(GL_UNIFORM_BUFFER, 0, 0);
+	glBindBufferBase(GL_UNIFORM_BUFFER, 1, 0);
+
 
 	RenderText();
 
@@ -157,11 +163,14 @@ void Renderer2D::RenderText() {
 		if( SheetObject != LastUsedSpriteSheet)
 		{
 			//	TODO: start finding alternatives to this
+			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, SheetObject->GetTextureBufferID());
 			GetQuad().BufferTexCoords(SheetObject);
+			Shader.SetInt("u_Texture", 0);
 
 			LastUsedSpriteSheet = SheetObject;
 		}
+
 		
 		
 		Shader.SetStandardModel(glm::translate(glm::mat4(1.f), DrawCall.GetPositionVector()));
@@ -175,7 +184,7 @@ void Renderer2D::RenderText() {
 		Shader.SetIntArray("u_LineBreakArray", TextObject->GetLineBreakArray().data(), LineBreakCount);
 		Shader.SetFloatArray("u_LineLengths", TextObject->GetLineLengthsArray().data(), LineBreakCount);
 
-		Shader.SetFloat("u_LineMaximumLength", OptionsObject.m_LineLength);
+		//Shader.SetFloat("u_LineMaximumLength", OptionsObject.m_LineLength);
 		Shader.SetFloat("u_CharacterHeight", OptionsObject.m_CharacterHeight);
 		Shader.SetFloat("u_SpacingBetweenLines", OptionsObject.m_SpacingBetweenLines);
 
@@ -189,8 +198,6 @@ void Renderer2D::RenderText() {
 
 	m_TextArray.clear();
 	Text::UnbindCommonVAO();
-	glUseProgram(0);
-	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 
@@ -260,8 +267,8 @@ void Renderer2D::RenderSoftBatches() {
 		Soft->ActivateTextures("u_Textures");
 
 		if (Soft->GetType() == SoftBatchType::FloatingQuad) {
-			Shader->SetFloat("u_TexWidth", static_cast<const int>(Sheet->GetSpriteSheetWidth()));
-			Shader->SetFloat("u_TexHeight", static_cast<const int>(Sheet->GetSpriteSheetHeight()));
+			Shader->SetFloat("u_TexWidth", static_cast<float>(Sheet->GetSpriteSheetWidth()));
+			Shader->SetFloat("u_TexHeight", static_cast<float>(Sheet->GetSpriteSheetHeight()));
 		}
 
 		Soft->BindUBOs();
