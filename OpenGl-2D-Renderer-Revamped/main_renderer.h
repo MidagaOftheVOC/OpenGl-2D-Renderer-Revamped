@@ -15,9 +15,11 @@
 #include "components/batch_types/strict_batch.h"
 #include "components/batch_types/soft_batch.h"
 #include "components/batch_types/free_batch.h"
+#include "components/batch_types/ui_batch.h"
 
 #include "components/uniform/uniform_data.h"
 
+#include "components/ui/ui_manager.h"
 #include "components/ui/text.h"
 
 
@@ -43,6 +45,9 @@ private:	//	Logical components
 
 
 	InputController m_InputController;
+
+
+	UIManager m_UIManager;
 
 
 	std::vector<SpriteSheet> m_SpriteSheetArray;
@@ -76,6 +81,7 @@ private:	//	Structures for draw queue optimisation
 		glm::vec3 GetPositionVector() const { return glm::vec3(m_xScreenCoord, m_yScreenCoord, m_zLayer); }
 	};
 
+	//		DRAWABLE
 
 	struct DrawableDrawCall : DrawCall {
 	private:
@@ -87,16 +93,13 @@ private:	//	Structures for draw queue optimisation
 		const Drawable* GetDrawablePointer() const { return m_Drawable; }
 	};
 
-
-	//	This comparator orders DrawCalls first by Shader*, and within
-	//	those Shader* groups, second by SpriteSheet*
 	struct DrawCallComparator{
 		bool operator()(const DrawableDrawCall& a, const DrawableDrawCall& b) const;
 	};
 
-
 	std::priority_queue<DrawableDrawCall, std::vector<DrawableDrawCall>, DrawCallComparator> m_DrawCallQueue;
 
+	//		BATCHES
 	
 	struct BatchDrawCall: DrawCall {
 	private:
@@ -113,7 +116,7 @@ private:	//	Structures for draw queue optimisation
 	std::vector<BatchDrawCall> m_SoftBatchArray;
 	std::vector<BatchDrawCall> m_FreeBatchArray;
 
-
+	//		TEXT
 
 	struct TextDrawCall : DrawCall {
 	private:
@@ -126,6 +129,22 @@ private:	//	Structures for draw queue optimisation
 	};
 
 	std::vector<TextDrawCall> m_TextArray;
+
+	//		UI
+
+	struct UIDrawCall : DrawCall {
+	private:
+		const UIBatch* m_UIBatch = nullptr;
+	public:	//	Point is that UI elements will always have the relevant positions in the batch itself
+			//	since those batches are supposed to be used en-masse, i.e. one such batch for each primitive
+			//	That is to say, all Panes, or all Buttons for rendering, will be done so with one batch for each.
+		UIDrawCall(const UIBatch* _uiBatch, float _cameraXpos, float _cameraYpos,float _furthestZcoord,const UniformDataVector* _uniformDataArray)
+			:m_UIBatch(_uiBatch), DrawCall(_cameraXpos, _cameraYpos, _furthestZcoord, _uniformDataArray)
+		{}
+		const UIBatch* GetUIBatchPointer() const { return m_UIBatch; }
+	};
+
+	std::vector<UIDrawCall> m_UIBatchArray;
 
 private:	//	Methods to render queued Drawcalls
 
@@ -142,6 +161,9 @@ private:	//	Methods to render queued Drawcalls
 
 
 	void RenderFreeBatches();
+
+
+	void RenderGUI();
 
 public:		//	Exposed functions
 	
@@ -207,6 +229,14 @@ public:		//	Exposed functions
 		float _zLayer,
 		UniformDataVector* _uniformArray
 	);
+
+
+	void Draw(
+		const UIBatch* _uiBatch,
+		float _furthestZcoord,
+		UniformDataVector* _uniformArray
+	);
+
 
 	//	Returns a brand new Drawable object derived from an existing SpriteSheet object.
 	// 

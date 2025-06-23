@@ -82,6 +82,22 @@ void Renderer2D::Draw(
 }
 
 
+void Renderer2D::Draw(
+	const UIBatch* _uiBatch,
+	float _furthestZcoord,
+	UniformDataVector* _uniformArray
+) {
+	glm::vec2 CameraPosition = m_Camera.GetPosition();
+	m_UIBatchArray.emplace_back(
+		_uiBatch,
+		50,
+		50,
+		0,
+		_uniformArray
+	);
+}
+
+
 void Renderer2D::ExecuteDraws() {
 
 #ifdef DEBUG__CODE
@@ -111,6 +127,7 @@ void Renderer2D::ExecuteDraws() {
 	RenderFreeBatches();
 	
 
+	RenderGUI();
 
 	glBindBufferBase(GL_UNIFORM_BUFFER, 0, 0);
 	glBindBufferBase(GL_UNIFORM_BUFFER, 1, 0);
@@ -123,6 +140,58 @@ void Renderer2D::ExecuteDraws() {
 
 	glfwSwapBuffers(GetWinHandle());
 	glfwPollEvents();
+}
+
+
+void Renderer2D::RenderGUI() {
+	std::vector<UIDrawCall>& Arr = m_UIBatchArray;
+
+	size_t ArraySize = Arr.size();
+
+	if (ArraySize == 0) {
+		return;
+	}
+
+	UIBatch::BindCommonVAO();
+
+	for (size_t i = 0; i < ArraySize; i++) {
+
+		const UIDrawCall& DrawCall = Arr[i];
+		const UIBatch* Batch = DrawCall.GetUIBatchPointer();
+		const SpriteSheet* SheetObject = Batch->GetSpecialSheetPointer();
+		const Shader* ShaderObject = SheetObject->GetShader();
+
+		const int InstanceCount = Batch->GetInstanceCount();
+
+		Batch->BindUniqueBuffers();
+
+
+		ShaderObject->UseShader();
+
+		glm::vec3 DCPosition = DrawCall.GetPositionVector();
+		DCPosition.z = 0;
+		ShaderObject->SetStandardModel(glm::translate(glm::mat4(1.f), DCPosition));
+		ShaderObject->SetStandardProjection(m_Camera.GetProjectionMatrix());
+		ShaderObject->SetStandardView(m_Camera.GetViewMatrix());
+
+		ShaderObject->ApplyUniforms(DrawCall.GetAppliedUniforms());
+		
+		Batch->ActivateTextures("u_Textures");
+		Batch->BindUBOs();
+
+
+#ifdef DEBUG__CODE
+		CheckGLErrors();
+#endif
+
+		glDrawElementsInstanced(GL_TRIANGLES, 6ui64, GL_UNSIGNED_SHORT, nullptr, InstanceCount);
+
+#ifdef DEBUG__CODE
+		CheckGLErrors();
+#endif
+	}
+	
+	UIBatch::UnbindCommonVAO();
 }
 
 
@@ -170,9 +239,7 @@ void Renderer2D::RenderText() {
 
 			LastUsedSpriteSheet = SheetObject;
 		}
-
-		
-		
+				
 		Shader.SetStandardModel(glm::translate(glm::mat4(1.f), DrawCall.GetPositionVector()));
 
 		//	Sprite indices are passed already, so we need sprite dimensions sent
@@ -191,9 +258,15 @@ void Renderer2D::RenderText() {
 
 		Shader.ApplyUniforms(DrawCall.GetAppliedUniforms());
 
+#ifdef DEBUG__CODE
 		CheckGLErrors();
+#endif
+
 		glDrawElementsInstanced(GL_TRIANGLES, 6Ui64, GL_UNSIGNED_SHORT, nullptr, static_cast<int>(CharInstances));
+
+#ifdef DEBUG__CODE
 		CheckGLErrors();
+#endif
 	}
 
 	m_TextArray.clear();
@@ -231,10 +304,15 @@ void Renderer2D::RenderFreeBatches() {
 		Free->BindUBOs();
 		
 
+#ifdef DEBUG__CODE
 		CheckGLErrors();
-		glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr, InstanceCount);
-		CheckGLErrors();
+#endif
 
+		glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr, InstanceCount);
+
+#ifdef DEBUG__CODE
+		CheckGLErrors();
+#endif
 	}
 
 	FreeBatch::UnbindCommonVAO();
@@ -483,7 +561,9 @@ Renderer2D::Renderer2D(
 	m_ScreenHeight(_screenHeight),
 	m_WindowTitle(_windowTitle),
 	m_Fullscreen(_fullscreen),
-	m_StandardQuad(g_StandardQuad)
+	m_StandardQuad(g_StandardQuad),
+
+	m_UIManager(this)
 {}
 
 
@@ -658,16 +738,16 @@ void Renderer2D::Draw(
 //	TODO: Add some configuration file/structure to take data from
 //	some file so we avoid hardcoding shit like the font size.
 void Renderer2D::PerClassVAOinitialisationFunction() {
-
 	SpriteInformation::InitialiseMasks();
 
 	StrictBatch::InitialiseCommonVAO();
 	SoftBatch::InitialiseCommonVAO();
 	FreeBatch::InitialiseCommonVAO();
+	UIBatch::InitialiseCommonVAO();
+
 
 	Font::InitialiseCommonFontSizeVBO(20);
 	Text::InitialiseCommonVAO();
-
 }
 
 

@@ -39,13 +39,7 @@
     <ClCompile Include="components\uniform\uniform_data.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="components\batch_types\strict_batch.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="common\standard_quad.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="components\batch_types\soft_batch.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="components\input_controller.cpp">
@@ -66,16 +60,10 @@
     <ClCompile Include="components\ui\window.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="components\batch_types\free_batch.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="components\batch_types\base_batch.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="test\test_snippets.h">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="components\batch_types\batch_instance_primitives.cpp">
+    <ClCompile Include="components\batch_types\batches.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -135,6 +123,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="components\batch_types\batch_instance_primitives.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="components\batch_types\ui_batch.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

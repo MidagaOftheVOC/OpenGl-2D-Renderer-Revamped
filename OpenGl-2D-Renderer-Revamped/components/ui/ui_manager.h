@@ -38,9 +38,8 @@ class UIManager {
 	Renderer2D* m_MainRenderer = nullptr;
 
 private:
+	
 
-	FreeBatch m_PaneBatch;
-	void SendPaneBatchesToRenderer();
 
 private:
 

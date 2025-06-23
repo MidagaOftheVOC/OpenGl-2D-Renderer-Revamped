@@ -38,6 +38,13 @@ void StandardQuad::Init() {
 	glGenBuffers(1, &m_OriginalTextureUVBuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, m_OriginalTextureUVBuffer);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(g_stdTexCoordArray), g_stdTexCoordArray, GL_STATIC_DRAW);
+
+
+
+	glGenBuffers(1, &m_InterpolationBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, m_InterpolationBuffer);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(g_stdTexCoordArray), g_stdTexCoordArray, GL_STATIC_DRAW);
+
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
@@ -120,7 +127,14 @@ void StandardQuad::BindUnmodifiedStandardQuadBufferAt(
 ) const {
 	glBindBuffer(GL_ARRAY_BUFFER, m_OriginalStandardQuadBuffer);
 	glEnableVertexAttribArray(_index);
-
+	glVertexAttribPointer(
+		_index,
+		2,
+		GL_FLOAT,
+		GL_FALSE,
+		2 * sizeof(float),
+		0
+	);
 }
 
 

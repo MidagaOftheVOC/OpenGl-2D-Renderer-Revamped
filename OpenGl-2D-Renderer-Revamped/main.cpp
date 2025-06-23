@@ -107,6 +107,23 @@ int main() {
 		0, 0
 	);
 
+
+
+	
+	r.UploadSpriteSheetParameters(
+		"test\\res\\gui.cfg",
+		"uib_std",
+		"uib_std",
+		0, 0
+	);
+
+
+	r.UploadShaderParameters(
+		"test\\res\\uib_std.shader",
+		"uib_std"
+	);
+
+
 	
 	r.StartLoadingProcess();
 
@@ -174,43 +191,103 @@ int main() {
 		4
 	);
 
-
-
 	unsigned short sprites[] = { 0, 0, 0, 0 };
 	unsigned short sheets[] = { 0, 0, 1, 1 };
 
 	fq.UpdateSpriteIndexVBO(sprites, sheets, 4);
+
+	StrictBatch strict = GetInitialisedStrictBatch(r.GetSpriteSheetByName("fox"));
+
 
 	const SpriteSheet* FB_normal = r.GetSpriteSheetByName("fd_std1");
 	const SpriteSheet* FB_panda = r.GetSpriteSheetByName("fd_std2");
 
 	FreeBatch free = FreeBatch(4);
 	free.InitialiseBuffers();
-	
 	free.AddSheetToBatch(FB_normal);
 	free.AddSheetToBatch(FB_panda);
-
 	free.BufferUBOs();
+	
 
 	SpriteInformation SI[4] = {
 		{0, 0}, {0, 0}, {1, 0}, {1, 0}
 	};
-
-	float dims[] = { 50.f, 50.f, 100.f, 100.f, 200.f, 200.f, 150.f, 150.f};
-
+	float dims[] = { 50.f, 50.f, 100.f, 100.f, 200.f, 250.f, 150.f, 150.f};
 	free.UpdateBuffers(SI, rotations, PositionPais, dims, 4);
 
 
-	StrictBatch strict = GetInitialisedStrictBatch(r.GetSpriteSheetByName("fox"));
+
+
+	UIBatch ui(9);
+	ui.InitialiseBuffers();
+	const SpriteSheet* sheet = r.GetSpriteSheetByName("uib_std");
+	ui.AddSheetToBatch(sheet);
+	ui.BufferUBOs();
+
+	float uidims[] = {
+		20, 20, // ul_corner
+		20, 20, // ur_corner
+		20, 20, // ll_corner
+		20, 20, // lr_corner
+
+		20, 20, // leftborder
+		20, 20, // rightborder
+		20, 20, // upperborder
+		20, 20, // lowerborder
+
+		20, 20  // middle
+	};
+
+
+	SpriteInformation uiSI[] = {
+		{0, 0},
+		{0, 1},
+		{0, 2},
+		{0, 3},
+		{0, 4},
+		{0, 5},
+		{0, 6},
+		{0, 7},
+		{0, 8}
+	};
+
+
+	float uiPositions[] = {
+		0, 0,        
+		40, 0,       
+		0, 40,       
+		40, 40,      
+
+		0, 20,       
+		40, 20,      
+		20, 0,       
+		20, 40,      
+
+		20, 20       
+	};
+
+
+
+	float zLayer = 5.f;
+
+	ui.UpdateBuffers(
+		uiSI,
+		uiPositions,
+		uidims,
+		&zLayer,
+		9
+	);
+
 
 	while (!r.IsRunning()) {
 		input.CaptureKeystates();
 
 		//r.Draw(&fq, 100, 100, 3, nullptr);
-		r.Draw(&free, 800, 400, 2, nullptr);
+		//r.Draw(&free, 800, 400, 2, nullptr);
+		//r.Draw(&t, 300, 300, 2, nullptr);
+		//r.Draw(&text, 300, 500, 2, nullptr);
 
-		r.Draw(&t, 300, 300, 2, nullptr);
-		r.Draw(&text, 300, 500, 2, nullptr);
+		r.Draw(&ui, 0, nullptr);
 
 		if (input.IsHeld(GLFW_KEY_RIGHT)) {
 			t.SetWordWrapBound(t.GetRightWordWrapBound() + .5f);

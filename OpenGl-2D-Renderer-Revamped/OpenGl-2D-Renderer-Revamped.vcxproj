@@ -143,11 +143,7 @@
   <ItemGroup>
     <ClCompile Include="common\common.cpp" />
     <ClCompile Include="common\standard_quad.cpp" />
-    <ClCompile Include="components\batch_types\base_batch.cpp" />
-    <ClCompile Include="components\batch_types\batch_instance_primitives.cpp" />
-    <ClCompile Include="components\batch_types\free_batch.cpp" />
-    <ClCompile Include="components\batch_types\soft_batch.cpp" />
-    <ClCompile Include="components\batch_types\strict_batch.cpp" />
+    <ClCompile Include="components\batch_types\batches.cpp" />
     <ClCompile Include="components\camera.cpp" />
     <ClCompile Include="components\drawable.cpp" />
     <ClCompile Include="components\input_controller.cpp" />
@@ -171,6 +167,7 @@
     <ClInclude Include="components\batch_types\free_batch.h" />
     <ClInclude Include="components\batch_types\soft_batch.h" />
     <ClInclude Include="components\batch_types\strict_batch.h" />
+    <ClInclude Include="components\batch_types\ui_batch.h" />
     <ClInclude Include="components\camera.h" />
     <ClInclude Include="components\drawable.h" />
     <ClInclude Include="components\input_controller.h" />

@@ -27,7 +27,7 @@ Pane::Pane(
 {}
 
 
-void Pane::SplitPane(
+void Pane::Record(
 	std::vector<float>& OUT_batchPairsOfXYdimensions,
 	std::vector<float>& OUT_batchPairsOfXYpositions,
 	size_t _indexOfFirstElement
