@@ -78,7 +78,6 @@ private:
 
 	uint32_t m_IndexOfSupplementRenderingData = 0;
 
-	
 
 	float m_CornerSidePx = 20.f;
 
@@ -105,9 +104,7 @@ public:
 
 	void UpdateArrays();
 
-
 public:
-
 
 	void SetIndexOfSupplementRenderingData(uint32_t _index);
 

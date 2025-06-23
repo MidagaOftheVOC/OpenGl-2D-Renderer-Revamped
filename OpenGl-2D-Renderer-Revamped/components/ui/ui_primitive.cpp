@@ -57,26 +57,26 @@ void Pane::UpdateArrays() {
 		VertexIndex = _indexOfPair * 2;
 		DimensionIndex = _indexOfPair * 2;
 
-		m_DimensionPairArray[DimensionIndex] = u0;
-		m_DimensionPairArray[DimensionIndex + 1] = v0;
+		m_PositionPairArray[VertexIndex] = u0;
+		m_PositionPairArray[VertexIndex + 1] = v0;
 
-		m_PositionPairArray[VertexIndex] = u1;
-		m_PositionPairArray[VertexIndex + 1] = v1;
+		m_DimensionPairArray[DimensionIndex] = u1;
+		m_DimensionPairArray[DimensionIndex + 1] = v1;
 	};
 
 
-	WriteQuad(0, 0, 0, CornerLength, CornerLength);
-	WriteQuad(1, LongUpperLength, 0, CornerLength, CornerLength);
-	WriteQuad(2, 0, LongSideLength, CornerLength, CornerLength);
-	WriteQuad(3, LongUpperLength, LongSideLength, CornerLength, CornerLength);
+	WriteQuad(0, 0,					0,					CornerLength,		CornerLength);
+	WriteQuad(1, LongUpperLength,	0,					CornerLength,		CornerLength);
+	WriteQuad(2, 0,					LongSideLength,		CornerLength,		CornerLength);
+	WriteQuad(3, LongUpperLength,	LongSideLength,		CornerLength,		CornerLength);
 
-	WriteQuad(4, CornerLength, 0, LongUpperLength, CornerLength);
-	WriteQuad(5, CornerLength, LongSideLength, LongUpperLength, CornerLength);
+	WriteQuad(4, CornerLength,		0,					LongUpperLength,	CornerLength);
+	WriteQuad(5, CornerLength,		LongSideLength,		LongUpperLength,	CornerLength);
 
-	WriteQuad(6, 0, CornerLength, CornerLength, LongSideLength);
-	WriteQuad(7, LongUpperLength, CornerLength, CornerLength, LongSideLength);
+	WriteQuad(6, 0,					CornerLength,		CornerLength,		LongSideLength);
+	WriteQuad(7, LongUpperLength,	CornerLength,		CornerLength,		LongSideLength);
 
-	WriteQuad(8, CornerLength, CornerLength, UpperLength, SideLength);
+	WriteQuad(8, CornerLength,		CornerLength,		UpperLength,		SideLength);
 }
 
 

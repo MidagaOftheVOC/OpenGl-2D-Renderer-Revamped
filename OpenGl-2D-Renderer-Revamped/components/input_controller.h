@@ -19,6 +19,10 @@ class InputController {
 
 	std::bitset<MAXIMUM_BITSET_SIZE> m_RecentKeystateBitmask;
 	std::bitset<MAXIMUM_BITSET_SIZE> m_PreviousKeystateBitmask;
+
+
+	float m_xMouseCoord = 0.f;
+	float m_yMouseCoord = 0.f;
 	
 private:
 
@@ -107,6 +111,13 @@ public:
 	void SetTrackedKeystatesBitmask(
 		TrackingBit _trackingBitmask
 	);
+
+public:
+
+	void GetMousePosition(
+		float &OUT_xMouseCoord,
+		float &OUT_yMouseCoord
+	) const;
 
 #if DEBUG__CODE
 

@@ -31,6 +31,7 @@ glm::vec2 SpriteSheet::GetCalculatedSpriteOffsets(
 	return { xCoord * m_SpriteUniformUVs.u1, yCoord * m_SpriteUniformUVs.v1 };
 }
 
+
 SpriteSheet::SpriteSheet(
 	const std::string& _locationOfImageOrConfigFile,
 	const std::string& _sheetName,
@@ -81,7 +82,7 @@ void SpriteSheet::TransformIndicesToUVRegionArray(
 
 	OUT_uvRegionArray.resize(_indexArraySize);
 
-	if (OUT_vertexArray) OUT_vertexArray->resize(_indexArraySize * 8);
+	if (OUT_vertexArray) OUT_vertexArray->resize(static_cast<size_t>(_indexArraySize) * 8);
 
 	const UVRegion* UVRegionArray = GetUVRegionArray().data();
 	for (size_t i = 0; i < static_cast<int>(_indexArraySize); i++) {
@@ -136,10 +137,10 @@ int SpriteSheet::DetermineLoadingMethodFromGivenPath(
 	std::string FileExtention;
 
 	
-	int FirstDotFromEndToBeginning = _pathFromConstructor.rfind('.');
+	int FirstDotFromEndToBeginning = static_cast<int>(_pathFromConstructor.rfind('.'));
+	int FirstSlash = static_cast<int>(_pathFromConstructor.rfind('/'));
+	int FirstBackslash = static_cast<int>(_pathFromConstructor.rfind('\\'));
 
-	int FirstSlash = _pathFromConstructor.rfind('/');
-	int FirstBackslash = _pathFromConstructor.rfind('\\');
 	
 	if (FirstSlash > FirstDotFromEndToBeginning
 		|| FirstBackslash > FirstDotFromEndToBeginning) {
@@ -196,12 +197,12 @@ void SpriteSheet::ConfigurationPairLoadingMethod(
 		LastSlash - FirstSlash - 1
 	);
 
+	std::getline(File, Line);
+	InterpretTextureParametersString(Line.substr(Line.find('\"') + 1, Line.rfind('\"') - Line.find('\"') - 1));
+
 	LoadImageInTexture(TextureImagePath.c_str());
 
 
-	std::getline(File, Line);
-
-	InterpretTextureParametersString(Line.substr(Line.find('\"') + 1, Line.rfind('\"') - Line.find('\"') - 1));
 
 	std::string AssetName;
 	AssetName.resize(100, '\0');
@@ -276,7 +277,7 @@ void SpriteSheet::LoadImageInTexture(
 	glGenTextures(1, &m_TextureBufferID);
 	glBindTexture(GL_TEXTURE_2D, m_TextureBufferID);
 
-	void SetTextureParametersToGL();
+	SetTextureParametersToGL();
 
 	GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_SheetWidth, m_SheetHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, imageData));
 
@@ -288,8 +289,6 @@ void SpriteSheet::LoadImageInTexture(
 
 
 void SpriteSheet::SetTextureParametersToGL() {
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, _vertical);
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, _horizontal);
 
 	const TextureParamsDataStruct& Params = GetTexParams();
 
@@ -303,8 +302,6 @@ void SpriteSheet::SetTextureParametersToGL() {
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	}
 	else glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, Params.T_WrapMode);
-
-
 
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
@@ -398,19 +395,16 @@ const std::string& SpriteSheet::GetName() const { return m_SheetName; }
 SpriteSheet::SpriteSheet() {}
 
 
-
 UVRegion::UVRegion(
 	float _u0, float _v0,
 	float _u1, float _v1
-)
-	: 
+) : 
 	u0(_u0), v0(_v0),
 	u1(_u1), v1(_v1)
 {}
 
 
-bool UVRegion::operator==(const UVRegion& other) const {
-	
+bool UVRegion::operator==(const UVRegion& other) const {	
 	return fEqual(u0, other.u0)
 		&& fEqual(v0, other.v0)
 		&& fEqual(u1, other.u1)

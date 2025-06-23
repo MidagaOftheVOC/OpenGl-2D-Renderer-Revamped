@@ -40,6 +40,14 @@ void InputController::CaptureKeystates() {
 		if(m_TrackedKeystatesBitmask.test(i))
 			m_RecentKeystateBitmask[i] = glfwGetKey(m_MainWinHandle, i);
 	}
+
+	//	Mouse coords
+
+	double xMousePosition, yMousePosition;
+	glfwGetCursorPos(m_MainWinHandle, &xMousePosition, &yMousePosition);
+
+	m_xMouseCoord = static_cast<float>(xMousePosition);
+	m_yMouseCoord = static_cast<float>(yMousePosition);
 }
 
 
@@ -134,3 +142,11 @@ void InputController::AddIndicesToTrackedKeystatesBitmask(
 	}
 }
 
+
+void InputController::GetMousePosition(
+	float& OUT_xMouseCoord,
+	float& OUT_yMouseCoord
+) const {
+	OUT_xMouseCoord = m_xMouseCoord;
+	OUT_yMouseCoord = m_yMouseCoord;
+}

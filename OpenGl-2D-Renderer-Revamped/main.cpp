@@ -244,10 +244,12 @@ int main() {
 		{0, 1},
 		{0, 2},
 		{0, 3},
-		{0, 4},
-		{0, 5},
 		{0, 6},
 		{0, 7},
+
+		{0, 4},
+		{0, 5},
+		
 		{0, 8}
 	};
 
@@ -266,14 +268,24 @@ int main() {
 		20, 20       
 	};
 
+	std::vector<float> v1;
+	std::vector<float> v2;
+
+	v1.resize(18);
+	v2.resize(18);
+
+	Pane p({ 200, 150 });
+	p.UpdateArrays();
+	p.Record(v1, v2, 0);
+	
 
 
 	float zLayer = 5.f;
 
 	ui.UpdateBuffers(
 		uiSI,
-		uiPositions,
-		uidims,
+		v2.data(),
+		v1.data(),
 		&zLayer,
 		9
 	);
