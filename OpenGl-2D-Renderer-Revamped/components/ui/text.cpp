@@ -224,7 +224,6 @@ void Text::CalculateWordWraps() {
 
 		char32_t Character = m_TextContent[i];
 
-		//float BufferOffsetForThisCharacter = GetTotalOffsetForCharAt(i);
 		float CurrentCharWidth = GetFont()->GetOffsetForGlyph(Character);
 		
 		CurrentLineLength += CurrentCharWidth;
@@ -239,7 +238,6 @@ void Text::CalculateWordWraps() {
 		if (CurrentLineLength > GetRightWordWrapBound()) {
 			//	we exceed bound
 			//	these line lengths need to be used by the buffer offsets
-
 
 			if(!LineHasSpace)	// no space in line => word is too long
 			{

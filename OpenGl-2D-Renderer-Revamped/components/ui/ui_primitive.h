@@ -34,6 +34,8 @@ protected:
 
 public:
 
+	UI_Primitive() {}
+
 	UI_Primitive(
 		glm::vec2 _dimensions,
 		glm::vec2 _relativeToWindow
@@ -82,6 +84,8 @@ private:
 	float m_CornerSidePx = 20.f;
 
 public:
+
+	Pane() : UI_Primitive() {}
 
 	Pane(
 		glm::vec2 _dimensions

@@ -14,13 +14,6 @@
 class Renderer2D;
 
 
-struct PaneSupplementDataStruct {
-	float m_Rotations[9] = { 0.f };
-	SpriteInformation m_SpriteInformation[9];
-};
-
-
-
 class UIManager {
 
 	//	From the renderer-assigned usable Z space
@@ -39,11 +32,11 @@ class UIManager {
 
 private:
 	
-
-
-private:
-
 	std::vector<Window> m_WindowArray;
+
+private:	//	UI primitives-related arrays
+
+
 
 public:
 

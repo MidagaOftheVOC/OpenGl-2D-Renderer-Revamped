@@ -17,10 +17,10 @@
 
 class Window {
 
-	ID m_WindowsID;
+	ID m_ID = 0;
 
 
-	const ID m_Paren = 0;
+	ID m_Parent = 0;
 
 
 	//	Relative to top left corner of screen
@@ -38,6 +38,8 @@ private:	// UI PRIMITIVE DATA
 
 public:
 
+	Window() {}
+
 	Window(
 		const ID _id
 	);
@@ -46,7 +48,7 @@ public:
 	
 public:
 
-
+	ID GetID() const { return m_ID; }
 
 	const Pane& GetPane() const { return m_WindowPane; }
 

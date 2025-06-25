@@ -77,9 +77,9 @@ __release_variant
 
 #else
 
-#define DEBUG_ASSRT(x_, ASSERTS_ARE_DISABLED) 
-#define DEBUG_ASSRT(x_, ASSERTS_ARE_DISABLED)
-#define DEBUG_LOG(msg_)
+#define DEBUG_ASSERT(x_, msg_, ...)
+#define DEBUG_WARN(x_, msg_, ...)
+#define DEBUG_LOG(msg_, ...)
 
 #endif
 

@@ -13,116 +13,25 @@ int main() {
 
 	r.Init();
 
-	r.UploadShaderParameters(
-		"test\\res\\text.shader",
-		r.c_SpecialTextShaderName
-	);
 
-	r.UploadSpriteSheetParameters(
-		"test\\res\\cyrillic.png",
-		"test_font",
-		r.c_SpecialTextShaderName,
-		9, 9
-	);
+	r.UploadShaderParameters("test\\res\\text.shader",				r.c_SpecialTextShaderName);
+	r.UploadShaderParameters("test\\res\\batch_test.shader",		"strict_batch");
+	r.UploadShaderParameters("test\\res\\sb_std.shader",			"soft_batch");
+	r.UploadShaderParameters("test\\res\\free_batch.shader",		"fb_shader");
+	r.UploadShaderParameters("test\\res\\sb_floating_quads.shader",	"sb_floating_quads");
+	r.UploadShaderParameters("test\\res\\fb_std.shader",			"fd_std");
+	r.UploadShaderParameters("test\\res\\uib_std.shader",			"uib_std");
 
 
-	r.UploadSpriteSheetParameters(
-		"test\\res\\test.cfg",
-		"fox",
-		"strict_batch",
-		0, 0
-	);
-
-	r.UploadShaderParameters(
-		"test\\res\\batch_test.shader",
-		"strict_batch"
-	);
-
-
-	r.UploadShaderParameters(
-		"test\\res\\sb_std.shader",
-		"soft_batch"
-	);
-
-	r.UploadSpriteSheetParameters(
-		"test\\res\\test.cfg",
-		"soft_sheet",
-		"soft_batch",
-		0, 0
-	);
-
-
-	r.UploadShaderParameters(
-		"test\\res\\free_batch.shader",
-		"fb_shader"
-	);
-
-	r.UploadSpriteSheetParameters(
-		"test\\res\\test.cfg",
-		"fb_sheet",
-		"fb_shader",
-		0, 0
-	);
-
-
-
-	r.UploadShaderParameters(
-		"test\\res\\sb_floating_quads.shader",
-		"sb_floating_quads"
-	);
-
-	r.UploadSpriteSheetParameters(
-		"test\\res\\test.cfg",
-		"sb_fq",
-		"sb_floating_quads",
-		0, 0
-	);
-
-	r.UploadSpriteSheetParameters(
-		"test\\res\\panda.cfg",
-		"sb_panda",
-		"sb_floating_quads",
-		0, 0
-	);
-
-
-	
-
-	r.UploadShaderParameters(
-		"test\\res\\fb_std.shader",
-		"fd_std"
-	);
-
-	r.UploadSpriteSheetParameters(
-		"test\\res\\test.cfg",
-		"fd_std1",
-		"fd_std",
-		0, 0
-	);
-
-	r.UploadSpriteSheetParameters(
-		"test\\res\\panda.cfg",
-		"fd_std2",
-		"fd_std",
-		0, 0
-	);
-
-
-
-	
-	r.UploadSpriteSheetParameters(
-		"test\\res\\gui.cfg",
-		"uib_std",
-		"uib_std",
-		0, 0
-	);
-
-
-	r.UploadShaderParameters(
-		"test\\res\\uib_std.shader",
-		"uib_std"
-	);
-
+	r.UploadSpriteSheetParameters("test\\res\\cyrillic.png",		"test_font",	r.c_SpecialTextShaderName,	9, 9);
+	r.UploadSpriteSheetParameters("test\\res\\test.cfg",			"fox",			"strict_batch",				0, 0);
+	r.UploadSpriteSheetParameters("test\\res\\test.cfg",			"soft_sheet",	"soft_batch",				0, 0);
+	r.UploadSpriteSheetParameters("test\\res\\test.cfg",			"fb_sheet",		"fb_shader",				0, 0);
+	r.UploadSpriteSheetParameters("test\\res\\test.cfg",			"sb_fq",		"sb_floating_quads",		0, 0);
+	r.UploadSpriteSheetParameters("test\\res\\panda.cfg",			"sb_panda",		"sb_floating_quads",		0, 0);
+	r.UploadSpriteSheetParameters("test\\res\\test.cfg",			"fd_std1",		"fd_std",					0, 0);
+	r.UploadSpriteSheetParameters("test\\res\\panda.cfg",			"fd_std2",		"fd_std",					0, 0);
+	r.UploadSpriteSheetParameters("test\\res\\gui.cfg",				"uib_std",		"uib_std",					0, 0);
 
 	
 	r.StartLoadingProcess();
@@ -133,13 +42,7 @@ int main() {
 		"cyrillic"
 	);
 
-	unsigned short off[] = { 
-		20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20,
-		20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20,
-		20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20,
-		20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20,
-		20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20,
-		20, 20, 20, 20, 20, 20 };
+	unsigned short off[] = { 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, };
 	f.Init(
 		U"абвгдежзийклмнопрстуфхцчшщъьюяѝ .,+-!?;:&><#/",
 		off,
@@ -198,7 +101,6 @@ int main() {
 
 	StrictBatch strict = GetInitialisedStrictBatch(r.GetSpriteSheetByName("fox"));
 
-
 	const SpriteSheet* FB_normal = r.GetSpriteSheetByName("fd_std1");
 	const SpriteSheet* FB_panda = r.GetSpriteSheetByName("fd_std2");
 
@@ -208,36 +110,15 @@ int main() {
 	free.AddSheetToBatch(FB_panda);
 	free.BufferUBOs();
 	
-
-	SpriteInformation SI[4] = {
-		{0, 0}, {0, 0}, {1, 0}, {1, 0}
-	};
+	SpriteInformation SI[4] = {{0, 0}, {0, 0}, {1, 0}, {1, 0}};
 	float dims[] = { 50.f, 50.f, 100.f, 100.f, 200.f, 250.f, 150.f, 150.f};
 	free.UpdateBuffers(SI, rotations, PositionPais, dims, 4);
-
-
-
 
 	UIBatch ui(9);
 	ui.InitialiseBuffers();
 	const SpriteSheet* sheet = r.GetSpriteSheetByName("uib_std");
 	ui.AddSheetToBatch(sheet);
 	ui.BufferUBOs();
-
-	float uidims[] = {
-		20, 20, // ul_corner
-		20, 20, // ur_corner
-		20, 20, // ll_corner
-		20, 20, // lr_corner
-
-		20, 20, // leftborder
-		20, 20, // rightborder
-		20, 20, // upperborder
-		20, 20, // lowerborder
-
-		20, 20  // middle
-	};
-
 
 	SpriteInformation uiSI[] = {
 		{0, 0},
@@ -253,32 +134,14 @@ int main() {
 		{0, 8}
 	};
 
-
-	float uiPositions[] = {
-		0, 0,        
-		40, 0,       
-		0, 40,       
-		40, 40,      
-
-		0, 20,       
-		40, 20,      
-		20, 0,       
-		20, 40,      
-
-		20, 20       
-	};
-
-	std::vector<float> v1;
-	std::vector<float> v2;
+	std::vector<float> v1, v2;
 
 	v1.resize(18);
 	v2.resize(18);
 
-	Pane p({ 200, 150 });
+	Pane p({ 300, 200 });
 	p.UpdateArrays();
 	p.Record(v1, v2, 0);
-	
-
 
 	float zLayer = 5.f;
 
@@ -289,6 +152,9 @@ int main() {
 		&zLayer,
 		9
 	);
+
+
+
 
 
 	while (!r.IsRunning()) {

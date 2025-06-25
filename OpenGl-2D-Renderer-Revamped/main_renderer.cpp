@@ -90,8 +90,8 @@ void Renderer2D::Draw(
 	glm::vec2 CameraPosition = m_Camera.GetPosition();
 	m_UIBatchArray.emplace_back(
 		_uiBatch,
-		50.f,
-		50.f,
+		CameraPosition.x,
+		CameraPosition.y,
 		0.f,
 		_uniformArray
 	);

@@ -7,7 +7,7 @@
 
 
 
-/*		PRIMITIVES		*/
+/*		DATA TYPES		*/
 
 
 uint16_t SpriteInformation::s_SheetSpriteBitmask = 0;
@@ -76,9 +76,16 @@ void BaseBatch::ActivateTextures(
 		glBindTexture(GL_TEXTURE_2D, m_SpriteSheets[i]->GetTextureBufferID());
 		TexUnits.push_back(static_cast<int>(i));
 	}
+
+#ifdef DEBUG__CODE
 	CheckGLErrors();
+#endif
+
 	Shader->SetIntArray(_sampler2DArrayUniformName, TexUnits.data(), static_cast<const int>(TexUnits.size()));
+
+#ifdef DEBUG__CODE
 	CheckGLErrors();
+#endif
 }
 
 

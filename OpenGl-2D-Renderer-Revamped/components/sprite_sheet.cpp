@@ -221,8 +221,12 @@ void SpriteSheet::ConfigurationPairLoadingMethod(
 		}
 
 		int xOffset, yOffset, AssetWidth, AssetHeight;
-		DEBUG_ASSERT(sscanf(Line.c_str(), "x%dy%dw%dh%d", &xOffset, &yOffset, &AssetWidth, &AssetHeight) == 4,
-			"[%s] > Configuration file malformed.", _pathToConfigFile);
+		int Result = sscanf(Line.c_str(), "x%dy%dw%dh%d", &xOffset, &yOffset, &AssetWidth, &AssetHeight);
+		DEBUG_ASSERT( Result == 4, "[%s] > Configuration file malformed.", _pathToConfigFile);
+
+		if (Result != 4) {
+			continue;
+		}
 
 		m_UVregionsFromConfigFile.emplace_back(
 			xOffset / static_cast<float>(m_SheetWidth),
