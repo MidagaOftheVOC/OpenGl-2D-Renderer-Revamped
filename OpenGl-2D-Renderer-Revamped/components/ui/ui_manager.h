@@ -5,7 +5,10 @@
 #include "../../common/standard_quad.h"
 
 
-#include "../batch_types/free_batch.h"
+#include "../batch_types/ui_batch.h"
+
+
+#include "primitives/factories/pane_factory.h"
 
 
 #include "window.h"
@@ -26,17 +29,33 @@ class UIManager {
 	//	taken by LayerIndex * (this float value)
 	float m_CalculatedWindowZlayerStep = 0.f;
 	float m_CalculatedPrimitiveZlayerStep = 0.f;
+	/*
+	
+	Suppose each window has its own distinct layers, 1 for the pane and 3 for primitives
 
+	So we get a step of  (Upper - Lower) / (WindowCount * 4)
+	
+	*/
 
 	Renderer2D* m_MainRenderer = nullptr;
+
+
+	ID m_UniqueWindowIDCounter = 0;
 
 private:
 	
 	std::vector<Window> m_WindowArray;
 
-private:	//	UI primitives-related arrays
+private:	//	Factories for UI primitives
 
+	PaneFactory m_ThePaneFactory;
 
+private:
+
+	UIBatch m_PaneBatch = UIBatch(9);
+	
+
+	void UpdateAllBatches();
 
 public:
 
@@ -46,8 +65,14 @@ public:
 
 
 	//	Iterate over the Window objects.
-	void RenderAllActiveWindows(
+	void RenderAllActiveWindows();
 
+
+	//	If nullptr is passed as skin name, the window won't have a background
+	Window CreateWindow(
+		glm::vec2 _windowDimensions,
+		float _cornerLengthPx,
+		const char* _uiSkinName
 	);
 
 
@@ -60,5 +85,19 @@ public:
 	void RemoveWindow(
 		ID _windowID
 	);
+	 
+private:
+	
+	ID GetNextUniqueWindowID();
+
+
+	size_t CountAllWindowsWithBackgrounds() const;
+
+public:
+
+	void SetDistributionBounds(float _low, float _high);
+
+	UIBatch& GetPaneBatch() { return m_PaneBatch; }
+	PaneFactory& GetPaneFactory() { return m_ThePaneFactory; }
 
 };

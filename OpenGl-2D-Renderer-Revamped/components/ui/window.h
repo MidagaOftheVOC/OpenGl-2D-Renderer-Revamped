@@ -10,9 +10,7 @@
 #include <unordered_map>
 
 
-#include "ui_primitive.h"
-
-
+#include "primitives/types/pane.h"
 
 
 class Window {
@@ -22,7 +20,7 @@ class Window {
 
 	ID m_Parent = 0;
 
-
+		
 	//	Relative to top left corner of screen
 	glm::vec2 m_WindowPosition = glm::vec2(0.f, 0.f);
 
@@ -31,26 +29,40 @@ class Window {
 
 private:	// UI PRIMITIVE DATA
 
-	bool m_HasPane = true;
+	bool m_HasPane = false;
 	Pane m_WindowPane;
-
-
 
 public:
 
 	Window() {}
 
+
 	Window(
-		const ID _id
+		ID _windowId
 	);
 
 
+	//	If set to nullptr, pane will be removed
+	void SetPane(
+		Pane&& _pane
+	);
 	
 public:
 
-	ID GetID() const { return m_ID; }
+	//	Also changes the pane's dimensions, if there is one
+	void SetDimensions(
+		glm::vec2 _dimensions
+	);
 
+
+	void SetPosition(
+		glm::vec2 _position
+	);
+
+	ID GetID() const { return m_ID; }
 	const Pane& GetPane() const { return m_WindowPane; }
+	const bool HasPane() const { return m_HasPane; }
+	const glm::vec2& GetWinPosition() const { return m_WindowPosition; }
 
 };
 

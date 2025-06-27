@@ -4,6 +4,8 @@
 #include "../../common/standard_quad.h"
 
 
+#include "batch_instance_primitives.h"
+
 
 //	Common batch methods and data
 
@@ -80,7 +82,7 @@ public:
 	//	Bits 0-8 : Sprite index
 	//	Bits 9-15: Sheet index
 	//
-	//	TODO: Make this more flexible, maximum sampler2D in one drawcall is system dependant.
+	//	TODO: Make this more flexible, maximum sampler2D count in one drawcall is system dependant.
 	//	Currently, the sampler2D array in the shaders has a maximum size of 32.
 	//
 	//	Returns:	[false], if either array pointer is null OR _arrayElementCount > m_BufferedInstanceCount
@@ -90,6 +92,13 @@ public:
 		const unsigned short* _sheetIndices,
 		const size_t _arrayElementCount,
 		unsigned short* OUT_finishedArray
+	) const;
+
+	
+	//	If the sheet or sprite is missing, it'll return an SI with values (0, 0)
+	SpriteInformation DeriveSprite(
+		const char* _sheetName,
+		const char* _spriteNameWithinSheet
 	) const;
 
 

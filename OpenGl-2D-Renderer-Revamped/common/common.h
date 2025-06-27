@@ -88,11 +88,18 @@ typedef unsigned int ID;
 
 
 
+inline unsigned short gc_ui16ErrorCode = 0xffffui16;
+
 
 
 void CheckGLErrors(const char* context = "OpenGL");
 
+
 bool fEqual(float _val1, float _val2);
+
+
+bool FastStringCompare(const char* _str1, const char* _str2);
+
 
 
 struct GLdiagnostics {

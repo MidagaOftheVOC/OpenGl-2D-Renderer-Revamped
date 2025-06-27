@@ -68,53 +68,22 @@ int main() {
 	InputController& input = r.GetInputController();
 
 
-	const unsigned short indices[] = { 0, 0, 0, 0 };
-	float rotations[] = {0.f, 1.f, 2.f, 3.f};
-	float PositionPais[] = { 20.f, 20.f, 120.f, 120.f, 220.f, 220.f, 320.f, 320.f };
-
-	const SpriteSheet* SB_normal = r.GetSpriteSheetByName("sb_fq");
-	const SpriteSheet* SB_panda = r.GetSpriteSheetByName("sb_panda");
-
-
-	SoftBatch fq = SoftBatch(4, SoftBatchType::FloatingQuad);
-	fq.InitialiseBuffers();
-	fq.AddSheetToBatch(
-		SB_normal
-	);
-
-	fq.AddSheetToBatch(
-		SB_panda
-	);
-	fq.BufferUBOs();
-
-	fq.UpdateBuffers(
-		nullptr,
-		rotations,
-		PositionPais,
-		4
-	);
-
-	unsigned short sprites[] = { 0, 0, 0, 0 };
-	unsigned short sheets[] = { 0, 0, 1, 1 };
-
-	fq.UpdateSpriteIndexVBO(sprites, sheets, 4);
-
-	StrictBatch strict = GetInitialisedStrictBatch(r.GetSpriteSheetByName("fox"));
+	//StrictBatch strict = GetInitialisedStrictBatch(r.GetSpriteSheetByName("fox"));
 
 	const SpriteSheet* FB_normal = r.GetSpriteSheetByName("fd_std1");
 	const SpriteSheet* FB_panda = r.GetSpriteSheetByName("fd_std2");
 
-	FreeBatch free = FreeBatch(4);
-	free.InitialiseBuffers();
-	free.AddSheetToBatch(FB_normal);
-	free.AddSheetToBatch(FB_panda);
-	free.BufferUBOs();
-	
-	SpriteInformation SI[4] = {{0, 0}, {0, 0}, {1, 0}, {1, 0}};
-	float dims[] = { 50.f, 50.f, 100.f, 100.f, 200.f, 250.f, 150.f, 150.f};
-	free.UpdateBuffers(SI, rotations, PositionPais, dims, 4);
+	//FreeBatch free = FreeBatch(4);
+	//free.InitialiseBuffers();
+	//free.AddSheetToBatch(FB_normal);
+	//free.AddSheetToBatch(FB_panda);
+	//free.BufferUBOs();
+	//
+	//SpriteInformation SI[4] = {{0, 0}, {0, 0}, {1, 0}, {1, 0}};
+	//float dims[] = { 50.f, 50.f, 100.f, 100.f, 200.f, 250.f, 150.f, 150.f};
+	//free.UpdateBuffers(SI, rotations, PositionPais, dims, 4);
 
-	UIBatch ui(9);
+	/*UIBatch ui(9);
 	ui.InitialiseBuffers();
 	const SpriteSheet* sheet = r.GetSpriteSheetByName("uib_std");
 	ui.AddSheetToBatch(sheet);
@@ -151,11 +120,41 @@ int main() {
 		v1.data(),
 		&zLayer,
 		9
+	);*/
+
+	SpriteInformation uiSI[] = {
+	{0, 0},
+	{0, 1},
+	{0, 2},
+	{0, 3},
+	{0, 6},
+	{0, 7},
+
+	{0, 4},
+	{0, 5},
+
+	{0, 8}
+	};
+	
+	UIManager& ui = r.GetUIManager();
+	ui.GetPaneBatch().InitialiseBuffers();
+	ui.GetPaneBatch().AddSheetToBatch(r.GetSpriteSheetByName("uib_std"));
+	ui.GetPaneBatch().BufferUBOs();
+	ui.SetDistributionBounds(1, 2);
+
+
+	PaneSkin skin;
+	memcpy(skin.m_SIArray, uiSI, 9 * sizeof(SpriteInformation));
+	ui.GetPaneFactory().AddSkin(skin, "default");
+	
+	Window win = ui.CreateWindow(
+		{ 600, 300 },
+		20,
+		"default"
 	);
 
-
-
-
+	win.SetPosition({ 250, 250 });
+	ui.AddWindow(win);
 
 	while (!r.IsRunning()) {
 		input.CaptureKeystates();
@@ -165,10 +164,13 @@ int main() {
 		//r.Draw(&t, 300, 300, 2, nullptr);
 		//r.Draw(&text, 300, 500, 2, nullptr);
 
-		r.Draw(&ui, 0, nullptr);
+		//r.Draw(&ui, 0, nullptr);
 
 		if (input.IsHeld(GLFW_KEY_RIGHT)) {
-			t.SetWordWrapBound(t.GetRightWordWrapBound() + .5f);
+			//t.SetWordWrapBound(t.GetRightWordWrapBound() + .5f);
+			
+			
+			
 			std::cout << "right pressed\n";
 		}
 
@@ -176,7 +178,7 @@ int main() {
 			return 0;
 		}
 
-
+		ui.RenderAllActiveWindows();
 		r.ExecuteDraws();
 	}
 

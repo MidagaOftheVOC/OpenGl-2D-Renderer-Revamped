@@ -380,6 +380,22 @@ void SpriteSheet::InterpretTextureParametersString(
 }
 
 
+unsigned short SpriteSheet::GetSpriteIndexByName(
+	const char* _spriteName
+) const {
+
+	for (size_t i = 0; i < m_UVregionNamesFromConfigFile.size(); i++) {
+
+		if (FastStringCompare(m_UVregionNamesFromConfigFile[i].c_str(), _spriteName)) {
+			return i;
+		}
+	}
+
+	return gc_ui16ErrorCode;
+}
+
+
+
 const UVRegion* SpriteSheet::GetUVRegionByName(
 	const char* _assetName
 ) const {

@@ -355,6 +355,7 @@ public:		// getters and setters,
 	GLFWwindow*			GetWinHandle() const { return m_MainWindowHandle; }
 	Camera&				GetCamera() { return m_Camera; }
 	InputController&	GetInputController() { return m_InputController; }
+	UIManager&			GetUIManager() { return m_UIManager; }
 
 	Shader&				GetTextShader() { return m_TextRenderingShader; }
 

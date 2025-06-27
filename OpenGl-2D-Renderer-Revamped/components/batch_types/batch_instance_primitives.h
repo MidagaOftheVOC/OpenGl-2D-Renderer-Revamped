@@ -8,6 +8,9 @@
 //	Instance-related primitive structs for sets of data
 
 struct SpriteInformation {
+
+	SpriteInformation() {}
+
 	
 	SpriteInformation(
 		unsigned int _sheetIndex,

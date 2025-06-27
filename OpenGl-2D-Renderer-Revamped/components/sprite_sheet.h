@@ -108,6 +108,11 @@ public:
 	SpriteSheet();
 
 
+	unsigned short GetSpriteIndexByName(
+		const char* _spriteName
+	) const;
+
+
 	//	!!!		ABANDONED	  !!!
 	void TransformIndicesToUVRegionArray(
 		const int* _indexArray,

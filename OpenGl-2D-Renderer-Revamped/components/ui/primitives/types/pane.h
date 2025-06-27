@@ -1,52 +1,7 @@
 #pragma once
 
 
-
-#include "../../common/common.h"
-#include "../../common/standard_quad.h"
-
-
-#include "../batch_types/batch_instance_primitives.h"
-
-
-
-/*
-
-Abstract class for all graphical primitives.
-
-*/
-
-
-struct UI_Primitive {
-
-private:
-
-	static void* FUTURE_POINTER_TO_STRING_MANAGER_AND_ALLOCATOR;
-
-protected:
-
-	glm::vec2 m_Dimensions;
-
-
-	//	Drawcalls will be made to the upper left corner of the window object
-	//	therefore primitives require offset from that point.
-	glm::vec2 m_PositionRelativeToWindow;
-
-public:
-
-	UI_Primitive() {}
-
-	UI_Primitive(
-		glm::vec2 _dimensions,
-		glm::vec2 _relativeToWindow
-	);
-
-
-	
-
-};
-
-
+#include "../ui_primitive.h"
 
 
 /*
@@ -74,11 +29,11 @@ In total:
 struct Pane : public UI_Primitive {
 private:
 
-	float m_PositionPairArray[18] = { 0 };
-	float m_DimensionPairArray[18] = { 0 };
+	float m_PositionPairArray[18];
+	float m_DimensionPairArray[18];
 
 
-	uint32_t m_IndexOfSupplementRenderingData = 0;
+	const SpriteInformation* m_Skin = nullptr;
 
 
 	float m_CornerSidePx = 20.f;
@@ -88,7 +43,8 @@ public:
 	Pane() : UI_Primitive() {}
 
 	Pane(
-		glm::vec2 _dimensions
+		glm::vec2 _dimensions,
+		float _cornerLengthPx
 	);
 
 
@@ -96,23 +52,28 @@ public:
 	//	SpriteInformation data will be added by the UI manager immediately after.
 	//	This is made to avoid unnecessary complication while allowing the UI managre to set
 	//	custom indices for the corners, sides, and so on.
-	//
-	//	Output for this function:
-	//
-	void Record (
+	void AppendPaneBatchingData(
 		std::vector<float>& OUT_batchPairsOfXYdimensions,
 		std::vector<float>& OUT_batchPairsOfXYpositions,
-		size_t _indexOfFirstElement
+		std::vector<SpriteInformation>& OUT_batchSpriteInformation,
+		float _xOffset,
+		float _yOffset
 	) const;
 
+private:
 
 	void UpdateArrays();
 
+
+	virtual void OnDimensionChange();
+
 public:
 
-	void SetIndexOfSupplementRenderingData(uint32_t _index);
+	void SetCornerLength(float _lengthPx);
+	void SetSpriteInformation(const SpriteInformation* _siArray);
 
 };
+
 
 
 

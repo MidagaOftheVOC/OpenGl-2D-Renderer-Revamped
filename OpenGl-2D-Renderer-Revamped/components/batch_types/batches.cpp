@@ -165,6 +165,8 @@ bool BaseBatch::PackIndicesTogether(
 void BaseBatch::BufferUBOs() {
 	if (m_SpriteSheets.empty()) return;
 
+	CheckGLErrors();
+
 	if (!GLdiagnostics::IsBuffer(m_SheetIndexOffsetsUBO)) {
 		DEBUG_ASSERT(0, "Buffering UBOs that aren't initialised.");
 		return;
@@ -219,6 +221,26 @@ void BaseBatch::BindUBOs() const {
 	glBindBufferBase(GL_UNIFORM_BUFFER, 0, m_SheetUVRegionsUBO);
 	glBindBufferBase(GL_UNIFORM_BUFFER, 1, m_SheetIndexOffsetsUBO);
 }
+
+
+SpriteInformation BaseBatch::DeriveSprite(
+	const char* _sheetName,
+	const char* _spriteNameWithinSheet
+) const {
+
+	for (size_t i = 0; i < m_SpriteSheets.size(); i++) {
+		if (FastStringCompare(m_SpriteSheets[i]->GetName().c_str(), _sheetName)) {
+			unsigned short Result = m_SpriteSheets[i]->GetSpriteIndexByName(_spriteNameWithinSheet);
+			if (Result != gc_ui16ErrorCode) {
+				return SpriteInformation(i, Result);
+			}
+			return SpriteInformation(0, 0);
+		}
+	}
+
+	return SpriteInformation(0, 0);
+}
+
 
 
 /*		STRICT BATCH		*/
