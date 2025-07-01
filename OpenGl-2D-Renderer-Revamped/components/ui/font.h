@@ -7,7 +7,7 @@
 #include "../../common/standard_quad.h"
 
 
-constexpr unsigned int MAXIMUM_GLYPHS_PER_FONT = 256;
+inline constexpr unsigned int MAXIMUM_GLYPHS_PER_FONT = 256;
 
 class Font {
 

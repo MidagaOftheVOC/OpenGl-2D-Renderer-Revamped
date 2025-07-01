@@ -153,8 +153,20 @@ int main() {
 		"default"
 	);
 
-	win.SetPosition({ 250, 250 });
-	ui.AddWindow(win);
+	Window win2 = ui.CreateWindow(
+		{ 400, 200 },
+		20,
+		"default"
+	);
+
+	ID winID1 = ui.AddWindow(win);
+	ID winID2 = ui.AddWindow(win2);
+
+
+	ui.OpenWindow(winID1, 200, 200);
+	ui.OpenWindow(winID2, 500, 300);
+	
+
 
 	while (!r.IsRunning()) {
 		input.CaptureKeystates();

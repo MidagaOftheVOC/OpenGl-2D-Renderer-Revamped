@@ -89,6 +89,7 @@ typedef unsigned int ID;
 
 
 inline unsigned short gc_ui16ErrorCode = 0xffffui16;
+inline unsigned int gc_ui32ErrorCode = 0xffffffffui32;
 
 
 

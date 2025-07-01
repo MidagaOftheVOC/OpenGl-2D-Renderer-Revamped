@@ -45,6 +45,9 @@ class UIManager {
 private:
 	
 	std::vector<Window> m_WindowArray;
+	
+
+	std::vector<ID> m_WindowIDArrayForRendering;
 
 private:	//	Factories for UI primitives
 
@@ -77,7 +80,7 @@ public:
 
 
 	//	Adds window to the GUI
-	void AddWindow(
+	ID AddWindow(
 		Window _window
 	);
 	
@@ -85,13 +88,53 @@ public:
 	void RemoveWindow(
 		ID _windowID
 	);
+
+
+	//	The placed window will automatically be put at the forefront.
+	void OpenWindow(
+		ID _windowID,
+		float _xCoord,
+		float _yCoord
+	);
+
+
+	void CloseWindow(
+		ID _windowID
+	);
+
+
+	//	Layer 0 is the foremost layer.
+	void MoveWindowToLayer(
+		ID _windowID,
+		size_t _layer
+	);
 	 
 private:
 	
+	size_t GetIndexOfWindowByIDInRenderArray(
+		const ID _windowID
+	) const;
+
+
 	ID GetNextUniqueWindowID();
 
 
 	size_t CountAllWindowsWithBackgrounds() const;
+
+
+	Window* GetWindowByID(
+		const ID _windowID
+	);
+
+
+	Window* GetWindowByIDFromRenderArray(
+		const ID _windowID
+	);
+
+
+	bool IsWindowIDInRenderArray(
+		const ID _windowID
+	) const;
 
 public:
 
