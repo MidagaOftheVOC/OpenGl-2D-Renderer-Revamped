@@ -232,7 +232,7 @@ SpriteInformation BaseBatch::DeriveSprite(
 		if (FastStringCompare(m_SpriteSheets[i]->GetName().c_str(), _sheetName)) {
 			unsigned short Result = m_SpriteSheets[i]->GetSpriteIndexByName(_spriteNameWithinSheet);
 			if (Result != gc_ui16ErrorCode) {
-				return SpriteInformation(i, Result);
+				return SpriteInformation(static_cast<unsigned int>(i), Result);
 			}
 			return SpriteInformation(0, 0);
 		}

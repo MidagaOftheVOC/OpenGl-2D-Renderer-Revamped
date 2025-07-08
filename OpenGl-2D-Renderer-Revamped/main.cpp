@@ -82,7 +82,6 @@ int main() {
 	//SpriteInformation SI[4] = {{0, 0}, {0, 0}, {1, 0}, {1, 0}};
 	//float dims[] = { 50.f, 50.f, 100.f, 100.f, 200.f, 250.f, 150.f, 150.f};
 	//free.UpdateBuffers(SI, rotations, PositionPais, dims, 4);
-
 	/*UIBatch ui(9);
 	ui.InitialiseBuffers();
 	const SpriteSheet* sheet = r.GetSpriteSheetByName("uib_std");
@@ -123,17 +122,17 @@ int main() {
 	);*/
 
 	SpriteInformation uiSI[] = {
-	{0, 0},
-	{0, 1},
-	{0, 2},
-	{0, 3},
-	{0, 6},
-	{0, 7},
+		{0, 0},
+		{0, 1},
+		{0, 2},
+		{0, 3},
+		{0, 6},
+		{0, 7},
 
-	{0, 4},
-	{0, 5},
+		{0, 4},
+		{0, 5},
 
-	{0, 8}
+		{0, 8}
 	};
 	
 	UIManager& ui = r.GetUIManager();
@@ -149,40 +148,36 @@ int main() {
 	
 	Window win = ui.CreateWindow(
 		{ 600, 300 },
-		20,
-		"default"
+		20
 	);
 
 	Window win2 = ui.CreateWindow(
 		{ 400, 200 },
-		20,
-		"default"
+		20
 	);
 
 	ID winID1 = ui.AddWindow(win);
 	ID winID2 = ui.AddWindow(win2);
 
 
-	ui.OpenWindow(winID1, 200, 200);
 	ui.OpenWindow(winID2, 500, 300);
+	ui.OpenWindow(winID1, 200, 200);
 	
 
 
 	while (!r.IsRunning()) {
 		input.CaptureKeystates();
 
-		//r.Draw(&fq, 100, 100, 3, nullptr);
-		//r.Draw(&free, 800, 400, 2, nullptr);
-		//r.Draw(&t, 300, 300, 2, nullptr);
-		//r.Draw(&text, 300, 500, 2, nullptr);
-
-		//r.Draw(&ui, 0, nullptr);
+		//r.Draw(&fq,	100, 100, 3, nullptr);
+		//r.Draw(&free,	800, 400, 2, nullptr);
+		//r.Draw(&t,	300, 300, 2, nullptr);
+		//r.Draw(&text,	300, 500, 2, nullptr);
 
 		if (input.IsHeld(GLFW_KEY_RIGHT)) {
 			//t.SetWordWrapBound(t.GetRightWordWrapBound() + .5f);
-			
-			
-			
+
+
+
 			std::cout << "right pressed\n";
 		}
 

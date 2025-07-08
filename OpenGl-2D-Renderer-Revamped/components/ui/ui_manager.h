@@ -75,7 +75,7 @@ public:
 	Window CreateWindow(
 		glm::vec2 _windowDimensions,
 		float _cornerLengthPx,
-		const char* _uiSkinName
+		const char* _uiSkinName = "default"
 	);
 
 
