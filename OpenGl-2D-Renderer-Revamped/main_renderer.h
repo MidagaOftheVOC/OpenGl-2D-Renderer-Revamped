@@ -334,9 +334,21 @@ private:	//	Following functions executer the load params for shaders and
 		int _spritesPerCol
 	);
 
+
+	void LoadPaneSkinsFile(
+		const std::string& _locationSkinsFile
+	);
+
 private:
 
 	void PerClassVAOinitialisationFunction();
+
+private:
+
+	void SendStandardUniforms(
+		const Shader* _targetShader,
+		const glm::vec3& _positionVector
+	) const;
 
 public:		// getters and setters, 
 
@@ -352,13 +364,18 @@ public:		// getters and setters,
 	//	Gets the single instance governing OpenGL objects like 
 	//	VBOs, IBO and VAO used for rendering
 	StandardQuad&		GetQuad() { return m_StandardQuad; }
-	GLFWwindow*			GetWinHandle() const { return m_MainWindowHandle; }
+	GLFWwindow*			GetWinHandle() const { return m_MainWindowHandle; }	// always required to be non-const
 	Camera&				GetCamera() { return m_Camera; }
 	InputController&	GetInputController() { return m_InputController; }
 	UIManager&			GetUIManager() { return m_UIManager; }
-
 	Shader&				GetTextShader() { return m_TextRenderingShader; }
 
+
+	const StandardQuad&		GetQuad() const { return m_StandardQuad; }
+	const Camera&			GetCamera() const { return m_Camera; }
+	const InputController&	GetInputController() const { return m_InputController; }
+	const UIManager&		GetUIManager() const { return m_UIManager; }
+	const Shader&			GetTextShader() const { return m_TextRenderingShader; }
 };
 
 

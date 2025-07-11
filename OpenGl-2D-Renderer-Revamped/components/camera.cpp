@@ -10,7 +10,7 @@ void Camera::Initialisation(
 
 ) {
 	m_Position = _position;
-	DEBUG_WARN(m_Position.x > 0 && m_Position.y > 0, "Camera initial position has negative values.")
+	DEBUG_WARN(m_Position.x > -FLOAT_COMPARE_TOLERANCE && m_Position.y > -FLOAT_COMPARE_TOLERANCE, "Camera initial position has negative values.")
 	m_ViewPortSize = _viewPortSize;
 	DEBUG_ASSERT(m_ViewPortSize.x > 0 && m_ViewPortSize.y > 0, "Camera view port size has non-positive values.")
 

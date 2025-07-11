@@ -92,7 +92,7 @@ void Renderer2D::Draw(
 		_uiBatch,
 		CameraPosition.x,
 		CameraPosition.y,
-		0.f,
+		0.f,	//	default is 0, since UI manager distributes final Z coordinates for the components
 		_uniformArray
 	);
 }
@@ -146,11 +146,9 @@ void Renderer2D::ExecuteDraws() {
 void Renderer2D::RenderGUI() {
 	std::vector<UIDrawCall>& Arr = m_UIBatchArray;
 
-	size_t ArraySize = Arr.size();
+	if (Arr.empty()) return;
 
-	if (ArraySize == 0) {
-		return;
-	}
+	size_t ArraySize = Arr.size();
 
 	UIBatch::BindCommonVAO();
 
@@ -167,12 +165,7 @@ void Renderer2D::RenderGUI() {
 
 
 		ShaderObject->UseShader();
-
-		glm::vec3 DCPosition = DrawCall.GetPositionVector();
-		DCPosition.z = 0;
-		ShaderObject->SetStandardModel(glm::translate(glm::mat4(1.f), DCPosition));
-		ShaderObject->SetStandardProjection(m_Camera.GetProjectionMatrix());
-		ShaderObject->SetStandardView(m_Camera.GetViewMatrix());
+		SendStandardUniforms(ShaderObject, DrawCall.GetPositionVector());
 
 		ShaderObject->ApplyUniforms(DrawCall.GetAppliedUniforms());
 		
@@ -198,15 +191,12 @@ void Renderer2D::RenderGUI() {
 void Renderer2D::RenderText() {
 	std::vector<TextDrawCall>& Arr = m_TextArray;
 
-	size_t ArraySize = Arr.size();
+	if (Arr.empty()) return;
 
-	if (ArraySize == 0) {
-		return;
-	}
+	size_t ArraySize = Arr.size();
 
 	Text::BindCommonVAO();
 
-	//	Get the common shader only used for text rendering
 	const Shader& Shader = GetTextShader();
 	Shader.UseShader();
 	Shader.SetStandardView(GetCamera().GetViewMatrix());
@@ -246,12 +236,10 @@ void Renderer2D::RenderText() {
 		Shader.SetVec2("u_SpriteDimensions", SheetObject->GetSpriteDimensions());
 		Shader.SetInt("u_RowSpriteCount", SheetObject->GetSheetRowSpriteCount());
 
-		//	Line breaks
 		Shader.SetInt("u_LineBreakCount", LineBreakCount);
 		Shader.SetIntArray("u_LineBreakArray", TextObject->GetLineBreakArray().data(), LineBreakCount);
 		Shader.SetFloatArray("u_LineLengths", TextObject->GetLineLengthsArray().data(), LineBreakCount);
 
-		//Shader.SetFloat("u_LineMaximumLength", OptionsObject.m_LineLength);
 		Shader.SetFloat("u_CharacterHeight", OptionsObject.m_CharacterHeight);
 		Shader.SetFloat("u_SpacingBetweenLines", OptionsObject.m_SpacingBetweenLines);
 
@@ -277,15 +265,13 @@ void Renderer2D::RenderText() {
 void Renderer2D::RenderFreeBatches() {
 	std::vector<BatchDrawCall>& Arr = m_FreeBatchArray;
 
-	if (Arr.size() == 0) return;
+	if (Arr.empty()) return;
 
 	FreeBatch::BindCommonVAO();
 
 	for (size_t i = 0; i < Arr.size(); i++) {
 
 		const BatchDrawCall BatchDrawCallObject = Arr[i];
-
-		//	down cast to proper pointer
 		const FreeBatch* Free = dynamic_cast<const FreeBatch*>(BatchDrawCallObject.GetBaseBatchPointer());
 		const Shader* ShaderObject = Free->GetSpecialSheetPointer()->GetShader();
 
@@ -294,9 +280,7 @@ void Renderer2D::RenderFreeBatches() {
 		Free->BindUniqueBuffers();
 
 		ShaderObject->UseShader();
-		ShaderObject->SetStandardModel(glm::translate(glm::mat4(1.f), BatchDrawCallObject.GetPositionVector()));
-		ShaderObject->SetStandardView(GetCamera().GetViewMatrix());
-		ShaderObject->SetStandardProjection(GetCamera().GetProjectionMatrix());
+		SendStandardUniforms(ShaderObject, BatchDrawCallObject.GetPositionVector());
 
 		ShaderObject->ApplyUniforms(BatchDrawCallObject.GetAppliedUniforms());
 
@@ -323,8 +307,9 @@ void Renderer2D::RenderFreeBatches() {
 void Renderer2D::RenderSoftBatches() {
 	std::vector<BatchDrawCall>& Arr = m_SoftBatchArray;
 	
-	SoftBatch::BindCommonVAO();
+	if (Arr.empty()) return;
 
+	SoftBatch::BindCommonVAO();
 
 	for (size_t i = 0; i < Arr.size(); i++) {
 		const BatchDrawCall& DrawCall = Arr[i];
@@ -338,13 +323,11 @@ void Renderer2D::RenderSoftBatches() {
 		Soft->BindUniqueBuffers();
 
 		Shader->UseShader();
-		Shader->SetStandardModel(glm::translate(glm::mat4(1.f), DrawCall.GetPositionVector()));
-		Shader->SetStandardView(GetCamera().GetViewMatrix());
-		Shader->SetStandardProjection(GetCamera().GetProjectionMatrix());
+		SendStandardUniforms(Shader, DrawCall.GetPositionVector());
 
 		Soft->ActivateTextures("u_Textures");
 
-		if (Soft->GetType() == SoftBatchType::FloatingQuad) {
+		if (Soft->GetType() == SoftBatchType::FloatingQuad) {	//	needed if quad dims must fit sampled texture region to the pixel
 			Shader->SetFloat("u_TexWidth", static_cast<float>(Sheet->GetSpriteSheetWidth()));
 			Shader->SetFloat("u_TexHeight", static_cast<float>(Sheet->GetSpriteSheetHeight()));
 		}
@@ -377,6 +360,8 @@ void Renderer2D::RenderStrictBatches() {
 
 	std::vector<BatchDrawCall>& Arr = m_StrictBatchArray;
 
+	if (Arr.empty()) return;
+
 	StrictBatch::BindCommonVAO();
 
 	for (size_t i = 0; i < Arr.size(); i++) {
@@ -395,9 +380,7 @@ void Renderer2D::RenderStrictBatches() {
 
 		// SHADER SET UP
 		ShaderCurrent->UseShader();
-		ShaderCurrent->SetStandardModel(glm::translate(glm::mat4(1.f), DrawCallCurrent.GetPositionVector()));
-		ShaderCurrent->SetStandardView(m_Camera.GetViewMatrix());
-		ShaderCurrent->SetStandardProjection(m_Camera.GetProjectionMatrix());
+		SendStandardUniforms(ShaderCurrent, DrawCallCurrent.GetPositionVector());
 
 		CheckGLErrors();
 		Strict->ActivateTextures("u_Texture");
@@ -421,6 +404,16 @@ void Renderer2D::RenderStrictBatches() {
 
 	StrictBatch::UnbindCommonVAO();
 	Arr.clear();
+}
+
+
+void Renderer2D::SendStandardUniforms(
+	const Shader* _targetShader,
+	const glm::vec3& _positionVector
+)  const {
+	_targetShader->SetStandardModel(glm::translate(glm::mat4(1.f), _positionVector));
+	_targetShader->SetStandardView(GetCamera().GetViewMatrix());
+	_targetShader->SetStandardProjection(GetCamera().GetProjectionMatrix());
 }
 
 
@@ -526,14 +519,12 @@ bool Renderer2D::Init() {
 
 	//	Component initialisation
 
-	m_Camera.Initialisation(
-		{ 1, 1 },
-		{ m_ScreenWidth, m_ScreenHeight }
-	);
+	const glm::vec2 DefaultCameraLocation = glm::vec2(0.f, 0.f);
+	const glm::vec2 DefaultViewportDimensions = glm::vec2(m_ScreenWidth, m_ScreenHeight);
 
-	m_InputController = InputController(
-		GetWinHandle()
-	);
+	m_Camera.Initialisation(DefaultCameraLocation, DefaultViewportDimensions);
+
+	m_InputController = InputController(GetWinHandle());
 
 	m_InputController.SetTrackedKeystatesBitmask(
 		InputController::c_ArrowTrackBit |
@@ -762,6 +753,32 @@ bool Renderer2D::DrawCallComparator::operator()(const DrawableDrawCall& a, const
 	}
 
 	return aS > bS;
+}
+
+
+void Renderer2D::LoadPaneSkinsFile(
+	const std::string& _locationSkinsFile
+) {
+	UIManager& UI = GetUIManager();
+
+
+	std::fstream SkinFileStream;
+	SkinFileStream.open(_locationSkinsFile, std::ios::in);
+
+	std::string Line;
+
+	while (!std::getline(SkinFileStream, Line).eof()) {
+
+		if (Line.empty()) continue;
+		
+		if (Line[0] == '#') continue;
+
+
+	}
+
+
+
+	SkinFileStream.close();
 }
 
 
