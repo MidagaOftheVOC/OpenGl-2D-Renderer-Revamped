@@ -42,7 +42,7 @@ class UIManager {
 
 	ID m_UniqueWindowIDCounter = 0;
 
-private:
+private:	//	Windows
 	
 	std::vector<Window> m_WindowArray;
 	
@@ -53,12 +53,22 @@ private:	//	Factories for UI primitives
 
 	PaneFactory m_ThePaneFactory;
 
-private:
+private:	//	Batches
 
 	UIBatch m_PaneBatch = UIBatch(9);
 	
 
 	void UpdateAllBatches();
+
+public:		//	Constants
+
+	const size_t c_ForemostWindowLayer = 0;
+
+public:
+
+	void LoadPaneSkins(
+		const char* _relativePathToSkinsFile
+	);
 
 public:
 
@@ -90,7 +100,6 @@ public:
 	);
 
 
-	//	The placed window will automatically be put at the forefront.
 	void OpenWindow(
 		ID _windowID,
 		float _xCoord,
@@ -103,7 +112,6 @@ public:
 	);
 
 
-	//	Layer 0 is the foremost layer.
 	void MoveWindowToLayer(
 		ID _windowID,
 		size_t _layer

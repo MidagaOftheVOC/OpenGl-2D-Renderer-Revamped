@@ -7,11 +7,11 @@
 
 #include "test/test_snippets.h"
 
-int main() {
+int main(int argc, char** argv) {
 
 	Renderer2D r(1600, 900, "Absolyuten hui");
-
 	r.Init();
+	r.SetBaseDirectory(__FILE__);
 
 
 	r.UploadShaderParameters("test\\res\\text.shader",				r.c_SpecialTextShaderName);
@@ -136,6 +136,8 @@ int main() {
 	};
 	
 	UIManager& ui = r.GetUIManager();
+	ui.LoadPaneSkins("test/res/ui/pane_skins");
+
 	ui.GetPaneBatch().InitialiseBuffers();
 	ui.GetPaneBatch().AddSheetToBatch(r.GetSpriteSheetByName("uib_std"));
 	ui.GetPaneBatch().BufferUBOs();
@@ -146,15 +148,9 @@ int main() {
 	memcpy(skin.m_SIArray, uiSI, 9 * sizeof(SpriteInformation));
 	ui.GetPaneFactory().AddSkin(skin, "default");
 	
-	Window win = ui.CreateWindow(
-		{ 600, 300 },
-		20
-	);
+	Window win  = ui.CreateWindow({	600, 300 },	20);
+	Window win2 = ui.CreateWindow({ 400, 200 },	20);
 
-	Window win2 = ui.CreateWindow(
-		{ 400, 200 },
-		20
-	);
 
 	ID winID1 = ui.AddWindow(win);
 	ID winID2 = ui.AddWindow(win2);

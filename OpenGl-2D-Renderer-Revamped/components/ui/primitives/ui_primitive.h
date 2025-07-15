@@ -36,6 +36,12 @@ public:
 
 	UI_Primitive() {}
 
+
+	UI_Primitive(
+		glm::vec2 _relativeToWindow
+	);
+
+
 	UI_Primitive(
 		glm::vec2 _dimensions,
 		glm::vec2 _relativeToWindow

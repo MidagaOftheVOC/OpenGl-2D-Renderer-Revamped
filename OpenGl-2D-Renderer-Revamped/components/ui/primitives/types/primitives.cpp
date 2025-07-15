@@ -1,7 +1,28 @@
 #include "../ui_primitive.h"
 #include "pane.h"
+#include "label.h"
+
 
 //		--		UI	PRIMITIVE		--		//
+
+
+void* UI_Primitive::FUTURE_POINTER_TO_STRING_MANAGER_AND_ALLOCATOR = nullptr;
+
+
+UI_Primitive::UI_Primitive(
+	glm::vec2 _dimensions,
+	glm::vec2 _relativeToWindow
+) :
+	m_Dimensions(_dimensions),
+	m_PositionRelativeToWindow(_relativeToWindow)
+{}
+
+
+UI_Primitive::UI_Primitive(
+	glm::vec2 _relativeToWindow
+) :
+	m_PositionRelativeToWindow(_relativeToWindow)
+{}
 
 
 void UI_Primitive::SetDimensions(const glm::vec2& _dimensions){
@@ -116,5 +137,17 @@ void Pane::OnDimensionChange() {
 	UpdateArrays();
 }
 
+
+
+//		--			LABEL			--		//
+
+
+
+
+Label::Label(
+	const Text& _textObject
+) :
+	m_TextObject(_textObject)
+{}
 
 

@@ -54,9 +54,6 @@
     <ClCompile Include="components\ui\ui_manager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="components\ui\primitives\ui_primitive.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="components\ui\window.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -70,6 +67,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="components\ui\primitives\factories\factories.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="components\ui\primitives\types\label.h">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="components\file_handler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -138,6 +141,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="components\ui\primitives\factories\pane_factory.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="components\file_handler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

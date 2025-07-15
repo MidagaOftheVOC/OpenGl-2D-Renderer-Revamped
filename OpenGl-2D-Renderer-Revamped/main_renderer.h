@@ -11,6 +11,7 @@
 #include "components/drawable.h"
 #include "components/camera.h"
 #include "components/input_controller.h"
+#include "components/file_handler.h"
 
 #include "components/batch_types/strict_batch.h"
 #include "components/batch_types/soft_batch.h"
@@ -39,6 +40,9 @@ private:	//	Window-related information
 private:	//	Logical components
 
 	StandardQuad& m_StandardQuad;
+
+
+	FileHandler m_FileHandler;
 
 
 	Camera m_Camera;
@@ -182,6 +186,7 @@ public:		//	Exposed functions
 
 	//	Execute all draw calls.
 	void ExecuteDraws();
+
 
 	//	Here, the X and Y coordinates represent the anchor point for the SoftBatch.
 	//	In essence, all the positions given to the SoftBatch object at creation
@@ -334,11 +339,6 @@ private:	//	Following functions executer the load params for shaders and
 		int _spritesPerCol
 	);
 
-
-	void LoadPaneSkinsFile(
-		const std::string& _locationSkinsFile
-	);
-
 private:
 
 	void PerClassVAOinitialisationFunction();
@@ -351,6 +351,11 @@ private:
 	) const;
 
 public:		// getters and setters, 
+
+	void SetBaseDirectory(
+		const char* _pathToMain
+	);
+
 
 	const Shader* GetShaderByName(
 		const char* _shaderName
@@ -369,6 +374,7 @@ public:		// getters and setters,
 	InputController&	GetInputController() { return m_InputController; }
 	UIManager&			GetUIManager() { return m_UIManager; }
 	Shader&				GetTextShader() { return m_TextRenderingShader; }
+	FileHandler&		GetFileHandler() { return m_FileHandler; }
 
 
 	const StandardQuad&		GetQuad() const { return m_StandardQuad; }

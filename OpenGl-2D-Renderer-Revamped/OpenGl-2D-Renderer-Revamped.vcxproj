@@ -146,15 +146,16 @@
     <ClCompile Include="components\batch_types\batches.cpp" />
     <ClCompile Include="components\camera.cpp" />
     <ClCompile Include="components\drawable.cpp" />
+    <ClCompile Include="components\file_handler.cpp" />
     <ClCompile Include="components\input_controller.cpp" />
     <ClCompile Include="components\shader.cpp" />
     <ClCompile Include="components\sprite_sheet.cpp" />
     <ClCompile Include="components\ui\font.cpp" />
     <ClCompile Include="components\ui\primitives\factories\factories.cpp" />
+    <ClCompile Include="components\ui\primitives\types\label.h" />
     <ClCompile Include="components\ui\primitives\types\primitives.cpp" />
     <ClCompile Include="components\ui\text.cpp" />
     <ClCompile Include="components\ui\ui_manager.cpp" />
-    <ClCompile Include="components\ui\primitives\ui_primitive.cpp" />
     <ClCompile Include="components\ui\window.cpp" />
     <ClCompile Include="components\uniform\uniform_data.cpp" />
     <ClCompile Include="main.cpp" />
@@ -172,6 +173,7 @@
     <ClInclude Include="components\batch_types\ui_batch.h" />
     <ClInclude Include="components\camera.h" />
     <ClInclude Include="components\drawable.h" />
+    <ClInclude Include="components\file_handler.h" />
     <ClInclude Include="components\input_controller.h" />
     <ClInclude Include="components\shader.h" />
     <ClInclude Include="components\sprite_sheet.h" />

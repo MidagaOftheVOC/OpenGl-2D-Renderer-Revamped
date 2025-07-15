@@ -42,7 +42,6 @@ public:
 		const char* _skinName
 	) const;
 
-private:
 
 	const PaneSkin* GetSkinByName(
 		const char* _name

@@ -225,3 +225,20 @@ size_t UIManager::GetIndexOfWindowByIDInRenderArray(
 	return gc_ui32ErrorCode;
 }
 
+
+void UIManager::LoadPaneSkins(
+	const char* _relativePathToSkinsFile
+) {
+	FileHandler& Handler = m_MainRenderer->GetFileHandler();
+	Handler.FileExists(_relativePathToSkinsFile);
+	
+	std::string ConcatenatedLines;
+	Handler.GetAllContentLinesConcatenatedWithDelimFromFileAt(_relativePathToSkinsFile, ConcatenatedLines);
+
+	StringIndices Pair = Handler.GetFirstElementIndexOfLineWithinConcatenatedContentLines(ConcatenatedLines, 0);
+
+	return;
+}
+
+
+

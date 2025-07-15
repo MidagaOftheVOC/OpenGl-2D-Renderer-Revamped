@@ -271,7 +271,7 @@ void Renderer2D::RenderFreeBatches() {
 
 	for (size_t i = 0; i < Arr.size(); i++) {
 
-		const BatchDrawCall BatchDrawCallObject = Arr[i];
+		const BatchDrawCall& BatchDrawCallObject = Arr[i];
 		const FreeBatch* Free = dynamic_cast<const FreeBatch*>(BatchDrawCallObject.GetBaseBatchPointer());
 		const Shader* ShaderObject = Free->GetSpecialSheetPointer()->GetShader();
 
@@ -756,29 +756,11 @@ bool Renderer2D::DrawCallComparator::operator()(const DrawableDrawCall& a, const
 }
 
 
-void Renderer2D::LoadPaneSkinsFile(
-	const std::string& _locationSkinsFile
+void Renderer2D::SetBaseDirectory(
+	const char* _pathToMain
 ) {
-	UIManager& UI = GetUIManager();
-
-
-	std::fstream SkinFileStream;
-	SkinFileStream.open(_locationSkinsFile, std::ios::in);
-
-	std::string Line;
-
-	while (!std::getline(SkinFileStream, Line).eof()) {
-
-		if (Line.empty()) continue;
-		
-		if (Line[0] == '#') continue;
-
-
-	}
-
-
-
-	SkinFileStream.close();
+	fs::path Path = fs::path(_pathToMain);
+	m_FileHandler = FileHandler(Path.parent_path());
 }
 
 
