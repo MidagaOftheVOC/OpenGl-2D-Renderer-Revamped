@@ -28,6 +28,9 @@ These include:
 #include <iostream>
 #include <chrono>
 #include <random>
+#include <fstream>
+#include <filesystem>
+#include <format>
 
 
 #include "../dependancies/GL/glew.h"
@@ -37,6 +40,7 @@ These include:
 #include "../dependancies/glm/gtc/matrix_transform.hpp"
 #include "../dependancies/glm/gtc/type_ptr.hpp"
 
+namespace fs = std::filesystem;
 
 
 #define FLOAT_COMPARE_TOLERANCE 0.0001f
@@ -84,13 +88,21 @@ __release_variant
 #endif
 
 
+//          COMMON VALUE DEFINITINOS
+
+
 typedef unsigned int ID;
 
 
 
 inline unsigned short gc_ui16ErrorCode = 0xffffui16;
 inline unsigned int gc_ui32ErrorCode = 0xffffffffui32;
+inline unsigned long long U64_ERROR_CODE = 0xFFFFFFFFFFFFFFFF;
 
+#define U64_ERROR 0xFFFFFFFFFFFFFFFFui64
+
+
+//          UTILITY METHODS AND DIAGNOSTICS
 
 
 void CheckGLErrors(const char* context = "OpenGL");
@@ -100,7 +112,6 @@ bool fEqual(float _val1, float _val2);
 
 
 bool FastStringCompare(const char* _str1, const char* _str2);
-
 
 
 struct GLdiagnostics {
@@ -244,5 +255,85 @@ struct Profiler {
     static double ElapsedMilliseconds() {
         return std::chrono::duration<double, std::milli>(s_End - s_Start).count();
     }
+};
+
+
+
+
+
+//          I/O
+
+
+class FileReader {
+
+    std::ifstream m_FileStream;
+
+    
+    std::string m_CommentMarker;
+
+    
+    FileReader(
+        std::ifstream&& _openedStream,
+        const char* _commentMarker
+    );
+
+public:
+
+    bool ReadNextContentLine(
+        std::string& OUT_nextLine
+    );
+
+
+    bool IsFileOpened() const;
+
+
+    bool IsEOF() const;
+
+
+    static FileReader OpenFile(
+        const char* _fileDirectory,
+        const char* _commentMarker = "//"
+    );
+
+    
+    ~FileReader();
+
+};
+
+
+class Tokeniser {
+
+    std::string m_InitialString;
+
+
+    std::vector<std::string_view> m_Tokens;
+
+private:
+
+    void SplitString();
+
+public:
+
+    Tokeniser() {}
+
+
+    Tokeniser(
+        const std::string& _string
+    );
+
+
+    std::string_view GetToken(
+        const size_t _tokenNumber
+    ) const;
+
+
+    void LoadString(
+        const std::string& _string
+    );
+
+public:
+
+    size_t GetTokenCount() const { return m_Tokens.size(); }
+
 };
 

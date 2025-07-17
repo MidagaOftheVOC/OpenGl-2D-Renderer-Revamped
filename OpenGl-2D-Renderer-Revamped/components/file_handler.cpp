@@ -30,11 +30,11 @@ void FileHandler::GetAllContentLinesConcatenatedWithDelimFromFileAt(
 	std::string& OUT_concatenatedLines,
 	char _delimiter
 ) const {
-	DEBUG_ASSERT(FileExists(_relativePathFromMain), "File at [~\\%s] doesn't exist.", _relativePathFromMain);
+	DEBUG_ASSERT(FileExists(_relativePathFromMain), "File at [~/%s] doesn't exist.", _relativePathFromMain);
 
 	std::ifstream Stream;
 	Stream.open(m_DirectoryOfMain / fs::path(_relativePathFromMain), std::ios::in);
-	DEBUG_ASSERT(Stream.is_open(), "File at [~\\%s] exists but can't be opened.", _relativePathFromMain);
+	DEBUG_ASSERT(Stream.is_open(), "File at [~/%s] exists but can't be opened.", _relativePathFromMain);
 
 	std::string CurrentLine;
 	OUT_concatenatedLines.clear();

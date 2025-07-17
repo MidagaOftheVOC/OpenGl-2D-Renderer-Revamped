@@ -24,6 +24,8 @@
 #include "components/ui/text.h"
 
 
+#include "components/managers/resource_manager.h"
+
 
 class Renderer2D {
 private:	//	Window-related information
@@ -50,6 +52,8 @@ private:	//	Logical components
 
 	InputController m_InputController;
 
+
+	ResourceManager m_ResourceManager;
 
 	UIManager m_UIManager;
 
@@ -340,6 +344,9 @@ private:	//	Following functions executer the load params for shaders and
 	);
 
 private:
+
+	bool GLFWInitialisation();
+	
 
 	void PerClassVAOinitialisationFunction();
 

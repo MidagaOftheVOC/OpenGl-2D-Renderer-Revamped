@@ -489,33 +489,16 @@ void Renderer2D::RenderDrawables() {
 
 bool Renderer2D::Init() {
 
-	//	Window and GLFW context initialisation
-	if (!glfwInit()) {
-		std::cout << "Window not opened.\n";
-		return false;
-	}
-
-	m_MainWindowHandle = glfwCreateWindow(
-		m_ScreenWidth,
-		m_ScreenHeight,
-		m_WindowTitle.c_str(),
-		NULL, NULL
-	);
-
-	if (!m_MainWindowHandle) {
-		glfwTerminate();
-		return false;
-	}
-
-	glfwMakeContextCurrent(m_MainWindowHandle);
-	glfwSwapInterval(1);
-	GLenum glewReturnCode = glewInit();
-	if (glewReturnCode != GLEW_OK) {
-		std::cout << glewGetErrorString(glewReturnCode);
-		return false;
-	}
-
+	GLFWInitialisation();
 	glEnable(GL_DEPTH_TEST);
+
+	//	Managers
+
+	
+
+
+	m_SheetManager.LoadTexturesFromConfigFile("s");
+
 
 	//	Component initialisation
 
@@ -761,6 +744,35 @@ void Renderer2D::SetBaseDirectory(
 ) {
 	fs::path Path = fs::path(_pathToMain);
 	m_FileHandler = FileHandler(Path.parent_path());
+}
+
+
+bool Renderer2D::GLFWInitialisation() {
+	//	Window and GLFW context initialisation
+	if (!glfwInit()) {
+		std::cout << "Window not opened.\n";
+		return false;
+	}
+
+	m_MainWindowHandle = glfwCreateWindow(
+		m_ScreenWidth,
+		m_ScreenHeight,
+		m_WindowTitle.c_str(),
+		NULL, NULL
+	);
+
+	if (!m_MainWindowHandle) {
+		glfwTerminate();
+		return false;
+	}
+
+	glfwMakeContextCurrent(m_MainWindowHandle);
+	glfwSwapInterval(1);
+	GLenum glewReturnCode = glewInit();
+	if (glewReturnCode != GLEW_OK) {
+		std::cout << glewGetErrorString(glewReturnCode);
+		return false;
+	}
 }
 
 

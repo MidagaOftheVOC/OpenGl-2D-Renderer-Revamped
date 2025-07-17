@@ -148,6 +148,7 @@
     <ClCompile Include="components\drawable.cpp" />
     <ClCompile Include="components\file_handler.cpp" />
     <ClCompile Include="components\input_controller.cpp" />
+    <ClCompile Include="components\managers\managers.cpp" />
     <ClCompile Include="components\shader.cpp" />
     <ClCompile Include="components\sprite_sheet.cpp" />
     <ClCompile Include="components\ui\font.cpp" />
@@ -175,6 +176,7 @@
     <ClInclude Include="components\drawable.h" />
     <ClInclude Include="components\file_handler.h" />
     <ClInclude Include="components\input_controller.h" />
+    <ClInclude Include="components\managers\resource_manager.h" />
     <ClInclude Include="components\shader.h" />
     <ClInclude Include="components\sprite_sheet.h" />
     <ClInclude Include="components\ui\font.h" />

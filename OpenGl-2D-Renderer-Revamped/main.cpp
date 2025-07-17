@@ -11,7 +11,7 @@ int main(int argc, char** argv) {
 
 	Renderer2D r(1600, 900, "Absolyuten hui");
 	r.Init();
-	r.SetBaseDirectory(__FILE__);
+	//r.SetBaseDirectory(__FILE__);
 
 
 	r.UploadShaderParameters("test\\res\\text.shader",				r.c_SpecialTextShaderName);
@@ -136,7 +136,7 @@ int main(int argc, char** argv) {
 	};
 	
 	UIManager& ui = r.GetUIManager();
-	ui.LoadPaneSkins("test/res/ui/pane_skins");
+	//ui.LoadPaneSkins("test/res/ui/pane_skins");
 
 	ui.GetPaneBatch().InitialiseBuffers();
 	ui.GetPaneBatch().AddSheetToBatch(r.GetSpriteSheetByName("uib_std"));

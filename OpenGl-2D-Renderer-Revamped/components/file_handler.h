@@ -4,11 +4,6 @@
 #include "../common/common.h"
 
 
-#include <filesystem>
-#include <format>
-#include <fstream>
-
-namespace fs = std::filesystem;
 
 
 struct StringIndices {

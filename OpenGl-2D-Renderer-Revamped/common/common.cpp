@@ -39,3 +39,124 @@ void CheckGLErrors(const char* context) {
 		__debugbreak();
 	}
 }
+
+
+
+
+FileReader::FileReader(
+	std::ifstream&& _openedStream,
+	const char* _commentMarker
+) :
+	m_FileStream(std::move(_openedStream)),
+	m_CommentMarker(_commentMarker)
+{}
+
+
+FileReader::~FileReader() {
+	m_FileStream.close();
+}
+
+
+bool FileReader::IsFileOpened() const {
+	return m_FileStream.is_open();
+}
+
+
+bool FileReader::ReadNextContentLine(
+	std::string& OUT_nextLine
+) {
+	if (!IsFileOpened()) {
+		DEBUG_LOG("Trying to read from a non-opened file.");
+		return false;
+	}
+
+	while (std::getline(m_FileStream, OUT_nextLine)) {
+		if (OUT_nextLine.empty()) continue;
+
+		size_t CommentIndex = OUT_nextLine.find(m_CommentMarker);
+
+		if (CommentIndex == 0) continue;
+
+		if (CommentIndex == std::string::npos) return true;
+		else {
+			OUT_nextLine.erase(OUT_nextLine.begin() + CommentIndex, OUT_nextLine.end());
+			return true;
+		}
+	}
+
+	return false;
+}
+
+bool FileReader::IsEOF() const {
+	return m_FileStream.eof();
+}
+
+
+FileReader FileReader::OpenFile(
+	const char* _fileDirectory,
+	const char* _commentMarker
+) {
+	std::ifstream FileStream(_fileDirectory);
+	return FileReader(std::move(FileStream), _commentMarker);
+}
+
+
+
+
+Tokeniser::Tokeniser(
+	const std::string& _string
+) :
+	m_InitialString(_string)
+{
+	SplitString();
+}
+
+
+void Tokeniser::SplitString() {
+
+	size_t First = 0;
+	bool InEmptyInterval = true;
+
+	for (size_t i = 0; i < m_InitialString.size(); i++) {
+
+		char CurrChar = m_InitialString[i];
+
+		if (InEmptyInterval) {
+			if (!(CurrChar == ' ' || CurrChar == '\t')) {
+				InEmptyInterval = false;
+				First = i;
+			}
+			continue;
+		}
+
+		else {
+			if (CurrChar == ' ' || CurrChar == '\t') {
+				InEmptyInterval = true;
+				m_Tokens.emplace_back(m_InitialString.c_str() + First, i - First);
+			}
+			else if (i == m_InitialString.size() - 1) {
+				m_Tokens.emplace_back(m_InitialString.c_str() + First, i - First + 1);
+			}
+			continue;
+		}
+	}
+}
+
+
+std::string_view Tokeniser::GetToken(
+	const size_t _tokenNumber
+) const {
+	DEBUG_ASSERT(_tokenNumber < m_Tokens.size(), "Indexing tokens out of bounds.");
+	return m_Tokens[_tokenNumber];
+}
+
+
+void Tokeniser::LoadString(
+	const std::string& _string
+) {
+	m_InitialString = _string;
+	SplitString();
+}
+
+
+
