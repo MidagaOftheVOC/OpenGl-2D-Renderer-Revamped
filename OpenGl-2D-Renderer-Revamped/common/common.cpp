@@ -117,6 +117,8 @@ void Tokeniser::SplitString() {
 	size_t First = 0;
 	bool InEmptyInterval = true;
 
+	m_Tokens.clear();
+
 	for (size_t i = 0; i < m_InitialString.size(); i++) {
 
 		char CurrChar = m_InitialString[i];

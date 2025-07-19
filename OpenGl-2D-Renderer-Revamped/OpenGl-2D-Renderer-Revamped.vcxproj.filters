@@ -152,5 +152,8 @@
     <ClInclude Include="components\managers\resource_manager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="common\io_util.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

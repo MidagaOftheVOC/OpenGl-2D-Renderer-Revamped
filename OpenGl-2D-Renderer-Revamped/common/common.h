@@ -40,6 +40,11 @@ These include:
 #include "../dependancies/glm/gtc/matrix_transform.hpp"
 #include "../dependancies/glm/gtc/type_ptr.hpp"
 
+
+#include "io_util.h"
+
+
+
 namespace fs = std::filesystem;
 
 
@@ -258,82 +263,4 @@ struct Profiler {
 };
 
 
-
-
-
-//          I/O
-
-
-class FileReader {
-
-    std::ifstream m_FileStream;
-
-    
-    std::string m_CommentMarker;
-
-    
-    FileReader(
-        std::ifstream&& _openedStream,
-        const char* _commentMarker
-    );
-
-public:
-
-    bool ReadNextContentLine(
-        std::string& OUT_nextLine
-    );
-
-
-    bool IsFileOpened() const;
-
-
-    bool IsEOF() const;
-
-
-    static FileReader OpenFile(
-        const char* _fileDirectory,
-        const char* _commentMarker = "//"
-    );
-
-    
-    ~FileReader();
-
-};
-
-
-class Tokeniser {
-
-    std::string m_InitialString;
-
-
-    std::vector<std::string_view> m_Tokens;
-
-private:
-
-    void SplitString();
-
-public:
-
-    Tokeniser() {}
-
-
-    Tokeniser(
-        const std::string& _string
-    );
-
-
-    std::string_view GetToken(
-        const size_t _tokenNumber
-    ) const;
-
-
-    void LoadString(
-        const std::string& _string
-    );
-
-public:
-
-    size_t GetTokenCount() const { return m_Tokens.size(); }
-
-};
 

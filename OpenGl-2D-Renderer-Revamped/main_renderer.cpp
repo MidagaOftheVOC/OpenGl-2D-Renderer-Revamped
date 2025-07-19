@@ -495,9 +495,10 @@ bool Renderer2D::Init() {
 	//	Managers
 
 	
+	m_ResourceManager.LoadAssetsFromResourceConfigFile("test/configs/resource_configuration.rcfg");
 
 
-	m_SheetManager.LoadTexturesFromConfigFile("s");
+	//m_SheetManager.LoadTexturesFromConfigFile("s");
 
 
 	//	Component initialisation
