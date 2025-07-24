@@ -1,46 +1,99 @@
-shader_directory=/shaders
-sheet_directory=/spritesheets
-img_directory=/spritesheets/images/
-font_directory=/fonts
 
+config{
+	special_text_shader_name = __TEXT_SHADER__
 
-
+	shader_directory=/shaders
+	sheet_directory=/spritesheets
+	img_directory=/spritesheets/images/
+	font_directory=/fonts
+}
 
 //	Shaders
 //	Shader name						shader file
 
-shader=__TEXT_SHADER__				file=text.shader
-shader=std_strict_batch				file=batch_test.shader
-shader=std_soft_batch				file=sb_std.shader
-shader=std_floating_quads			file=sb_floating_quads.shader
-shader=std_free_batch				file=fb_std.shader
-shader=std_ui_batch					file=uib_std.shader
+shader{
+	name=__TEXT_SHADER__
+	file=text.shader
+}
+
+shader{
+	name=std_strict_batch
+	file=batch_test.shader
+}
+
+shader{
+	name=std_soft_batch
+	file=sb_std.shader
+}
+
+shader{
+	name=std_floating_quads
+	file=sb_floating_quads.shader
+}
+
+shader{
+	name=std_free_batch
+	file=fb_std.shader
+}
+
+shader{
+	name=std_ui_batch
+	uib_std.shader
+}
 
 
+//	sprite sheets
+sheet{
+	name=fox
+	img=test.png
+	cfg=test.cfg
+	shader=std_strict_batch
+}
 
-//	Sprite sheets
-//	Sheet name						image file				sprites					shader name
-sheet=fox							img=test.png			cfg=test.cfg			shader_name=std_strict_batch
-sheet=soft_batch_sheet1				img=test.png			cfg=test.cfg			shader_name=std_soft_batch
-sheet=fqsoft_batch_sheet1			img=test.png			cfg=test.cfg			shader_name=std_floating_quads
-sheet=fqsoft_batch_sheet2			img=panda.png			cfg=panda.cfg			shader_name=std_floating_quads
-sheet=free_batch_sheet1				img=test.png			cfg=test.cfg			shader_name=std_free_batch
-sheet=free_batch_sheet2				img=panda.png			cfg=panda.cfg			shader_name=std_free_batch
-sheet=ui_batch_sheet				img=ui.png				cfg=gui.cfg				shader_name=std_ui_batch
+sheet{
+	name=soft_batch_sheet1
+	img=test.png
+	cfg=test.cfg
+	shader=std_soft_batch
+}
+
+sheet{
+	name=fqsoft_batch_sheet1
+	img=test.png
+	cfg=test.cfg
+	shader=std_floating_quads
+}
+
+sheet{
+	name=fqsoft_batch_sheet2		
+	img=panda.png
+	cfg=panda.cfg
+	shader=std_floating_quads
+}
+
+sheet{
+	name=free_batch_sheet1				img=test.png			cfg=test.cfg			shader=std_free_batch
+}
+
+sheet{
+	name=free_batch_sheet2				img=panda.png			cfg=panda.cfg			shader=std_free_batch
+}
+
+sheet{
+	name=ui_batch_sheet				img=ui.png				cfg=gui.cfg				shader=std_ui_batch
+}
 
 
 
 //	Fonts
 //	Font name						Font image					(o)font sheet splits
-font=font_cyrillic					img=cyrillic.png			w=9		h=9
+font{
+	name=font_cyrillic					
+	img=cyrillic.png
+}
 
-unknown_symbol_replacement_index=30
-space_index=30
 
-
-
-//	UI-related data
-
+////*****		UI-related data
 
 //	Pane skin
 pane=default
