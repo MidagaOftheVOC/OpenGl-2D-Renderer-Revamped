@@ -53,7 +53,7 @@ int main(int argc, char** argv) {
 
 	Text t = Text(
 		&f,
-		U"здрастиииииии! всичките сте курви!",
+		U"здрастиииииии! всичките сте !",
 		textoptions
 	);
 
@@ -63,7 +63,7 @@ int main(int argc, char** argv) {
 		textoptions
 	);
 
-	t.SetWordWrapBound(200);
+	t.SetWordWrapBound(0);
 
 	InputController& input = r.GetInputController();
 
@@ -73,83 +73,12 @@ int main(int argc, char** argv) {
 	const SpriteSheet* FB_normal = r.GetSpriteSheetByName("fd_std1");
 	const SpriteSheet* FB_panda = r.GetSpriteSheetByName("fd_std2");
 
-	//FreeBatch free = FreeBatch(4);
-	//free.InitialiseBuffers();
-	//free.AddSheetToBatch(FB_normal);
-	//free.AddSheetToBatch(FB_panda);
-	//free.BufferUBOs();
-	//
-	//SpriteInformation SI[4] = {{0, 0}, {0, 0}, {1, 0}, {1, 0}};
-	//float dims[] = { 50.f, 50.f, 100.f, 100.f, 200.f, 250.f, 150.f, 150.f};
-	//free.UpdateBuffers(SI, rotations, PositionPais, dims, 4);
-	/*UIBatch ui(9);
-	ui.InitialiseBuffers();
-	const SpriteSheet* sheet = r.GetSpriteSheetByName("uib_std");
-	ui.AddSheetToBatch(sheet);
-	ui.BufferUBOs();
-
-	SpriteInformation uiSI[] = {
-		{0, 0},
-		{0, 1},
-		{0, 2},
-		{0, 3},
-		{0, 6},
-		{0, 7},
-
-		{0, 4},
-		{0, 5},
-		
-		{0, 8}
-	};
-
-	std::vector<float> v1, v2;
-
-	v1.resize(18);
-	v2.resize(18);
-
-	Pane p({ 300, 200 });
-	p.UpdateArrays();
-	p.Record(v1, v2, 0);
-
-	float zLayer = 5.f;
-
-	ui.UpdateBuffers(
-		uiSI,
-		v2.data(),
-		v1.data(),
-		&zLayer,
-		9
-	);*/
-
-	SpriteInformation uiSI[] = {
-		{0, 0},
-		{0, 1},
-		{0, 2},
-		{0, 3},
-		{0, 6},
-		{0, 7},
-
-		{0, 4},
-		{0, 5},
-
-		{0, 8}
-	};
 	
 	UIManager& ui = r.GetUIManager();
-	//ui.LoadPaneSkins("test/res/ui/pane_skins");
-
-	ui.GetPaneBatch().InitialiseBuffers();
-	ui.GetPaneBatch().AddSheetToBatch(r.GetSpriteSheetByName("uib_std"));
-	ui.GetPaneBatch().BufferUBOs();
-	ui.SetDistributionBounds(1, 2);
-
-
-	PaneSkin skin;
-	memcpy(skin.m_SIArray, uiSI, 9 * sizeof(SpriteInformation));
-	ui.GetPaneFactory().AddSkin(skin, "default");
 	
 	Window win  = ui.CreateWindow({	600, 300 },	20);
-	Window win2 = ui.CreateWindow({ 400, 200 },	20);
+	Window win2 = ui.CreateWindow({ 400, 200 }, 20);
+	Window win3 = ui.CreateWindow({ 400, 200 },	20);
 
 
 	ID winID1 = ui.AddWindow(win);
@@ -158,7 +87,6 @@ int main(int argc, char** argv) {
 
 	ui.OpenWindow(winID2, 500, 300);
 	ui.OpenWindow(winID1, 200, 200);
-	
 
 
 	while (!r.IsRunning()) {
@@ -166,18 +94,16 @@ int main(int argc, char** argv) {
 
 		//r.Draw(&fq,	100, 100, 3, nullptr);
 		//r.Draw(&free,	800, 400, 2, nullptr);
-		//r.Draw(&t,	300, 300, 2, nullptr);
-		//r.Draw(&text,	300, 500, 2, nullptr);
+		r.Draw(&t,	300, 300, 2, nullptr);
+		r.Draw(&text,	300, 500, 2, nullptr);
 
 		if (input.IsHeld(GLFW_KEY_RIGHT)) {
-			//t.SetWordWrapBound(t.GetRightWordWrapBound() + .5f);
-
-
-
+			t.SetWordWrapBound(t.GetRightWordWrapBound() + .5f);
 			std::cout << "right pressed\n";
 		}
 
 		if (input.IsPressed(GLFW_KEY_ESCAPE)) {
+
 			return 0;
 		}
 

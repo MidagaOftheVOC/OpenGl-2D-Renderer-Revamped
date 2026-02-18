@@ -685,6 +685,10 @@ void Renderer2D::StartLoadingProcess() {
 	}
 	m_SpriteSheetLoadQueue.clear();
 
+	m_UIManager.GetPaneBatch().InitialiseBuffers();
+	m_UIManager.GetPaneBatch().AddSheetToBatch(GetSpriteSheetByName("uib_std"));
+	m_UIManager.GetPaneBatch().BufferUBOs();
+	m_UIManager.SetDistributionBounds(1, 2);
 }
 
 

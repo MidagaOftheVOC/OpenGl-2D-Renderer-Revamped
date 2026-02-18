@@ -4,7 +4,25 @@
 
 /*		PANE	FACTORY		*/
 
-PaneFactory::PaneFactory() {}
+PaneFactory::PaneFactory() {
+	PaneSkin skin;
+	SpriteInformation SIarray[] = {
+		{0, 0},
+		{0, 1},
+		{0, 2},
+		{0, 3},
+		{0, 6},
+		{0, 7},
+
+		{0, 4},
+		{0, 5},
+
+		{0, 8}
+	};
+
+	memcpy(skin.m_SIArray, SIarray, 9 * sizeof(SpriteInformation));
+	AddSkin(skin, "default");
+}
 
 
 void PaneFactory::AddSkin(
