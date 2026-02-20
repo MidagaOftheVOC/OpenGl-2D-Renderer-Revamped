@@ -54,7 +54,9 @@ int main(int argc, char** argv) {
 
 
 	Label label = Label(r.GenText(U"здрасти"), {50, 80});
+	Label label2 = Label(r.GenText(U"бепче"), { 50, 100 });
 	win.AttachWidget(&label);
+	win.AttachWidget(&label2);
 
 	ID winID1 = ui.AddWindow(win);
 	ID winID2 = ui.AddWindow(win2);
