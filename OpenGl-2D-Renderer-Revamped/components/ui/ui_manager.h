@@ -9,7 +9,7 @@
 
 
 #include "primitives/factories/pane_factory.h"
-
+#include "primitives/types/label.h"
 
 #include "window.h"
 
@@ -37,9 +37,6 @@ class UIManager {
 	
 	*/
 
-	Renderer2D* m_MainRenderer = nullptr;
-
-
 	ID m_UniqueWindowIDCounter = 0;
 
 private:	//	Windows
@@ -55,7 +52,7 @@ private:	//	Factories for UI primitives
 
 private:	//	Batches
 
-	UIBatch m_PaneBatch = UIBatch(9);
+	UIBatch* m_UIBatch = nullptr;
 	
 
 	void UpdateAllBatches();
@@ -72,14 +69,9 @@ public:
 
 public:
 
-	UIManager(
-		Renderer2D* _renderer
-	);
+	UIManager(UIBatch* _uiBatch);
 
-
-	//	Iterate over the Window objects.
-	void RenderAllActiveWindows();
-
+	void SetUiBatchPointer(UIBatch* _uiBatch);
 
 	//	If nullptr is passed as skin name, the window won't have a background
 	Window CreateWindow(
@@ -88,17 +80,14 @@ public:
 		const char* _uiSkinName = "default"
 	);
 
-
 	//	Adds window to the GUI
 	ID AddWindow(
 		Window _window
 	);
-	
 
 	void RemoveWindow(
 		ID _windowID
 	);
-
 
 	void OpenWindow(
 		ID _windowID,
@@ -106,11 +95,9 @@ public:
 		float _yCoord
 	);
 
-
 	void CloseWindow(
 		ID _windowID
 	);
-
 
 	void MoveWindowToLayer(
 		ID _windowID,
@@ -148,7 +135,7 @@ public:
 
 	void SetDistributionBounds(float _low, float _high);
 
-	UIBatch& GetPaneBatch() { return m_PaneBatch; }
+	const UIBatch* GetUIBatch() { return m_UIBatch; }
 	PaneFactory& GetPaneFactory() { return m_ThePaneFactory; }
 
 };

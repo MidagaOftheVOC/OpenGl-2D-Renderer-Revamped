@@ -1,14 +1,8 @@
 #include "ui_manager.h"
-#include "../../main_renderer.h"
 
-
-
-UIManager::UIManager(
-	Renderer2D* _renderer
-):
-	m_MainRenderer(_renderer)
+UIManager::UIManager(UIBatch* _uiBatch)
+	: m_UIBatch(_uiBatch)
 {}
-
 
 Window UIManager::CreateWindow(
 	glm::vec2 _windowDimensions,
@@ -51,6 +45,8 @@ void UIManager::UpdateAllBatches() {
 	std::vector<float> PANE_Dimensions;
 	std::vector<float> PANE_zLayers;
 
+	int PaneTotalSubsprites = 0;
+
 
 	for (size_t i = 0; i < m_WindowIDArrayForRendering.size(); i++) {
 		Window* CurrWindow = GetWindowByID(m_WindowIDArrayForRendering[i]);
@@ -72,7 +68,10 @@ void UIManager::UpdateAllBatches() {
 		const glm::vec2& WinPos = CurrWindow->GetWinPosition();
 
 		//	TODO: test if Z layering is proper.
-		PANE_zLayers.emplace_back(PaneZLayer);
+		for (int i = 0; i < 9; i++) {
+			PANE_zLayers.emplace_back(PaneZLayer);
+
+		}
 		CurrWindow->GetPane().AppendPaneBatchingData(
 			PANE_Dimensions,
 			PANE_Positions,
@@ -81,28 +80,34 @@ void UIManager::UpdateAllBatches() {
 			WinPos.y
 		);
 
+		PaneTotalSubsprites += 9;
 
 		//	Here come loops who will take care of any primitive arrays within each window
 		//	I.e. they will utilise the Micro steps adn the more precise layer distribution
 
+		const std::vector<UI_Primitive*>& CurrWinWidgets = CurrWindow->GetWidgets();
+
+		for (size_t i = 0; i < CurrWinWidgets.size(); i++) {
+			if(Label* label = dynamic_cast<Label*>(CurrWinWidgets[i]))
+			
+		}
+
 
 	}
 
+	//	renders 1 red dot at the moment, we use fb_std.shader which is the NEW STANDARD FREEBATCH SHADER WITH UBO
+	//	TODO:	remove leaky implementation, mainly the *9
 
-	m_PaneBatch.UpdateBuffers(
+	//	new discovery: we'll actually use UI batch again, just retailor it to work with subsprites if needed, not with 9-part pieces at a time
+	//	problem is FB_STD is not equivalent to UIB_STD
+	m_UIBatch->UpdateBuffers(
 		PANE_Skins.data(),
 		PANE_Positions.data(),
 		PANE_Dimensions.data(),
 		PANE_zLayers.data(),
-		m_WindowArray.size() * 9
+		PaneTotalSubsprites
 	);
 }
-
-
-void UIManager::RenderAllActiveWindows() {
-	m_MainRenderer->Draw(&m_PaneBatch, 0, nullptr);
-}
-
 
 void UIManager::SetDistributionBounds(
 	float _low, 
@@ -137,7 +142,7 @@ void UIManager::RemoveWindow(
 
 
 ID UIManager::GetNextUniqueWindowID() {
-	return m_UniqueWindowIDCounter++;
+	return ++m_UniqueWindowIDCounter;
 }
 
 
@@ -226,19 +231,6 @@ size_t UIManager::GetIndexOfWindowByIDInRenderArray(
 }
 
 
-void UIManager::LoadPaneSkins(
-	const char* _relativePathToSkinsFile
-) {
-	FileHandler& Handler = m_MainRenderer->GetFileHandler();
-	Handler.FileExists(_relativePathToSkinsFile);
-	
-	std::string ConcatenatedLines;
-	Handler.GetAllContentLinesConcatenatedWithDelimFromFileAt(_relativePathToSkinsFile, ConcatenatedLines);
-
-	StringIndices Pair = Handler.GetFirstElementIndexOfLineWithinConcatenatedContentLines(ConcatenatedLines, 0);
-
-	return;
+void UIManager::SetUiBatchPointer(UIBatch* _uiBatch) {
+	m_UIBatch = _uiBatch;
 }
-
-
-

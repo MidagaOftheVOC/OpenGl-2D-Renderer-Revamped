@@ -117,7 +117,9 @@ void Renderer2D::ExecuteDraws() {
 	//  so on draw call objects, but just maintain them and add/remove on necessity.
 	//
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	
+
+	Draw(&m_UIBatch, 0, nullptr);
+
 	//	-- RENDERING STARTS --	//
 
 
@@ -127,13 +129,12 @@ void Renderer2D::ExecuteDraws() {
 	RenderFreeBatches();
 	
 
-	RenderGUI();
-
 	glBindBufferBase(GL_UNIFORM_BUFFER, 0, 0);
 	glBindBufferBase(GL_UNIFORM_BUFFER, 1, 0);
 
 
 	RenderText();
+	RenderGUI();
 
 
 	//	-- RENDERING ENDS	--	//
@@ -538,7 +539,7 @@ Renderer2D::Renderer2D(
 	m_Fullscreen(_fullscreen),
 	m_StandardQuad(g_StandardQuad),
 
-	m_UIManager(this)
+	m_UIManager(&m_UIBatch)
 {}
 
 
@@ -685,9 +686,9 @@ void Renderer2D::StartLoadingProcess() {
 	}
 	m_SpriteSheetLoadQueue.clear();
 
-	m_UIManager.GetPaneBatch().InitialiseBuffers();
-	m_UIManager.GetPaneBatch().AddSheetToBatch(GetSpriteSheetByName("uib_std"));
-	m_UIManager.GetPaneBatch().BufferUBOs();
+	m_UIBatch.InitialiseBuffers();
+	m_UIBatch.AddSheetToBatch(GetSpriteSheetByName(c_SpecialUISheetName));
+	m_UIBatch.BufferUBOs();
 	m_UIManager.SetDistributionBounds(1, 2);
 }
 

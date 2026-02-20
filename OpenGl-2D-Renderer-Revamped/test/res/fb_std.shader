@@ -79,7 +79,7 @@ uniform sampler2D u_Textures[32];
 out vec4 FragColour;
 
 void main(){
-	FragColour = texture(u_Textures[v_SheetIndex], v_TextureVertex);
+	FragColour = mix(texture(u_Textures[v_SheetIndex], v_TextureVertex), vec4(1.0, 0, 0, 1.0), 0.5);
 }
 
 

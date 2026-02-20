@@ -138,16 +138,17 @@ void Pane::OnDimensionChange() {
 }
 
 
-
 //		--			LABEL			--		//
 
-
-
-
 Label::Label(
-	const Text& _textObject
-) :
-	m_TextObject(_textObject)
-{}
+	const Text& _textObject,
+	glm::vec2 _offsetFromWindowCorner
+) {
+	m_PositionRelativeToWindow = _offsetFromWindowCorner;
+	m_TextObject = _textObject;
+}
 
 
+void Label::PostAttachment(WidgetWindowData _data) {
+	m_TextObject.SetWordWrapBound(_data.WindowDimensions.y - m_PositionRelativeToWindow.y);
+}

@@ -43,20 +43,17 @@ private:	//	Logical components
 
 	StandardQuad& m_StandardQuad;
 
-
 	FileHandler m_FileHandler;
-
 
 	Camera m_Camera;
 
-
 	InputController m_InputController;
-
 
 	ResourceManager m_ResourceManager;
 
 	UIManager m_UIManager;
 
+	UIBatch m_UIBatch = UIBatch(1);
 
 	std::vector<SpriteSheet> m_SpriteSheetArray;
 	std::vector<Shader> m_ShaderArray;
@@ -266,6 +263,7 @@ public:		//	Exposed functions
 public:		// Exposed constants
 
 	const char* c_SpecialTextShaderName = "SPECIAL_COMMON_TEXT_SHADER";
+	const char* c_SpecialUISheetName = "SPECIAL_UI_SPRITESHEET_NAME";
 
 public:		//	Loading functions, which append loading parameters to the queues.
 			//	All necessary resources must pass through those, after which we

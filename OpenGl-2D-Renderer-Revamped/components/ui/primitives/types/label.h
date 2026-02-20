@@ -12,18 +12,18 @@ struct Label : public UI_Primitive {
 public:
 
 	Label() : UI_Primitive() {}
-
 	
 	Label(
-		const char32_t _string
+		const char32_t _string,
+		glm::vec2 _offsetFromWindowCorner
 	);
-
 
 	Label(
-		const Text& _textObject
+		const Text& _textObject,
+		glm::vec2 _offsetFromWindowCorner
 	);
-	
 
+	virtual void PostAttachment(WidgetWindowData _data);
 
 	void UpdateBuffers();
 
