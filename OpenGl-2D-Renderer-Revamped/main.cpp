@@ -64,7 +64,7 @@ int main(int argc, char** argv) {
 
 
 	ui.OpenWindow(winID1, 200, 200);
-	ui.OpenWindow(winID2, 900, 300);
+	ui.OpenWindow(winID2, 360, 250);
 
 	Text rando = r.GenText(U"здр");
 

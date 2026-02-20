@@ -211,7 +211,6 @@ void Renderer2D::RenderText() {
 	//	Keep this for now, remove later when we reorganise the structures better
 	const SpriteSheet* LastUsedSpriteSheet = nullptr;
 
-	//	TODO: Refactor to use priority_queue, sort by Font* -> SpriteSheet*
 	for (size_t i = 0; i < ArraySize; i++) {
 
 		const TextDrawCall& DrawCall = Arr[i];

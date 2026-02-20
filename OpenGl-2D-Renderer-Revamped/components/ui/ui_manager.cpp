@@ -59,7 +59,7 @@ void UIManager::UpdateAllBatches() {
 		}
 
 
-		float BaseWindowZLayer = m_UpperBoundOfZlayerDistribution - i * PaneStep;
+		float BaseWindowZLayer = m_LowerBoundOfZlayerDistribution + (i + 1) * PaneStep;
 
 		const glm::vec2& WinPos = CurrWindow->GetWinPosition();
 
@@ -84,7 +84,7 @@ void UIManager::UpdateAllBatches() {
 
 		for (size_t i = 0; i < CurrWinWidgets.size(); i++) {
 			if (Label* label = dynamic_cast<Label*>(CurrWinWidgets[i])) {
-				std::cout << "OUR FIRST DETECTED LABEL EVERYBODY\n";
+				std::cout << "TEXT LAYERS : " << BaseWindowZLayer - SubStep << "\n";
 				m_CachedTexts.push_back(
 					TextWithZLayer(
 						label->GetText(),

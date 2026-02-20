@@ -778,7 +778,7 @@ void UIBatch::InitialiseCommonVAO() {
 	glVertexAttribFormat(4, 1, GL_FLOAT, GL_FALSE, 0);
 	glEnableVertexAttribArray(4);
 	glVertexAttribBinding(4, 4);
-	glVertexBindingDivisor(4, 9);
+	glVertexBindingDivisor(4, 1);
 
 
 	glBindVertexArray(0);
@@ -794,11 +794,8 @@ void UIBatch::UpdateBuffers(
 ) {
 	SetInstanceCount(static_cast<int>(_arrayElementCount));
 
-	DEBUG_ASSERT(_arrayElementCount % 9 == 0, "UIBatch has instance count not divisibly by 9.");
+	//DEBUG_ASSERT(_arrayElementCount % 9 == 0, "UIBatch has instance count not divisibly by 9.");
 
-	int zLayerCount = GetInstanceCount() / 9;
-	int zLayerSize = zLayerCount * sizeof(float);
-	
 	if (m_Flags.CheckAndClearFlag(c_MaximumInstanceCountExceeded)) {
 		m_Flags.ClearFlag(c_NotInitialised);
 
@@ -812,7 +809,7 @@ void UIBatch::UpdateBuffers(
 			GetInstanceCount() * sizeof(float) * 2, _pairsOfXYdimensions, GL_DYNAMIC_DRAW);
 		
 		glNamedBufferData(m_LayersVBO, 
-			zLayerSize, _zLayers, GL_DYNAMIC_DRAW);
+			GetInstanceCount() * sizeof(float), _zLayers, GL_DYNAMIC_DRAW);
 
 		return;
 	}
@@ -827,7 +824,7 @@ void UIBatch::UpdateBuffers(
 		glNamedBufferSubData(m_DimensionsVBO, 0, GetInstanceCount() * sizeof(float) * 2, _pairsOfXYdimensions);
 	
 	if (_zLayers)
-		glNamedBufferSubData(m_LayersVBO, 0, zLayerSize, _zLayers);
+		glNamedBufferSubData(m_LayersVBO, 0, GetInstanceCount() * sizeof(float), _zLayers);
 }
 
 
