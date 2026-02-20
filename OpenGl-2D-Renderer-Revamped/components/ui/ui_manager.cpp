@@ -37,15 +37,17 @@ ID UIManager::AddWindow(
 
 void UIManager::UpdateAllBatches() {
 
-	float PaneStep = (m_UpperBoundOfZlayerDistribution - m_LowerBoundOfZlayerDistribution) / m_WindowArray.size();
-	float MicroStep = PaneStep / 4;
+	float PaneStep = (m_UpperBoundOfZlayerDistribution - m_LowerBoundOfZlayerDistribution) / m_WindowIDArrayForRendering.size();
+	float SubStep = PaneStep / 4;
 
-	std::vector<SpriteInformation> PANE_Skins;
-	std::vector<float> PANE_Positions;
-	std::vector<float> PANE_Dimensions;
-	std::vector<float> PANE_zLayers;
+	std::vector<SpriteInformation> WidgetData_Skins;
+	std::vector<float> WidgetData_Positions;
+	std::vector<float> WidgetData_Dimensions;
+	std::vector<float> WidgetData_zLayers;
 
 	int PaneTotalSubsprites = 0;
+
+	m_CachedTexts.clear();	//	reset texts for labels;
 
 
 	for (size_t i = 0; i < m_WindowIDArrayForRendering.size(); i++) {
@@ -56,26 +58,19 @@ void UIManager::UpdateAllBatches() {
 			continue;
 		}
 
-		//	If smaller values are closer to the screen AND the first window is the one closes to us
-		//	AND the LowerBound is the one whose absolute value is lower than the other bound
-		//	this should be the formula.
-		//
-		//	Changed to (i + 1), now the last window will take the high bound exactly.
-		//	After calculating the PaneZLayer, we subtract n * MicroStep to get to the n-th
-		//	microlayer associated with the current window
-		float PaneZLayer = (i + 1) * PaneStep + m_LowerBoundOfZlayerDistribution;
+
+		float BaseWindowZLayer = m_UpperBoundOfZlayerDistribution - i * PaneStep;
 
 		const glm::vec2& WinPos = CurrWindow->GetWinPosition();
 
 		//	TODO: test if Z layering is proper.
 		for (int i = 0; i < 9; i++) {
-			PANE_zLayers.emplace_back(PaneZLayer);
-
+			WidgetData_zLayers.emplace_back(BaseWindowZLayer);
 		}
 		CurrWindow->GetPane().AppendPaneBatchingData(
-			PANE_Dimensions,
-			PANE_Positions,
-			PANE_Skins,
+			WidgetData_Dimensions,
+			WidgetData_Positions,
+			WidgetData_Skins,
 			WinPos.x,
 			WinPos.y
 		);
@@ -88,11 +83,19 @@ void UIManager::UpdateAllBatches() {
 		const std::vector<UI_Primitive*>& CurrWinWidgets = CurrWindow->GetWidgets();
 
 		for (size_t i = 0; i < CurrWinWidgets.size(); i++) {
-			if(Label* label = dynamic_cast<Label*>(CurrWinWidgets[i]))
+			if (Label* label = dynamic_cast<Label*>(CurrWinWidgets[i])) {
+				std::cout << "OUR FIRST DETECTED LABEL EVERYBODY\n";
+				m_CachedTexts.push_back(
+					TextWithZLayer(
+						label->GetText(),
+						WinPos.x + label->GetXOffset(),
+						WinPos.y + label->GetYOffset(),
+						BaseWindowZLayer - SubStep
+					)
+				);
+			}
 			
 		}
-
-
 	}
 
 	//	renders 1 red dot at the moment, we use fb_std.shader which is the NEW STANDARD FREEBATCH SHADER WITH UBO
@@ -101,10 +104,10 @@ void UIManager::UpdateAllBatches() {
 	//	new discovery: we'll actually use UI batch again, just retailor it to work with subsprites if needed, not with 9-part pieces at a time
 	//	problem is FB_STD is not equivalent to UIB_STD
 	m_UIBatch->UpdateBuffers(
-		PANE_Skins.data(),
-		PANE_Positions.data(),
-		PANE_Dimensions.data(),
-		PANE_zLayers.data(),
+		WidgetData_Skins.data(),
+		WidgetData_Positions.data(),
+		WidgetData_Dimensions.data(),
+		WidgetData_zLayers.data(),
 		PaneTotalSubsprites
 	);
 }

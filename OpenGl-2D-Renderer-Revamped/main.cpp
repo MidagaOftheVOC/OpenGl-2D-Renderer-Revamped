@@ -38,34 +38,6 @@ int main(int argc, char** argv) {
 	r.StartLoadingProcess();
 
 
-	Font f = Font(
-		r.GetSpriteSheetByName("test_font"),
-		"cyrillic"
-	);
-
-	unsigned short off[] = { 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, };
-	f.Init(
-		U"абвгдежзийклмнопрстуфхцчшщъьюяѝ .,+-!?;:&><#/",
-		off,
-		50
-	);
-
-	TextOptions textoptions(20, 5);
-
-	Text t = Text(
-		&f,
-		U"здрастиииииии! всичките сте !",
-		textoptions
-	);
-
-	Text text = Text(
-		&f,
-		U"здравейте, дами и господа!",
-		textoptions
-	);
-
-	t.SetWordWrapBound(0);
-
 	InputController& input = r.GetInputController();
 
 
@@ -81,21 +53,24 @@ int main(int argc, char** argv) {
 	Window win2 = ui.CreateWindow({ 400, 200 }, 20);
 
 
+	Label label = Label(r.GenText(U"здрасти"), {50, 80});
+	win.AttachWidget(&label);
+
 	ID winID1 = ui.AddWindow(win);
 	ID winID2 = ui.AddWindow(win2);
 
 
-	ui.OpenWindow(winID2, 500, 300);
+
 	ui.OpenWindow(winID1, 200, 200);
+	ui.OpenWindow(winID2, 900, 300);
+
+	Text rando = r.GenText(U"здр");
 
 
 	while (!r.IsRunning()) {
 		input.CaptureKeystates();
 
-		//r.Draw(&fq,	100, 100, 3, nullptr);
-		//r.Draw(&free,	800, 400, 2, nullptr);
-		r.Draw(&t,	300, 300, 2, nullptr);
-		r.Draw(&text,	300, 500, 2, nullptr);
+		r.Draw(&rando,	300, 700, 1, nullptr);
 
 		if (input.IsHeld(GLFW_KEY_RIGHT)) {
 			//	TODO: this is bugged for some reason.

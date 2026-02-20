@@ -10,6 +10,8 @@
 
 
 struct TextOptions {
+	const Font* m_Font = nullptr;
+
 	float m_LineLength = 0.f;
 	//	TODO:
 	//	Allow for upper and lower cut-off bounds, if the text is within a textbox
@@ -25,11 +27,19 @@ struct TextOptions {
 	TextOptions() {}
 
 	TextOptions(
+		const Font* _font
+	) :
+		m_Font(_font)
+	{}
+
+	TextOptions(
+		const Font* _font,
 		float _charHeight,
 		float _spacingBetweenLines
 	):
 		m_CharacterHeight(_charHeight),
-		m_SpacingBetweenLines(_spacingBetweenLines)
+		m_SpacingBetweenLines(_spacingBetweenLines),
+		m_Font(_font)
 	{}
 };
 
@@ -62,7 +72,6 @@ public:
 
 
 	Text(
-		const Font* _font,
 		const std::u32string& _string,
 		TextOptions _textOptions
 	);
@@ -131,7 +140,7 @@ public:
 	//float GetScaleFactor() const { return m_ScaleFactor; }
 	unsigned int GetGlyphDataVBO() const { return m_GlyphDataVBO; }
 	const std::u32string& GetTextString() const { return m_TextContent; }
-	const Font* GetFont() const { return m_Font; }
+	const Font* GetFont() const { return m_TextOptions.m_Font; }
 	size_t GetCharCount() const { return m_TextContent.size(); }
 
 private:

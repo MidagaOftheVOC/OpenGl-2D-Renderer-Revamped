@@ -23,12 +23,12 @@ private:
 
 protected:
 
-	glm::vec2 m_Dimensions;
+	glm::vec2 m_Dimensions = { 0.f, 0.f };
 
 
 	//	Drawcalls will be made to the upper left corner of the window object
 	//	therefore primitives require offset from that point.
-	glm::vec2 m_PositionRelativeToWindow;
+	glm::vec2 m_PositionRelativeToWindow = { 0.f, 0.f };
 
 public:
 
@@ -48,6 +48,9 @@ private:
 	virtual void OnDimensionChange() {}	//<<< why is this here??
 
 public:
+
+	float GetXOffset() const { return m_PositionRelativeToWindow.x; }
+	float GetYOffset() const { return m_PositionRelativeToWindow.y; }
 
 	void SetDimensions(const glm::vec2& _dimensions);
 	void SetPositionRelativeToWindow(const glm::vec2& _posRelativeToWindow);

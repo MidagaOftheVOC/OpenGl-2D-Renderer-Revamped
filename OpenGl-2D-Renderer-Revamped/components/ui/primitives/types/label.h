@@ -12,11 +12,6 @@ struct Label : public UI_Primitive {
 public:
 
 	Label() : UI_Primitive() {}
-	
-	Label(
-		const char32_t _string,
-		glm::vec2 _offsetFromWindowCorner
-	);
 
 	Label(
 		const Text& _textObject,
@@ -30,7 +25,7 @@ public:
 public:
 
 	const std::u32string& GetString() const;
-	Text& GetText();
+	const Text* GetText() const { return &m_TextObject; };
 
 };
 

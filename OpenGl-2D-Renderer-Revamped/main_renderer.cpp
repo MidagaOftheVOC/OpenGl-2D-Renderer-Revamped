@@ -1,4 +1,4 @@
-
+﻿
 #include "main_renderer.h"
 
 
@@ -132,6 +132,11 @@ void Renderer2D::ExecuteDraws() {
 	glBindBufferBase(GL_UNIFORM_BUFFER, 0, 0);
 	glBindBufferBase(GL_UNIFORM_BUFFER, 1, 0);
 
+	const std::vector<TextWithZLayer>& UITexts = m_UIManager.GetUITexts();
+	for (size_t i = 0; i < UITexts.size(); i++) {
+		TextWithZLayer text = UITexts[i];
+		Draw(text.text, text.xLayer, text.yLayer, text.zLayer, nullptr);
+	}
 
 	RenderText();
 	RenderGUI();
@@ -686,10 +691,7 @@ void Renderer2D::StartLoadingProcess() {
 	}
 	m_SpriteSheetLoadQueue.clear();
 
-	m_UIBatch.InitialiseBuffers();
-	m_UIBatch.AddSheetToBatch(GetSpriteSheetByName(c_SpecialUISheetName));
-	m_UIBatch.BufferUBOs();
-	m_UIManager.SetDistributionBounds(1, 2);
+	LoadDefaultVariables();
 }
 
 
@@ -782,4 +784,38 @@ bool Renderer2D::GLFWInitialisation() {
 }
 
 
+void Renderer2D::LoadDefaultVariables() {
+	m_UIBatch.InitialiseBuffers();
+	m_UIBatch.AddSheetToBatch(GetSpriteSheetByName(c_SpecialUISheetName));
+	m_UIBatch.BufferUBOs();
+	m_UIManager.SetDistributionBounds(1, 2);
 
+	m_DefaultFont = Font(
+		GetSpriteSheetByName("test_font"),
+		"cyrillic"
+	);
+
+	unsigned short off[] = { 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, };
+	m_DefaultFont.Init(
+		U"абвгдежзийклмнопрстуфхцчшщъьюяѝ .,+-!?;:&><#/",
+		off,
+		50
+	);
+
+	m_DefaultTextOptions.m_Font = &m_DefaultFont;
+}
+
+//	ПОПЪЛНИ ГРАФИК !!!
+
+Text Renderer2D::GenText(
+	const char32_t* _string,
+	TextOptions _textOptions
+) const {
+
+	if (_textOptions.m_Font == nullptr) {
+		//	default;
+		return Text(_string, m_DefaultTextOptions);
+	}
+
+	return Text(_string, _textOptions);
+}

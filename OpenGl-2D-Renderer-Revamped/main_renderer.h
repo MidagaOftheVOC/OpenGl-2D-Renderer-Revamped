@@ -62,6 +62,16 @@ private:
 
 	Shader m_TextRenderingShader;
 
+	Font m_DefaultFont;
+	TextOptions m_DefaultTextOptions;
+
+public:
+
+	Text GenText(
+		const char32_t* _string32u,
+		TextOptions _textOptions = TextOptions(nullptr)
+	) const;
+
 private:	//	Structures for draw queue optimisation
 
 	//	Base class for DrawCall-like structures
@@ -340,6 +350,8 @@ private:	//	Following functions executer the load params for shaders and
 		int _spritesPerRow,
 		int _spritesPerCol
 	);
+
+	void LoadDefaultVariables();
 
 private:
 

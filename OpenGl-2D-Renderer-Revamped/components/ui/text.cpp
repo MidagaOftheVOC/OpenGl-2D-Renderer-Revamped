@@ -10,11 +10,9 @@ Text::Text() {
 
 
 Text::Text(
-	const Font* _font,
 	const std::u32string& _string,
 	TextOptions _textOptions
 ) :
-	m_Font(_font),
 	m_TextOptions(_textOptions)
 {
 	GenerateBuffers();

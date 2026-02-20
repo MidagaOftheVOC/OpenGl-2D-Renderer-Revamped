@@ -13,9 +13,23 @@
 
 #include "window.h"
 
-
-class Renderer2D;
-
+struct TextWithZLayer {
+	TextWithZLayer(
+		const Text* _text,
+		float _x,
+		float _y,
+		float _zLayer
+	):
+		text(_text),
+		xLayer(_x),
+		yLayer(_y),
+		zLayer(_zLayer)
+	{}
+	const float xLayer = 0.f;
+	const float yLayer = 0.f;
+	const float zLayer = 0.f;
+	const Text* text = nullptr;
+};
 
 class UIManager {
 
@@ -42,9 +56,10 @@ class UIManager {
 private:	//	Windows
 	
 	std::vector<Window> m_WindowArray;
-	
 
 	std::vector<ID> m_WindowIDArrayForRendering;
+
+	std::vector<TextWithZLayer> m_CachedTexts;
 
 private:	//	Factories for UI primitives
 
@@ -60,12 +75,6 @@ private:	//	Batches
 public:		//	Constants
 
 	const size_t c_ForemostWindowLayer = 0;
-
-public:
-
-	void LoadPaneSkins(
-		const char* _relativePathToSkinsFile
-	);
 
 public:
 
@@ -137,5 +146,6 @@ public:
 
 	const UIBatch* GetUIBatch() { return m_UIBatch; }
 	PaneFactory& GetPaneFactory() { return m_ThePaneFactory; }
+	const std::vector<TextWithZLayer>& GetUITexts() const { return m_CachedTexts; }
 
 };
