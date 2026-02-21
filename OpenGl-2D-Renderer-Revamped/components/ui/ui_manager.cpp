@@ -84,7 +84,6 @@ void UIManager::UpdateAllBatches() {
 
 		for (size_t i = 0; i < CurrWinWidgets.size(); i++) {
 			if (Label* label = dynamic_cast<Label*>(CurrWinWidgets[i])) {
-				std::cout << "TEXT LAYERS : " << BaseWindowZLayer - SubStep << "\n";
 				m_CachedTexts.push_back(
 					TextWithZLayer(
 						label->GetText(),
@@ -98,11 +97,6 @@ void UIManager::UpdateAllBatches() {
 		}
 	}
 
-	//	renders 1 red dot at the moment, we use fb_std.shader which is the NEW STANDARD FREEBATCH SHADER WITH UBO
-	//	TODO:	remove leaky implementation, mainly the *9
-
-	//	new discovery: we'll actually use UI batch again, just retailor it to work with subsprites if needed, not with 9-part pieces at a time
-	//	problem is FB_STD is not equivalent to UIB_STD
 	m_UIBatch->UpdateBuffers(
 		WidgetData_Skins.data(),
 		WidgetData_Positions.data(),

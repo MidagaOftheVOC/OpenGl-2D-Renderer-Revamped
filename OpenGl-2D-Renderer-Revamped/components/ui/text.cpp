@@ -198,6 +198,10 @@ void Text::SetMaximumCharactersPerLine(
 }
 
 
+//	This shit breaks if the max line length is under the width of a glyph
+//	since it forces the bounds strictly, i.e. no overflow of any kind under any circumstance.
+//
+//	Also the wrapping seems to have crashed comlpetly, maybe it bugs out only with special symbols in the middle or something
 void Text::CalculateWordWraps() {
 
 	m_LineBreaks.clear();

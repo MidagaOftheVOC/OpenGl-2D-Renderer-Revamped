@@ -39,13 +39,6 @@ int main(int argc, char** argv) {
 
 
 	InputController& input = r.GetInputController();
-
-
-	//StrictBatch strict = GetInitialisedStrictBatch(r.GetSpriteSheetByName("fox"));
-
-	const SpriteSheet* FB_normal = r.GetSpriteSheetByName("fd_std1");
-	const SpriteSheet* FB_panda = r.GetSpriteSheetByName("fd_std2");
-
 	
 	UIManager& ui = r.GetUIManager();
 	
@@ -61,22 +54,16 @@ int main(int argc, char** argv) {
 	ID winID1 = ui.AddWindow(win);
 	ID winID2 = ui.AddWindow(win2);
 
-
-
 	ui.OpenWindow(winID1, 200, 200);
 	ui.OpenWindow(winID2, 360, 250);
-
-	Text rando = r.GenText(U"здр");
-
 
 	while (!r.IsRunning()) {
 		input.CaptureKeystates();
 
-		r.Draw(&rando,	300, 700, 1, nullptr);
+		//r.Draw(&rando,	300, 700, 1, nullptr);
 
 		if (input.IsHeld(GLFW_KEY_RIGHT)) {
-			//	TODO: this is bugged for some reason.
-			//t.SetWordWrapBound(t.GetRightWordWrapBound() + .5f);
+			std::cout << "right pressed\n";
 		}
 
 		if (input.IsPressed(GLFW_KEY_ESCAPE)) {
