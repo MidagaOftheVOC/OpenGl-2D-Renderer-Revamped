@@ -112,6 +112,10 @@ public:
 		ID _windowID,
 		size_t _layer
 	);
+
+	void MoveWindowToFront(
+		ID _windowID
+	);
 	 
 private:
 	

@@ -204,7 +204,7 @@ void UIManager::MoveWindowToLayer(
 ) {
 	size_t TargetWindowIndex = GetIndexOfWindowByIDInRenderArray(_windowID);
 	DEBUG_ASSERT(TargetWindowIndex != gc_ui32ErrorCode, "Trying to move window with invalid ID. [%u]", _windowID);
-	DEBUG_ASSERT(_layer < m_WindowIDArrayForRendering.size(), "Attempting to move window to strange layer. [%llu]", _layer);
+	DEBUG_ASSERT(_layer < m_WindowIDArrayForRendering.size() || _layer >= 0, "Attempting to move window to strange layer. [%llu]", _layer);
 
 	if (TargetWindowIndex == _layer) return;
 	
@@ -230,4 +230,10 @@ size_t UIManager::GetIndexOfWindowByIDInRenderArray(
 
 void UIManager::SetUiBatchPointer(UIBatch* _uiBatch) {
 	m_UIBatch = _uiBatch;
+}
+
+void UIManager::MoveWindowToFront(
+	ID _windowID
+) {
+	MoveWindowToLayer(_windowID, 0);
 }

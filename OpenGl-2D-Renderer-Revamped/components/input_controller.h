@@ -16,10 +16,8 @@ class InputController {
 
 	GLFWwindow* m_MainWinHandle = nullptr;
 
-
 	std::bitset<MAXIMUM_BITSET_SIZE> m_RecentKeystateBitmask;
 	std::bitset<MAXIMUM_BITSET_SIZE> m_PreviousKeystateBitmask;
-
 
 	float m_xMouseCoord = 0.f;
 	float m_yMouseCoord = 0.f;
@@ -31,12 +29,10 @@ private:
 
 	std::bitset<MAXIMUM_BITSET_SIZE> m_TrackedKeystatesBitmask;
 
-
 	void AddIndicesToTrackedKeystatesBitmask(
 		const int* _indexArray,
 		int _indexElementCount
 	);
-
 
 	static constexpr int c_LetterKeystateIndices[] = {
 		GLFW_KEY_A, GLFW_KEY_B, GLFW_KEY_C, GLFW_KEY_D, GLFW_KEY_E,
@@ -46,29 +42,24 @@ private:
 		GLFW_KEY_U, GLFW_KEY_V, GLFW_KEY_W, GLFW_KEY_X, GLFW_KEY_Y, GLFW_KEY_Z
 	};
 
-
 	static constexpr int c_DigitKeystateIndices[] = {
 		GLFW_KEY_0, GLFW_KEY_1, GLFW_KEY_2, GLFW_KEY_3, GLFW_KEY_4,
 		GLFW_KEY_5, GLFW_KEY_6, GLFW_KEY_7, GLFW_KEY_8, GLFW_KEY_9
 	};
 
-
 	static constexpr int c_ArrowKeystateIndices[] = {
 		GLFW_KEY_LEFT, GLFW_KEY_RIGHT, GLFW_KEY_UP, GLFW_KEY_DOWN
 	};
 
-
 	static constexpr int c_SpecialSymbolKeystateIndices[] = {
 		GLFW_KEY_SLASH, GLFW_KEY_SEMICOLON, GLFW_KEY_APOSTROPHE
 	};
-
 
 	static constexpr int c_FunctionKeystateIndices[] = {
 		GLFW_KEY_F1, GLFW_KEY_F2, GLFW_KEY_F3, GLFW_KEY_F4, GLFW_KEY_F5,
 		GLFW_KEY_F6, GLFW_KEY_F7, GLFW_KEY_F8, GLFW_KEY_F9, GLFW_KEY_F10,
 		GLFW_KEY_F11, GLFW_KEY_F12
 	};
-
 
 	static constexpr int c_SpecialKeystateIndices[] = {
 		GLFW_KEY_SPACE, GLFW_KEY_ENTER, GLFW_KEY_TAB, GLFW_KEY_BACKSPACE,
@@ -90,23 +81,17 @@ public:
 
 	InputController() {}
 
-
 	InputController(
 		GLFWwindow* _mainWindowHandle
 	);
 
-
 	void CaptureKeystates();
-
 
 	bool IsPressed(GLuint _openglKeyCode) const;
 
-
 	bool IsHeld(GLuint _openglKeyCode) const;
 
-
 	bool IsReleased(GLuint _openglKeyCode) const;
-
 
 	void SetTrackedKeystatesBitmask(
 		TrackingBit _trackingBitmask
@@ -146,11 +131,9 @@ private:
 		int _index
 	) const;
 
-
 	bool AccessRecentKeystateBitmask(
 		int _index
 	) const;
-
 
 	bool AccessBitmask(
 		int _index,
