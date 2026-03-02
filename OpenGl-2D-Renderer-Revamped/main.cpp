@@ -5,7 +5,6 @@
 
 #include "components/batch_types/batch_instance_primitives.h"
 
-#include "test/test_snippets.h"
 
 int main(int argc, char** argv) {
 
@@ -59,6 +58,7 @@ int main(int argc, char** argv) {
 
 	while (!r.IsRunning()) {
 		input.CaptureKeystates();
+		//input.CaptureMouseButtons();
 
 		//r.Draw(&rando,	300, 700, 1, nullptr);
 
@@ -71,8 +71,17 @@ int main(int argc, char** argv) {
 			return 0;
 		}
 
-		r.ExecuteDraws();
+		//if(r.GetInputController().IsHeld(GLFW_MOUSE_BUTTON_1)) {		std::cout << "Mouse is   HELD	\n"; }
+		//if (r.GetInputController().IsPressed(GLFW_MOUSE_BUTTON_1)) {	std::cout << "Mouse is   PRESSED\n"; }
+		//if (r.GetInputController().IsReleased(GLFW_MOUSE_BUTTON_1)) {	std::cout << "Mouse is   RELEASED\n"; }
 
+		if (r.HasClicked()) {
+			std::cout << "Clicked outside a window.\n";
+		}
+		
+		
+
+		r.ExecuteDraws();
 	}
 
 	return 0;

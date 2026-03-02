@@ -146,10 +146,23 @@ private:
 
 public:
 
+	//	Returns 0 on no overlaps
+	const ID HasClickedOnUIElement(
+		float xMousePos,
+		float yMousePos
+	) const;
+
+	void ProvokeUIActionWithMouseCoords(
+		float xMousePos,
+		float yMousePos,
+		ID _winId
+	);
+
 	void SetDistributionBounds(float _low, float _high);
 
 	const UIBatch* GetUIBatch() { return m_UIBatch; }
 	PaneFactory& GetPaneFactory() { return m_ThePaneFactory; }
 	const std::vector<TextWithZLayer>& GetUITexts() const { return m_CachedTexts; }
 
+	const std::vector<Window>& GetWindows() const { return m_WindowArray; }
 };

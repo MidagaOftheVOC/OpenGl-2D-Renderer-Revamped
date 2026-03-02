@@ -21,6 +21,7 @@ class InputController {
 
 	float m_xMouseCoord = 0.f;
 	float m_yMouseCoord = 0.f;
+
 	
 private:
 
@@ -86,6 +87,8 @@ public:
 	);
 
 	void CaptureKeystates();
+
+	void CaptureMouseButtons();
 
 	bool IsPressed(GLuint _openglKeyCode) const;
 

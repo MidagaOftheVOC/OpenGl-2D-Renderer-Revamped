@@ -72,6 +72,14 @@ public:
 		TextOptions _textOptions = TextOptions(nullptr)
 	) const;
 
+private:
+
+	bool m_HasClickedThisFrame = false;
+
+public:
+
+	const bool HasClicked();
+
 private:	//	Structures for draw queue optimisation
 
 	//	Base class for DrawCall-like structures

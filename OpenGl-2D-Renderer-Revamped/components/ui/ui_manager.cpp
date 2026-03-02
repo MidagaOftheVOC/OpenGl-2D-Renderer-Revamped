@@ -237,3 +237,45 @@ void UIManager::MoveWindowToFront(
 ) {
 	MoveWindowToLayer(_windowID, 0);
 }
+
+const ID UIManager::HasClickedOnUIElement(
+	float xMousePos,
+	float yMousePos
+) const {
+	std::vector<uint32_t> WindowIDsWithOverlap;
+
+	for (const auto& win : m_WindowArray) {
+		auto LowerBounds = win.GetWinPosition();
+		auto UpperBounds = win.GetWinDimensions() + LowerBounds;
+		if (xMousePos >= LowerBounds.x && xMousePos <= UpperBounds.x
+			&& yMousePos >= LowerBounds.y && yMousePos <= UpperBounds.y) {
+			WindowIDsWithOverlap.emplace_back(win.GetID());
+#ifdef DEBUG__CODE 
+			std::cout << "Window with ID [" << win.GetID() << "] overlaps with click at [X: " << xMousePos << " Y: " << yMousePos << "]\n";
+#endif
+		}
+	}
+
+	ID TargetWindow = 0;
+
+	for(size_t i = 0; i < m_WindowIDArrayForRendering.size(); i++) {
+		for (auto id : WindowIDsWithOverlap) {
+			if (id == m_WindowIDArrayForRendering[i] ) {
+				TargetWindow = id;
+				break;
+			}
+		}
+		if (TargetWindow) break;
+	}
+
+	return TargetWindow;
+}
+
+
+void UIManager::ProvokeUIActionWithMouseCoords(
+	float xMousePos,
+	float yMousePos,
+	ID _winId
+) {
+	MoveWindowToFront(_winId);
+}

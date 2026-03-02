@@ -41,6 +41,12 @@ void InputController::CaptureKeystates() {
 			m_RecentKeystateBitmask[i] = glfwGetKey(m_MainWinHandle, i);
 	}
 
+	for (int i = 0; i <= GLFW_MOUSE_BUTTON_LAST; ++i)
+	{
+		m_RecentKeystateBitmask[i] =
+			(glfwGetMouseButton(m_MainWinHandle, i) == GLFW_PRESS);
+	}
+
 	//	Mouse coords
 
 	double xMousePosition, yMousePosition;
@@ -54,7 +60,7 @@ void InputController::CaptureKeystates() {
 bool InputController::IsPressed(
 	GLuint _openglKeyCode
 ) const {
-	DEBUG_ASSERT(_openglKeyCode >= 32 && _openglKeyCode <= MAXIMUM_TRACKED_KEYS_INDEX,
+	DEBUG_ASSERT(_openglKeyCode >= 0 && _openglKeyCode <= MAXIMUM_TRACKED_KEYS_INDEX,
 		"Attempt to check out-of-bounds keystate of keycode [%d].", _openglKeyCode);
 	return
 		AccessRecentKeystateBitmask(_openglKeyCode) &&
@@ -65,7 +71,7 @@ bool InputController::IsPressed(
 bool InputController::IsHeld (
 	GLuint _openglKeyCode
 ) const {
-	DEBUG_ASSERT(_openglKeyCode >= 32 && _openglKeyCode <= MAXIMUM_TRACKED_KEYS_INDEX,
+	DEBUG_ASSERT(_openglKeyCode >= 0 && _openglKeyCode <= MAXIMUM_TRACKED_KEYS_INDEX,
 		"Attempt to check out-of-bounds keystate of keycode [%d].", _openglKeyCode);
 	return
 		AccessRecentKeystateBitmask(_openglKeyCode) &&
@@ -76,7 +82,7 @@ bool InputController::IsHeld (
 bool InputController::IsReleased (
 	GLuint _openglKeyCode
 ) const {
-	DEBUG_ASSERT(_openglKeyCode >= 32 && _openglKeyCode <= MAXIMUM_TRACKED_KEYS_INDEX,
+	DEBUG_ASSERT(_openglKeyCode >= 0 && _openglKeyCode <= MAXIMUM_TRACKED_KEYS_INDEX,
 		"Attempt to check out-of-bounds keystate of keycode [%d].", _openglKeyCode);
 	return
 		!AccessRecentKeystateBitmask(_openglKeyCode) &&

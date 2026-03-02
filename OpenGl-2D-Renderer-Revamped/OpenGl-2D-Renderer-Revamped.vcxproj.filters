@@ -57,9 +57,6 @@
     <ClCompile Include="components\ui\window.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="test\test_snippets.h">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="components\batch_types\batches.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

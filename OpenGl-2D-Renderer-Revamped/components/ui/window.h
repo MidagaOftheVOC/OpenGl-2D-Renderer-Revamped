@@ -71,7 +71,7 @@ public:
 	const Pane& GetPane() const { return m_WindowPane; }
 	const bool HasPane() const { return m_HasPane; }
 	const glm::vec2& GetWinPosition() const { return m_WindowPosition; }
-
+	const glm::vec2& GetWinDimensions() const { return m_WindowDimensions; }
 };
 
 

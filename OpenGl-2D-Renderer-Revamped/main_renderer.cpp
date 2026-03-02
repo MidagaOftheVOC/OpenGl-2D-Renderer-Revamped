@@ -138,6 +138,26 @@ void Renderer2D::ExecuteDraws() {
 		Draw(text.text, text.xLayer, text.yLayer, text.zLayer, nullptr);
 	}
 
+	if ((
+		GetInputController().IsHeld(GLFW_MOUSE_BUTTON_1) ||
+		GetInputController().IsPressed(GLFW_MOUSE_BUTTON_1) ||
+		GetInputController().IsReleased(GLFW_MOUSE_BUTTON_1)
+		)) {
+		m_HasClickedThisFrame = true;
+
+		float xMousePos, yMousePos;
+		GetInputController().GetMousePosition(xMousePos, yMousePos);
+
+		ID ClickedWindowID = GetUIManager().HasClickedOnUIElement(xMousePos, yMousePos);
+		if (ClickedWindowID) {
+			m_UIManager.ProvokeUIActionWithMouseCoords(xMousePos, yMousePos, ClickedWindowID);
+			m_HasClickedThisFrame = false;	//	gameplay-wise, UI-related clicks will be ignored
+		}
+	}
+	else {
+		m_HasClickedThisFrame = false;
+	}
+
 	RenderText();
 	RenderGUI();
 
@@ -804,8 +824,6 @@ void Renderer2D::LoadDefaultVariables() {
 	m_DefaultTextOptions.m_Font = &m_DefaultFont;
 }
 
-//	ПОПЪЛНИ ГРАФИК !!!
-
 Text Renderer2D::GenText(
 	const char32_t* _string,
 	TextOptions _textOptions
@@ -817,4 +835,9 @@ Text Renderer2D::GenText(
 	}
 
 	return Text(_string, _textOptions);
+}
+
+
+const bool Renderer2D::HasClicked() {
+	return m_HasClickedThisFrame;
 }
