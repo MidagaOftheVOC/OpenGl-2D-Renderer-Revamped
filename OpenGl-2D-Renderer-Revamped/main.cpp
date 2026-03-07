@@ -54,7 +54,7 @@ int main(int argc, char** argv) {
 	ID winID2 = ui.AddWindow(win2);
 
 	ui.OpenWindow(winID1, 200, 200);
-	ui.OpenWindow(winID2, 360, 250);
+	ui.OpenWindow(winID2, 560, 250);
 
 	while (!r.IsRunning()) {
 		input.CaptureKeystates();
@@ -78,8 +78,6 @@ int main(int argc, char** argv) {
 		if (r.HasClicked()) {
 			std::cout << "Clicked outside a window.\n";
 		}
-		
-		
 
 		r.ExecuteDraws();
 	}

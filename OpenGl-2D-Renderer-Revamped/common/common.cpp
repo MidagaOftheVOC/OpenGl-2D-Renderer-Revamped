@@ -10,6 +10,13 @@ bool fEqual(
 }
 
 
+bool PointInRect(const glm::vec2& p, const glm::vec2& pos, const glm::vec2& size)
+{
+	return p.x >= pos.x && p.x <= pos.x + size.x &&
+		p.y >= pos.y && p.y <= pos.y + size.y;
+}
+
+
 bool FastStringCompare(const char* _str1, const char* _str2) {
 
 	if (!_str1 || !_str2) return false;

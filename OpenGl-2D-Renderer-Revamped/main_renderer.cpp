@@ -150,7 +150,7 @@ void Renderer2D::ExecuteDraws() {
 
 		ID ClickedWindowID = GetUIManager().HasClickedOnUIElement(xMousePos, yMousePos);
 		if (ClickedWindowID) {
-			m_UIManager.ProvokeUIActionWithMouseCoords(xMousePos, yMousePos, ClickedWindowID);
+			m_UIManager.ProvokeUIActionWithMouseCoords(&m_InputController, ClickedWindowID);
 			m_HasClickedThisFrame = false;	//	gameplay-wise, UI-related clicks will be ignored
 		}
 	}

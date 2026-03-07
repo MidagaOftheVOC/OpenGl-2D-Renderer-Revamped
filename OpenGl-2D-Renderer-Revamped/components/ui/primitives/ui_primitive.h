@@ -23,6 +23,8 @@ private:
 
 protected:
 
+	bool m_Clickable = true;
+
 	glm::vec2 m_Dimensions = { 0.f, 0.f };
 
 
@@ -49,12 +51,15 @@ private:
 
 public:
 
-	float GetXOffset() const { return m_PositionRelativeToWindow.x; }
-	float GetYOffset() const { return m_PositionRelativeToWindow.y; }
+	const glm::vec2 GetPositionRelativeToWindow() const { return m_PositionRelativeToWindow; }
+	const glm::vec2 GetDimensions() const { return m_Dimensions; }
 
 	void SetDimensions(const glm::vec2& _dimensions);
 	void SetPositionRelativeToWindow(const glm::vec2& _posRelativeToWindow);
+	bool IsClickable() const { return m_Clickable; }
+
 	virtual void PostAttachment(WidgetWindowData _data) = 0;
+	virtual void DoAction() = 0;
 
 };
 

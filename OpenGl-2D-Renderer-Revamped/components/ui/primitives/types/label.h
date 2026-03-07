@@ -27,5 +27,7 @@ public:
 	const std::u32string& GetString() const;
 	const Text* GetText() const { return &m_TextObject; };
 
+	virtual void DoAction() {}
+
 };
 

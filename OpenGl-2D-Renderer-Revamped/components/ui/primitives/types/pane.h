@@ -36,6 +36,8 @@ private:
 
 	float m_CornerSidePx = 20.f;
 
+	bool m_Clickable = false;
+
 public:
 
 	Pane() : UI_Primitive() {}
@@ -68,7 +70,9 @@ public:
 	void SetCornerLength(float _lengthPx);
 	void SetSpriteInformation(const SpriteInformation* _siArray);
 	virtual void PostAttachment(WidgetWindowData _data) {}
+	virtual void DoAction() {}
 
+	~Pane() {}
 };
 
 

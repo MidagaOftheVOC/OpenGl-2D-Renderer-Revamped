@@ -4,6 +4,7 @@
 #include "../../common/common.h"
 #include "../../common/standard_quad.h"
 
+#include "../input_controller.h"
 
 #include "../batch_types/ui_batch.h"
 
@@ -153,8 +154,7 @@ public:
 	) const;
 
 	void ProvokeUIActionWithMouseCoords(
-		float xMousePos,
-		float yMousePos,
+		const InputController* _input,
 		ID _winId
 	);
 

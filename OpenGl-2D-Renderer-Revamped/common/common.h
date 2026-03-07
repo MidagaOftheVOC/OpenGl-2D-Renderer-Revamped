@@ -264,3 +264,4 @@ struct Profiler {
 
 
 
+bool PointInRect(const glm::vec2& p, const glm::vec2& pos, const glm::vec2& size);

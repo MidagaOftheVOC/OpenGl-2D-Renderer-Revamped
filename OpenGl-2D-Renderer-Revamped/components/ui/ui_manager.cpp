@@ -84,11 +84,12 @@ void UIManager::UpdateAllBatches() {
 
 		for (size_t i = 0; i < CurrWinWidgets.size(); i++) {
 			if (Label* label = dynamic_cast<Label*>(CurrWinWidgets[i])) {
+				auto labelOffset = label->GetPositionRelativeToWindow();
 				m_CachedTexts.push_back(
 					TextWithZLayer(
 						label->GetText(),
-						WinPos.x + label->GetXOffset(),
-						WinPos.y + label->GetYOffset(),
+						WinPos.x + labelOffset.x,
+						WinPos.y + labelOffset.y,
 						BaseWindowZLayer - SubStep
 					)
 				);
@@ -251,7 +252,7 @@ const ID UIManager::HasClickedOnUIElement(
 			&& yMousePos >= LowerBounds.y && yMousePos <= UpperBounds.y) {
 			WindowIDsWithOverlap.emplace_back(win.GetID());
 #ifdef DEBUG__CODE 
-			std::cout << "Window with ID [" << win.GetID() << "] overlaps with click at [X: " << xMousePos << " Y: " << yMousePos << "]\n";
+			//std::cout << "Window with ID [" << win.GetID() << "] overlaps with click at [X: " << xMousePos << " Y: " << yMousePos << "]\n";
 #endif
 		}
 	}
@@ -273,9 +274,29 @@ const ID UIManager::HasClickedOnUIElement(
 
 
 void UIManager::ProvokeUIActionWithMouseCoords(
-	float xMousePos,
-	float yMousePos,
+	const InputController* _input,
 	ID _winId
 ) {
+	const Window* window = GetWindowByID(_winId);
+	float xMouse, yMouse;
+	_input->GetMousePosition(xMouse, yMouse);
+
+	auto MouseCoordsRelativeToWindow = window->GetWinPosition();
+	MouseCoordsRelativeToWindow.x = xMouse - MouseCoordsRelativeToWindow.x;
+	MouseCoordsRelativeToWindow.y = yMouse - MouseCoordsRelativeToWindow.y;
+
+	//	Input must give mouse coord changes
+
+	
+
 	MoveWindowToFront(_winId);
+
+	std::cout << "Relative to window [X: " << MouseCoordsRelativeToWindow.x << " Y: " << MouseCoordsRelativeToWindow.y << "]\n";
+
+	for (const auto& widget : window->GetWidgets()) {
+		if (PointInRect(MouseCoordsRelativeToWindow, widget->GetPositionRelativeToWindow(), widget->GetDimensions())) {
+			widget->DoAction();
+			break;
+		}
+	}
 }
