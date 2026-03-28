@@ -39,6 +39,9 @@ class UIManager {
 
 	ID m_UniqueWindowIDCounter = 0;
 
+	const Renderer2D* m_Renderer = nullptr;
+	const InputController* m_Input = nullptr;
+
 private:	//	Windows
 	
 	std::vector<Window> m_WindowArray;
@@ -63,6 +66,8 @@ public:		//	Constants
 	const size_t c_ForemostWindowLayer = 0;
 
 public:
+
+	UIManager() {}
 
 	UIManager(UIBatch* _uiBatch);
 
@@ -150,4 +155,10 @@ public:
 	const std::vector<TextWithZLayer>& GetUITexts() const { return m_CachedTexts; }
 
 	const std::vector<Window>& GetWindows() const { return m_WindowArray; }
+
+	const Renderer2D* GetRenderer() const { return m_Renderer; }
+	void SetRenderer(const Renderer2D* rend) { m_Renderer = rend; }
+
+	const InputController* GetInput() const { return m_Input; }
+	void SetInputController(const InputController* input) { m_Input = input; }
 };

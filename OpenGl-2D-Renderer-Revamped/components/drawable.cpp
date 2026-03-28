@@ -1,16 +1,6 @@
 #include "drawable.h"
 
 
-
-
-
-
-
-
-
-
-
-
 Drawable::Drawable(
 	const SpriteSheet* _spriteSheet,
 	int _spriteIndex

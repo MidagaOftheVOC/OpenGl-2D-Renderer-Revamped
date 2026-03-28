@@ -19,7 +19,7 @@ struct StandardQuad {
 	unsigned int m_InterpolationBuffer = 0;
 
 	UVRegion m_UVregionCurrentlyUsed;
-	const UVRegion& GetCurrentUVregion() const { return m_UVregionCurrentlyUsed; }
+	UVRegion& GetCurrentUVregion() { return m_UVregionCurrentlyUsed; }
 
 	StandardQuad();
 

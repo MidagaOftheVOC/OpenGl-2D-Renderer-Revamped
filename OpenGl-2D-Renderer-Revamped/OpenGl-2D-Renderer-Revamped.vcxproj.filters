@@ -27,7 +27,7 @@
     <ClCompile Include="components\sprite_sheet.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="main_renderer.cpp">
+    <ClCompile Include="subsystems\main_renderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="components\shader.cpp">
@@ -75,9 +75,12 @@
     <ClCompile Include="components\managers\managers.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="engine.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="main_renderer.h">
+    <ClInclude Include="subsystems\main_renderer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="components\drawable.h">
@@ -153,6 +156,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="components\ui\primitives\types\button.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="engine.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

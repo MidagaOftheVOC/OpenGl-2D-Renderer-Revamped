@@ -118,7 +118,7 @@ void Renderer2D::ExecuteDraws() {
 	//
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	Draw(&m_UIBatch, 0, nullptr);
+	//Draw(&m_UIBatch, 0, nullptr);
 
 	//	-- RENDERING STARTS --	//
 
@@ -132,31 +132,31 @@ void Renderer2D::ExecuteDraws() {
 	glBindBufferBase(GL_UNIFORM_BUFFER, 0, 0);
 	glBindBufferBase(GL_UNIFORM_BUFFER, 1, 0);
 
-	const std::vector<TextWithZLayer>& UITexts = m_UIManager.GetUITexts();
-	for (size_t i = 0; i < UITexts.size(); i++) {
-		TextWithZLayer text = UITexts[i];
-		Draw(text.text, text.xLayer, text.yLayer, text.zLayer, nullptr);
-	}
+	//const std::vector<TextWithZLayer>& UITexts = m_UIManager.GetUITexts();
+	//for (size_t i = 0; i < UITexts.size(); i++) {
+	//	TextWithZLayer text = UITexts[i];
+	//	Draw(text.text, text.xLayer, text.yLayer, text.zLayer, nullptr);
+	//}
 
-	if ((
-		GetInputController().IsHeld(GLFW_MOUSE_BUTTON_1) ||
-		GetInputController().IsPressed(GLFW_MOUSE_BUTTON_1) ||
-		GetInputController().IsReleased(GLFW_MOUSE_BUTTON_1)
-		)) {
-		m_HasClickedThisFrame = true;
+	//if ((
+	//	GetInputController().IsHeld(GLFW_MOUSE_BUTTON_1) ||
+	//	GetInputController().IsPressed(GLFW_MOUSE_BUTTON_1) ||
+	//	GetInputController().IsReleased(GLFW_MOUSE_BUTTON_1)
+	//	)) {
+	//	m_HasClickedThisFrame = true;
 
-		float xMousePos, yMousePos;
-		GetInputController().GetMousePosition(xMousePos, yMousePos);
+	//	float xMousePos, yMousePos;
+	//	GetInputController().GetMousePosition(xMousePos, yMousePos);
 
-		ID ClickedWindowID = GetUIManager().HasClickedOnUIElement(xMousePos, yMousePos);
-		if (ClickedWindowID) {
-			m_UIManager.ProvokeUIActionWithMouseCoords(&m_InputController, ClickedWindowID);
-			m_HasClickedThisFrame = false;	//	gameplay-wise, UI-related clicks will be ignored
-		}
-	}
-	else {
-		m_HasClickedThisFrame = false;
-	}
+	//	ID ClickedWindowID = GetUIManager().HasClickedOnUIElement(xMousePos, yMousePos);
+	//	if (ClickedWindowID) {
+	//		m_UIManager.ProvokeUIActionWithMouseCoords(&m_InputController, ClickedWindowID);
+	//		m_HasClickedThisFrame = false;	//	gameplay-wise, UI-related clicks will be ignored
+	//	}
+	//}
+	//else {
+	//	m_HasClickedThisFrame = false;
+	//}
 
 	RenderText();
 	RenderGUI();
@@ -517,16 +517,6 @@ bool Renderer2D::Init() {
 
 	GLFWInitialisation();
 	glEnable(GL_DEPTH_TEST);
-
-	//	Managers
-
-	
-	m_ResourceManager.LoadAssetsFromResourceConfigFile("test/configs/resource_configuration.rcfg");
-
-
-	//m_SheetManager.LoadTexturesFromConfigFile("s");
-
-
 	//	Component initialisation
 
 	const glm::vec2 DefaultCameraLocation = glm::vec2(0.f, 0.f);
@@ -534,14 +524,6 @@ bool Renderer2D::Init() {
 
 	m_Camera.Initialisation(DefaultCameraLocation, DefaultViewportDimensions);
 
-	m_InputController = InputController(GetWinHandle());
-
-	m_InputController.SetTrackedKeystatesBitmask(
-		InputController::c_ArrowTrackBit |
-		InputController::c_LetterTrackBit |
-		InputController::c_SpecialTrackBit
-	);
-	
 	//	Globals initialisation
 
 	g_StandardQuad.Init();
@@ -553,18 +535,18 @@ bool Renderer2D::Init() {
 
 
 Renderer2D::Renderer2D(
+	GLFWwindow* _initialisedWindow,
 	int _screenWidth,
 	int _screenHeight,
 	const char* _windowTitle,
 	bool _fullscreen
 )
-	: m_ScreenWidth(_screenWidth),
+	:
+	m_MainWindowHandle(_initialisedWindow),
+	m_ScreenWidth(_screenWidth),
 	m_ScreenHeight(_screenHeight),
 	m_WindowTitle(_windowTitle),
-	m_Fullscreen(_fullscreen),
-	m_StandardQuad(g_StandardQuad),
-
-	m_UIManager(&m_UIBatch)
+	m_Fullscreen(_fullscreen)
 {}
 
 
@@ -714,12 +696,6 @@ void Renderer2D::StartLoadingProcess() {
 	LoadDefaultVariables();
 }
 
-
-bool Renderer2D::IsRunning() const {
-	return glfwWindowShouldClose(GetWinHandle());
-}
-
-
 void Renderer2D::Draw(
 	const Text* _text,
 	float _xPosition,
@@ -765,79 +741,6 @@ bool Renderer2D::DrawCallComparator::operator()(const DrawableDrawCall& a, const
 
 	return aS > bS;
 }
-
-
-void Renderer2D::SetBaseDirectory(
-	const char* _pathToMain
-) {
-	fs::path Path = fs::path(_pathToMain);
-	m_FileHandler = FileHandler(Path.parent_path());
-}
-
-
-bool Renderer2D::GLFWInitialisation() {
-	//	Window and GLFW context initialisation
-	if (!glfwInit()) {
-		std::cout << "Window not opened.\n";
-		return false;
-	}
-
-	m_MainWindowHandle = glfwCreateWindow(
-		m_ScreenWidth,
-		m_ScreenHeight,
-		m_WindowTitle.c_str(),
-		NULL, NULL
-	);
-
-	if (!m_MainWindowHandle) {
-		glfwTerminate();
-		return false;
-	}
-
-	glfwMakeContextCurrent(m_MainWindowHandle);
-	glfwSwapInterval(1);
-	GLenum glewReturnCode = glewInit();
-	if (glewReturnCode != GLEW_OK) {
-		std::cout << glewGetErrorString(glewReturnCode);
-		return false;
-	}
-}
-
-
-void Renderer2D::LoadDefaultVariables() {
-	m_UIBatch.InitialiseBuffers();
-	m_UIBatch.AddSheetToBatch(GetSpriteSheetByName(c_SpecialUISheetName));
-	m_UIBatch.BufferUBOs();
-	m_UIManager.SetDistributionBounds(1, 2);
-
-	m_DefaultFont = Font(
-		GetSpriteSheetByName("test_font"),
-		"cyrillic"
-	);
-
-	unsigned short off[] = { 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, };
-	m_DefaultFont.Init(
-		U"абвгдежзийклмнопрстуфхцчшщъьюяѝ .,+-!?;:&><#/",
-		off,
-		50
-	);
-
-	m_DefaultTextOptions.m_Font = &m_DefaultFont;
-}
-
-Text Renderer2D::GenText(
-	const char32_t* _string,
-	TextOptions _textOptions
-) const {
-
-	if (_textOptions.m_Font == nullptr) {
-		//	default;
-		return Text(_string, m_DefaultTextOptions);
-	}
-
-	return Text(_string, _textOptions);
-}
-
 
 const bool Renderer2D::HasClicked() {
 	return m_HasClickedThisFrame;

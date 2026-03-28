@@ -159,8 +159,9 @@
     <ClCompile Include="components\ui\ui_manager.cpp" />
     <ClCompile Include="components\ui\window.cpp" />
     <ClCompile Include="components\uniform\uniform_data.cpp" />
+    <ClCompile Include="engine.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="main_renderer.cpp" />
+    <ClCompile Include="subsystems\main_renderer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="common\common.h" />
@@ -188,7 +189,8 @@
     <ClInclude Include="components\ui\primitives\ui_primitive.h" />
     <ClInclude Include="components\ui\window.h" />
     <ClInclude Include="components\uniform\uniform_data.h" />
-    <ClInclude Include="main_renderer.h" />
+    <ClInclude Include="engine.h" />
+    <ClInclude Include="subsystems\main_renderer.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

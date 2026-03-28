@@ -3,28 +3,22 @@
 #include <vector>
 #include <queue>
 
-#include "common/common.h"
-#include "common/standard_quad.h"
-
-#include "components/sprite_sheet.h"
-#include "components/shader.h"
-#include "components/drawable.h"
-#include "components/camera.h"
-#include "components/input_controller.h"
-#include "components/file_handler.h"
-
-#include "components/batch_types/strict_batch.h"
-#include "components/batch_types/soft_batch.h"
-#include "components/batch_types/free_batch.h"
-#include "components/batch_types/ui_batch.h"
-
-#include "components/uniform/uniform_data.h"
-
-#include "components/ui/ui_manager.h"
-#include "components/ui/text.h"
-
-
-#include "components/managers/resource_manager.h"
+#include "../common/common.h"
+#include "../common/standard_quad.h"
+#include "../components/sprite_sheet.h"
+#include "../components/shader.h"
+#include "../components/drawable.h"
+#include "../components/camera.h"
+#include "../components/input_controller.h"
+#include "../components/file_handler.h"
+#include "../components/batch_types/strict_batch.h"
+#include "../components/batch_types/soft_batch.h"
+#include "../components/batch_types/free_batch.h"
+#include "../components/batch_types/ui_batch.h"
+#include "../components/uniform/uniform_data.h"
+#include "../components/ui/ui_manager.h"
+#include "../components/ui/text.h"
+#include "../components/managers/resource_manager.h"
 
 
 class Renderer2D {
@@ -39,24 +33,23 @@ private:	//	Window-related information
 	bool m_IsRunning = false;
 	GLFWwindow* m_MainWindowHandle = nullptr;
 
+	const InputController* m_InputController = nullptr;
+	const UIManager* m_UIManager = nullptr;
+
 private:	//	Logical components
 
-	StandardQuad& m_StandardQuad;
-
-	FileHandler m_FileHandler;
+	StandardQuad m_StandardQuad;
 
 	Camera m_Camera;
 
-	InputController m_InputController;
-
-	ResourceManager m_ResourceManager;
-
-	UIManager m_UIManager;
-
-	UIBatch m_UIBatch = UIBatch(1);
-
 	std::vector<SpriteSheet> m_SpriteSheetArray;
 	std::vector<Shader> m_ShaderArray;
+
+private:
+
+	UIManager* m_UIManager = nullptr;
+
+	InputController* m_InputController = nullptr;
 
 private:
 
@@ -189,8 +182,12 @@ private:	//	Methods to render queued Drawcalls
 	void RenderGUI();
 
 public:		//	Exposed functions
+
+	Renderer2D() {}
+
 	
 	Renderer2D(
+		GLFWwindow* _initialisedWindow,
 		int _screenWidth,
 		int _screenHeight,
 		const char* _windowTitle,
@@ -277,11 +274,6 @@ public:		//	Exposed functions
 
 
 	bool IsRunning() const;
-
-public:		// Exposed constants
-
-	const char* c_SpecialTextShaderName = "SPECIAL_COMMON_TEXT_SHADER";
-	const char* c_SpecialUISheetName = "SPECIAL_UI_SPRITESHEET_NAME";
 
 public:		//	Loading functions, which append loading parameters to the queues.
 			//	All necessary resources must pass through those, after which we
@@ -393,20 +385,22 @@ public:		// getters and setters,
 
 	//	Gets the single instance governing OpenGL objects like 
 	//	VBOs, IBO and VAO used for rendering
-	StandardQuad&		GetQuad() { return m_StandardQuad; }
 	GLFWwindow*			GetWinHandle() const { return m_MainWindowHandle; }	// always required to be non-const
 	Camera&				GetCamera() { return m_Camera; }
-	InputController&	GetInputController() { return m_InputController; }
-	UIManager&			GetUIManager() { return m_UIManager; }
 	Shader&				GetTextShader() { return m_TextRenderingShader; }
-	FileHandler&		GetFileHandler() { return m_FileHandler; }
 
 
-	const StandardQuad&		GetQuad() const { return m_StandardQuad; }
 	const Camera&			GetCamera() const { return m_Camera; }
-	const InputController&	GetInputController() const { return m_InputController; }
-	const UIManager&		GetUIManager() const { return m_UIManager; }
 	const Shader&			GetTextShader() const { return m_TextRenderingShader; }
+
+
+	const InputController* GetInput() const { return m_InputController; }
+	const UIManager* GetUI() const { return m_UIManager; }
+
+	void SetInputController(const InputController* input) { m_InputController = input; }
+	void SetUIManager(const UIManager* ui) { m_UIManager = ui; }
+
+	StandardQuad& GetQuad() { return m_StandardQuad; }
 };
 
 
