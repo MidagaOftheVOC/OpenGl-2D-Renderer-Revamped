@@ -1,17 +1,13 @@
 #pragma once
 
-
 #include "../../common/common.h"
 #include "../../common/standard_quad.h"
-
 
 #include <vector>
 #include <memory>
 #include <unordered_map>
 
-
 #include "primitives/types/pane.h"
-
 
 class Window {
 
@@ -73,7 +69,3 @@ public:
 	const glm::vec2& GetWinPosition() const { return m_WindowPosition; }
 	const glm::vec2& GetWinDimensions() const { return m_WindowDimensions; }
 };
-
-
-
-

@@ -94,7 +94,6 @@ void UIManager::UpdateAllBatches() {
 					)
 				);
 			}
-			
 		}
 	}
 
@@ -251,9 +250,7 @@ const ID UIManager::HasClickedOnUIElement(
 		if (xMousePos >= LowerBounds.x && xMousePos <= UpperBounds.x
 			&& yMousePos >= LowerBounds.y && yMousePos <= UpperBounds.y) {
 			WindowIDsWithOverlap.emplace_back(win.GetID());
-#ifdef DEBUG__CODE 
 			//std::cout << "Window with ID [" << win.GetID() << "] overlaps with click at [X: " << xMousePos << " Y: " << yMousePos << "]\n";
-#endif
 		}
 	}
 
@@ -287,13 +284,13 @@ void UIManager::ProvokeUIActionWithMouseCoords(
 
 	//	Input must give mouse coord changes
 
-	
-
 	MoveWindowToFront(_winId);
 
 	std::cout << "Relative to window [X: " << MouseCoordsRelativeToWindow.x << " Y: " << MouseCoordsRelativeToWindow.y << "]\n";
 
 	for (const auto& widget : window->GetWidgets()) {
+		if (!widget->IsClickable()) continue;
+
 		if (PointInRect(MouseCoordsRelativeToWindow, widget->GetPositionRelativeToWindow(), widget->GetDimensions())) {
 			widget->DoAction();
 			break;

@@ -44,7 +44,8 @@ public:
 
 	Pane(
 		glm::vec2 _dimensions,
-		float _cornerLengthPx
+		float _cornerLengthPx,
+		bool _clickable = false
 	);
 
 	//	This function outputs vertex coord data for the FreeBatch object.
@@ -72,7 +73,9 @@ public:
 	virtual void PostAttachment(WidgetWindowData _data) {}
 	virtual void DoAction() {}
 
-	~Pane() {}
+	virtual void AppendWidgetRenderDataToArray(std::vector<float>& OUT_rects, std::vector<TextWithZLayer>& OUT_texts, float zLayer);
+
+	virtual ~Pane() {}
 };
 
 

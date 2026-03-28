@@ -28,6 +28,8 @@ public:
 	const Text* GetText() const { return &m_TextObject; };
 
 	virtual void DoAction() {}
+	virtual void AppendWidgetRenderDataToArray(std::vector<float>& OUT_rects, std::vector<TextWithZLayer>& OUT_texts, float zLayer);
 
+	virtual ~Label() {}
 };
 

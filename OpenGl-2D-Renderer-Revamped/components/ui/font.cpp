@@ -1,9 +1,6 @@
 #include "font.h"
 
-
-
 unsigned int Font::s_CommonFontSizeVBO = 0;
-
 
 Font::Font(
 	const SpriteSheet* _initialisedSheet,
@@ -12,7 +9,6 @@ Font::Font(
 	m_SpriteSheet(_initialisedSheet),
 	m_FontName(_name)
 {}
-
 
 void Font::Init(
 	const std::u32string& _containedGlyphs,
@@ -28,7 +24,6 @@ void Font::Init(
 
 	memcpy(m_GlyphOffsetsFromAdjecentGlyph, _glyphOffsets, _glyphCount * sizeof(unsigned short));
 }
-
 
 void Font::GetConsecutiveOffsetsFromFirstGlyph(
 	const std::u32string& _text,
@@ -61,7 +56,6 @@ void Font::GetConsecutiveOffsetsFromFirstGlyph(
 	}
 }
 
-
 unsigned short Font::GetOffsetForGlyph(
 	char32_t _char,
 	unsigned short* OUT_glyphIndexWithinSpriteSheet
@@ -77,7 +71,6 @@ unsigned short Font::GetOffsetForGlyph(
 	}
 	return -1;
 }
-
 
 void Font::InitialiseCommonFontSizeVBO(
 	float _commonFontSize
@@ -103,7 +96,6 @@ void Font::InitialiseCommonFontSizeVBO(
 	glBufferData(GL_ARRAY_BUFFER, sizeof(TempArray), TempArray, GL_STATIC_DRAW);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
-
 
 unsigned int Font::GetCommonFontSizeVBO() {
 	return s_CommonFontSizeVBO;

@@ -152,5 +152,8 @@
     <ClInclude Include="common\io_util.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="components\ui\primitives\types\button.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

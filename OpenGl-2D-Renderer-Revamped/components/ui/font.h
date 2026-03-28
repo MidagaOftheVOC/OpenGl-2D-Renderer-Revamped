@@ -2,10 +2,8 @@
 
 #include <string>
 
-
 #include "../../common/common.h"
 #include "../../common/standard_quad.h"
-
 
 inline constexpr unsigned int MAXIMUM_GLYPHS_PER_FONT = 256;
 
@@ -18,22 +16,18 @@ class Font {
 	int m_GlyphCount = 0;
 	unsigned short m_GlyphOffsetsFromAdjecentGlyph[MAXIMUM_GLYPHS_PER_FONT] = { 0 };
 
-
 	std::u32string m_GlyphIdentifier;
 
-	
 	std::string m_FontName;
 
 public:
 
 	Font() {}
 
-
 	Font(
 		const SpriteSheet* _initialisedSheet,
 		const std::string& _name
 	);
-
 
 	void Init(
 		const std::u32string& _containedGlyphs,
@@ -41,12 +35,10 @@ public:
 		int _glyphCount
 	);
 
-
 	void GetConsecutiveOffsetsFromFirstGlyph(
 		const std::u32string& _text,
 		std::vector<unsigned short>& OUT_preparedGlyphOffsets
 	) const;
-
 
 	unsigned short GetOffsetForGlyph(
 		char32_t _char,
@@ -58,7 +50,6 @@ public:
 	static void InitialiseCommonFontSizeVBO(
 		float _commonFontSize
 	);
-
 
 	static unsigned int GetCommonFontSizeVBO();
 

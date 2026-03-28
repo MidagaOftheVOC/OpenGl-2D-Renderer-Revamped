@@ -1,13 +1,10 @@
 #include "window.h"
 
-
-
 Window::Window(
 	ID _windowId
 ) {
 	m_ID = _windowId;
 }
-
 
 void Window::SetDimensions(
 	glm::vec2 _dimensions
@@ -18,13 +15,11 @@ void Window::SetDimensions(
 	}
 }
 
-
 void Window::SetPosition(
 	glm::vec2 _position
 ) {
 	m_WindowPosition = _position;
 }
-
 
 void Window::SetPane(
 	Pane&& _pane
@@ -32,4 +27,3 @@ void Window::SetPane(
 	m_HasPane = true;
 	m_WindowPane = std::move(_pane);
 }
-

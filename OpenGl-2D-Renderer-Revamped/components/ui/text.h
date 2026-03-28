@@ -8,7 +8,6 @@
 * a little more rules to rendering it.
 */
 
-
 struct TextOptions {
 	const Font* m_Font = nullptr;
 
@@ -54,14 +53,12 @@ class Text {
 
 	TextOptions m_TextOptions;
 
-
 	//	Since appending and removing from the string will take place
 	//	we need to track this for know if we can just buffer data
 	//	or allocated memori is insufficient and we need more.
 	size_t m_VBOlastReportedSize = 0;
 	//	This buffer holds pairs of unsigned shorts for each instance
 	unsigned int m_GlyphDataVBO = 0;
-
 
 	float m_fRightWordWrapBound = 0.f;
 	int m_MaximumCharsPerLine = 0;
@@ -70,12 +67,10 @@ public:
 
 	Text();
 
-
 	Text(
 		const std::u32string& _string,
 		TextOptions _textOptions
 	);
-
 
 	//	This could be called from any random Text instance but it has to 
 	//	be called only once in total. The idea is to have the common VAO
@@ -83,40 +78,32 @@ public:
 	//	with per-instance buffers
 	static void InitialiseCommonVAO();
 
-
 	void UpdateTextValue(
 		std::u32string&& _stringToMove
 	);
-
 
 	void UpdateTextValue(
 		const std::u32string& _stringToCopy
 	);
 
-
 	void AppendCharacter(
 		char32_t _char
 	);
-
 
 	void RemoveCharacter(
 		char32_t _char
 	);
 
-
 	//	This should only be called after this class' VAO is bound
 	void BindUniqueBuffers() const;
-
 
 	void SetWordWrapBound(
 		float _rightBound
 	);
 
-
 	void SetMaximumCharactersPerLine(
 		int _charsPerLine
 	);
-
 
 	void CalculateWordWraps();
 
@@ -149,17 +136,12 @@ private:
 		int _charIndex
 	);
 
-
 	void UpdateGlyphOffsets();
-
 
 	void UpdateVBO();
 
-
 	void GenerateBuffers();
-
 
 	size_t GetLastVBOsize() const { return m_VBOlastReportedSize; }
 
 };
-

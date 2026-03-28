@@ -258,6 +258,7 @@ void Renderer2D::RenderText() {
 		Shader.SetStandardModel(glm::translate(glm::mat4(1.f), DrawCall.GetPositionVector()));
 
 		//	Sprite indices are passed already, so we need sprite dimensions sent
+		DEBUG_ASSERT(SheetObject != nullptr, "Sprite sheet from font [%s] is null.", TextObject->GetFont()->GetName().c_str());
 		Shader.SetVec2("u_SpriteDimensions", SheetObject->GetSpriteDimensions());
 		Shader.SetInt("u_RowSpriteCount", SheetObject->GetSheetRowSpriteCount());
 

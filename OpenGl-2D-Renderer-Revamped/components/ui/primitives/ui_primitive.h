@@ -5,6 +5,8 @@
 
 #include "../../batch_types/batch_instance_primitives.h"
 
+#include "../text.h"
+
 /*
 
 Abstract class for all graphical primitives.
@@ -15,8 +17,26 @@ struct WidgetWindowData {
 	glm::vec2 WindowDimensions;
 };
 
-struct UI_Primitive {
+struct TextWithZLayer {
+	TextWithZLayer(
+		const Text* _text,
+		float _x,
+		float _y,
+		float _zLayer
+	) :
+		text(_text),
+		xLayer(_x),
+		yLayer(_y),
+		zLayer(_zLayer)
+	{
+	}
+	const float xLayer = 0.f;
+	const float yLayer = 0.f;
+	const float zLayer = 0.f;
+	const Text* text = nullptr;
+};
 
+struct UI_Primitive {
 private:
 
 	static void* FUTURE_POINTER_TO_STRING_MANAGER_AND_ALLOCATOR;
@@ -25,8 +45,9 @@ protected:
 
 	bool m_Clickable = true;
 
-	glm::vec2 m_Dimensions = { 0.f, 0.f };
+protected:
 
+	glm::vec2 m_Dimensions = { 0.f, 0.f };
 
 	//	Drawcalls will be made to the upper left corner of the window object
 	//	therefore primitives require offset from that point.
@@ -59,6 +80,11 @@ public:
 	bool IsClickable() const { return m_Clickable; }
 
 	virtual void PostAttachment(WidgetWindowData _data) = 0;
+
+	//	Develop this idea. Also, needs centralised way of acquiring resources for each widget, they need to hold
+	//	only ptrs to rendering data and append it when commanded to.
+	virtual void AppendWidgetRenderDataToArray(std::vector<float> &OUT_rects, std::vector<TextWithZLayer> &OUT_texts, float zLayer) = 0;
+
 	virtual void DoAction() = 0;
 
 };

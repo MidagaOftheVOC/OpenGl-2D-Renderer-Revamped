@@ -14,23 +14,7 @@
 
 #include "window.h"
 
-struct TextWithZLayer {
-	TextWithZLayer(
-		const Text* _text,
-		float _x,
-		float _y,
-		float _zLayer
-	):
-		text(_text),
-		xLayer(_x),
-		yLayer(_y),
-		zLayer(_zLayer)
-	{}
-	const float xLayer = 0.f;
-	const float yLayer = 0.f;
-	const float zLayer = 0.f;
-	const Text* text = nullptr;
-};
+
 
 class UIManager {
 

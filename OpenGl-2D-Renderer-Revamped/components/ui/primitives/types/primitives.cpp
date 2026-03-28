@@ -1,6 +1,7 @@
 #include "../ui_primitive.h"
 #include "pane.h"
 #include "label.h"
+#include "button.h"
 
 //	TODO:	MUST ADD COMMON DESTROY() FUNCTION TO INTERFACE
 //			ALSO, AFTER CREATING WIDGETS, WE IMMEDIATELY PASS OWNERSHIP TO WINDOWS(cause it'll be easier to manage that way)
@@ -46,10 +47,12 @@ void UI_Primitive::SetPositionRelativeToWindow(const glm::vec2& _posRelativeToWi
 
 Pane::Pane(
 	glm::vec2 _dimensions,
-	float _cornerLengthPx
+	float _cornerLengthPx,
+	bool _clickable
 ) :
 	UI_Primitive(_dimensions, glm::vec2(0.f, 0.f)),
-	m_CornerSidePx(_cornerLengthPx)
+	m_CornerSidePx(_cornerLengthPx),
+	m_Clickable(_clickable)
 {
 	UpdateArrays();
 }
@@ -142,6 +145,9 @@ void Pane::OnDimensionChange() {
 	UpdateArrays();
 }
 
+void Pane::AppendWidgetRenderDataToArray(std::vector<float>& OUT_rects, std::vector<TextWithZLayer>& OUT_texts, float zLayer) {
+
+}
 
 //		--			LABEL			--		//
 
@@ -156,4 +162,33 @@ Label::Label(
 
 void Label::PostAttachment(WidgetWindowData _data) {
 	m_TextObject.SetWordWrapBound(_data.WindowDimensions.y - m_PositionRelativeToWindow.y);
+}
+
+
+void Label::AppendWidgetRenderDataToArray(std::vector<float>& OUT_rects, std::vector<TextWithZLayer>& OUT_texts, float zLayer) {
+
+}
+
+//		--			BUTTON			--		//
+
+Button::Button(
+	glm::vec2 dimensions,
+	glm::vec2 relativeToWindow,
+	std::function<void()> actionLambda
+) :
+	UI_Primitive(
+		dimensions,
+		relativeToWindow
+	),
+	m_StoredActionLambda(actionLambda)
+{}
+
+void Button::PostAttachment(WidgetWindowData _data) {}
+
+void Button::DoAction() {
+	m_StoredActionLambda();
+}
+
+void Button::AppendWidgetRenderDataToArray(std::vector<float>& OUT_rects, std::vector<TextWithZLayer>& OUT_texts, float zLayer) {
+
 }

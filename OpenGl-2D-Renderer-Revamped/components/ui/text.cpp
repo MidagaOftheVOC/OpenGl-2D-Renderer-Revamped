@@ -1,13 +1,10 @@
 ﻿#include "text.h"
 
-
 unsigned int Text::s_VAO = 0;
-
 
 Text::Text() {
 	GenerateBuffers();
 }
-
 
 Text::Text(
 	const std::u32string& _string,
@@ -19,7 +16,6 @@ Text::Text(
 	UpdateTextValue(_string);
 }
 
-
 void Text::UpdateTextValue(
 	std::u32string&& _stringToMove
 ) {
@@ -28,7 +24,6 @@ void Text::UpdateTextValue(
 	UpdateVBO();
 	CalculateWordWraps();
 }
-
 
 void Text::UpdateTextValue(
 	const std::u32string& _stringToCopy
@@ -39,12 +34,10 @@ void Text::UpdateTextValue(
 	CalculateWordWraps();
 }
 
-
 void Text::UpdateGlyphOffsets() {
 	DEBUG_ASSERT(GetFont() != nullptr, "Font pointer in Text object is null. Object address is [%p].", this);
 	GetFont()->GetConsecutiveOffsetsFromFirstGlyph(m_TextContent, m_OffsetsFromFirstGlyph);
 }
-
 
 void Text::AppendCharacter(
 	char32_t _char
@@ -69,14 +62,12 @@ void Text::AppendCharacter(
 	CalculateWordWraps();
 }
 
-
 void Text::RemoveCharacter(
 	char32_t _char
 ) {
 	m_TextContent.pop_back();
 	CalculateWordWraps();
 }
-
 
 void Text::UpdateVBO() {
 
@@ -97,7 +88,6 @@ void Text::UpdateVBO() {
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
-
 
 void Text::InitialiseCommonVAO() {
 	
@@ -155,16 +145,13 @@ void Text::InitialiseCommonVAO() {
 	glBindVertexArray(0);
 }
 
-
 void Text::BindCommonVAO() {
 	glBindVertexArray(s_VAO);
 }
 
-
 void Text::UnbindCommonVAO() {
 	glBindVertexArray(0);
 }
-
 
 void Text::GenerateBuffers() {
 	if (glIsBuffer(m_GlyphDataVBO) == GL_TRUE) {
@@ -176,12 +163,10 @@ void Text::GenerateBuffers() {
 	glGenBuffers(1, &m_GlyphDataVBO);	
 }
 
-
 void Text::BindUniqueBuffers() const {
 	glVertexArrayVertexBuffer( s_VAO, 2, GetGlyphDataVBO(), 0, sizeof(unsigned short) * 2);
 	glVertexArrayVertexBuffer( s_VAO, 3, GetGlyphDataVBO(), sizeof(unsigned short) , sizeof(unsigned short) * 2);
 }
-
 
 void Text::SetWordWrapBound(
 	float _rightBound
@@ -190,13 +175,11 @@ void Text::SetWordWrapBound(
 	CalculateWordWraps();
 }
 
-
 void Text::SetMaximumCharactersPerLine(
 	int _charsPerLine
 ) {
 	m_MaximumCharsPerLine = _charsPerLine;
 }
-
 
 //	This shit breaks if the max line length is under the width of a glyph
 //	since it forces the bounds strictly, i.e. no overflow of any kind under any circumstance.
@@ -271,7 +254,6 @@ void Text::CalculateWordWraps() {
 	}
 }
 
-
 unsigned short Text::GetTotalOffsetForCharAt(
 	int _charIndex
 ) {
@@ -279,4 +261,3 @@ unsigned short Text::GetTotalOffsetForCharAt(
 		"Indexing out of Glyph offsets array in Text object; std::u32string address [%p].", &m_TextContent);
 	return m_OffsetsFromFirstGlyph[_charIndex * 2];
 }
-

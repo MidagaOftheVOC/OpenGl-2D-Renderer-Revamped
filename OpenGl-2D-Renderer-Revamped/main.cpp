@@ -1,7 +1,4 @@
-﻿
-
-
-#include "main_renderer.h"
+﻿#include "main_renderer.h"
 
 #include "components/batch_types/batch_instance_primitives.h"
 
