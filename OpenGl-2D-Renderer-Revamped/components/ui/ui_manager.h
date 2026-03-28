@@ -11,6 +11,7 @@
 
 #include "primitives/factories/pane_factory.h"
 #include "primitives/types/label.h"
+#include "primitives/types/button.h"
 
 #include "window.h"
 

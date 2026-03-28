@@ -94,6 +94,32 @@ void UIManager::UpdateAllBatches() {
 					)
 				);
 			}
+			if (const Button* btn = dynamic_cast<Button*>(CurrWinWidgets[i])) {
+				auto btnOffSet = btn->GetPositionRelativeToWindow();
+
+				for (int i = 0; i < 9; i++) {
+					WidgetData_zLayers.emplace_back(BaseWindowZLayer - SubStep);
+				}
+
+				btn->GetPane().AppendPaneBatchingData(
+					WidgetData_Dimensions,
+					WidgetData_Positions,
+					WidgetData_Skins,
+					WinPos.x + btn->GetPositionRelativeToWindow().x,
+					WinPos.y + btn->GetPositionRelativeToWindow().y
+				);
+
+				PaneTotalSubsprites += 9;
+
+				m_CachedTexts.push_back(
+					TextWithZLayer(
+						btn->GetLabel().GetText(),
+						WinPos.x + btnOffSet.x,
+						WinPos.y + btnOffSet.y,
+						BaseWindowZLayer - 2 * SubStep
+					)
+				);
+			}
 		}
 	}
 
@@ -286,7 +312,7 @@ void UIManager::ProvokeUIActionWithMouseCoords(
 
 	MoveWindowToFront(_winId);
 
-	std::cout << "Relative to window [X: " << MouseCoordsRelativeToWindow.x << " Y: " << MouseCoordsRelativeToWindow.y << "]\n";
+	//std::cout << "Relative to window [X: " << MouseCoordsRelativeToWindow.x << " Y: " << MouseCoordsRelativeToWindow.y << "]\n";
 
 	for (const auto& widget : window->GetWidgets()) {
 		if (!widget->IsClickable()) continue;

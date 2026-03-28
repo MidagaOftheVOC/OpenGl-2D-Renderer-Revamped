@@ -172,15 +172,18 @@ void Label::AppendWidgetRenderDataToArray(std::vector<float>& OUT_rects, std::ve
 //		--			BUTTON			--		//
 
 Button::Button(
-	glm::vec2 dimensions,
 	glm::vec2 relativeToWindow,
+	Text label,
+	Pane pane,
 	std::function<void()> actionLambda
 ) :
 	UI_Primitive(
-		dimensions,
+		pane.GetDimensions(),
 		relativeToWindow
 	),
-	m_StoredActionLambda(actionLambda)
+	m_StoredActionLambda(actionLambda),
+	m_Label(label, glm::vec2(2, 2)),
+	m_Pane(pane)
 {}
 
 void Button::PostAttachment(WidgetWindowData _data) {}
