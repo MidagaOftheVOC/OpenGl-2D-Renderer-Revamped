@@ -22,6 +22,93 @@
 
 #include "../components/ui/text.h"
 
+struct GameLoopReturnType {
+	const FreeBatch* batches = nullptr;
+	int count = 0;
+};
+
+//	Base class for DrawCall-like structures
+//	This contains required data for all draw calls like positions and a uniform array
+//	This class should not(and cannot as of now) be used anywhere else, one should only
+//	derive from it to create specialised draw calls.
+struct DrawCall {
+protected:
+	float m_xScreenCoord;
+	float m_yScreenCoord;
+	float m_zLayer;
+
+	//	If value is left at nullptr, no additional uniforms will be applied
+	const UniformDataVector* m_AppliedUniforms = nullptr;
+
+public:
+	DrawCall(float x, float y, float z, const UniformDataVector* _uniformDataArray)
+		: m_xScreenCoord(x), m_yScreenCoord(y), m_zLayer(z), m_AppliedUniforms(_uniformDataArray)
+	{
+	}
+
+	const UniformDataVector* GetAppliedUniforms() const { return m_AppliedUniforms; }
+	glm::vec3 GetPositionVector() const { return glm::vec3(m_xScreenCoord, m_yScreenCoord, m_zLayer); }
+};
+
+//		DRAWABLE
+
+struct DrawableDrawCall : DrawCall {
+private:
+	const Drawable* m_Drawable = nullptr;
+public:
+	DrawableDrawCall(const Drawable* _drawable, float x, float y, float z, const UniformDataVector* _uniformDataArray)
+		: m_Drawable(_drawable), DrawCall(x, y, z, _uniformDataArray)
+	{
+	}
+	const Drawable* GetDrawablePointer() const { return m_Drawable; }
+};
+
+struct DrawCallComparator {
+	bool operator()(const DrawableDrawCall& a, const DrawableDrawCall& b) const;
+};
+
+//		BATCHES
+
+struct BatchDrawCall : DrawCall {
+private:
+	const BaseBatch* m_Base = nullptr;
+public:
+	BatchDrawCall(const BaseBatch* _softBatch, float x, float y, float z, const UniformDataVector* _uniformDataArray)
+		: m_Base(_softBatch), DrawCall(x, y, z, _uniformDataArray)
+	{
+	}
+	//	RECAST AS APPROPRIATE
+	const BaseBatch* GetBaseBatchPointer() const { return m_Base; }
+};
+
+//		TEXT
+
+struct TextDrawCall : DrawCall {
+private:
+	const Text* m_Text = nullptr;
+public:
+	TextDrawCall(const Text* _text, float x, float y, float z, const UniformDataVector* _uniformDataArray)
+		:m_Text(_text), DrawCall(x, y, z, _uniformDataArray)
+	{
+	}
+	const Text* GetTextPointer() const { return m_Text; }
+};
+
+//		UI
+
+struct UIDrawCall : DrawCall {
+private:
+	const UIBatch* m_UIBatch = nullptr;
+public:	//	Point is that UI elements will always have the relevant positions in the batch itself
+	//	since those batches are supposed to be used en-masse, i.e. one such batch for each primitive
+	//	That is to say, all Panes, or all Buttons for rendering, will be done so with one batch for each.
+	UIDrawCall(const UIBatch* _uiBatch, float _cameraXpos, float _cameraYpos, float _furthestZcoord, const UniformDataVector* _uniformDataArray)
+		:m_UIBatch(_uiBatch), DrawCall(_cameraXpos, _cameraYpos, _furthestZcoord, _uniformDataArray)
+	{
+	}
+	const UIBatch* GetUIBatchPointer() const { return m_UIBatch; }
+};
+
 class Renderer2D {
 private:	//	Window-related information
 
@@ -43,13 +130,6 @@ private:	//	Logical components
 
 	Camera m_Camera;
 
-public:
-
-	Text GenText(
-		const char32_t* _string32u,
-		TextOptions _textOptions = TextOptions(nullptr)
-	) const;
-
 private:
 
 	bool m_HasClickedThisFrame = false;
@@ -60,91 +140,11 @@ public:
 
 private:	//	Structures for draw queue optimisation
 
-	//	Base class for DrawCall-like structures
-	//	This contains required data for all draw calls like positions and a uniform array
-	//	This class should not(and cannot as of now) be used anywhere else, one should only
-	//	derive from it to create specialised draw calls.
-	struct DrawCall {
-	protected:
-		float m_xScreenCoord;
-		float m_yScreenCoord;
-		float m_zLayer;
-
-		//	If value is left at nullptr, no additional uniforms will be applied
-		const UniformDataVector* m_AppliedUniforms = nullptr; 
-
-	public:
-		DrawCall(float x, float y, float z, const UniformDataVector* _uniformDataArray)
-			: m_xScreenCoord(x), m_yScreenCoord(y), m_zLayer(z), m_AppliedUniforms(_uniformDataArray)
-		{}
-
-		const UniformDataVector* GetAppliedUniforms() const { return m_AppliedUniforms; }
-		glm::vec3 GetPositionVector() const { return glm::vec3(m_xScreenCoord, m_yScreenCoord, m_zLayer); }
-	};
-
-	//		DRAWABLE
-
-	struct DrawableDrawCall : DrawCall {
-	private:
-		const Drawable* m_Drawable = nullptr;
-	public:
-		DrawableDrawCall(const Drawable* _drawable, float x, float y, float z, const UniformDataVector* _uniformDataArray)
-			: m_Drawable(_drawable), DrawCall(x, y, z, _uniformDataArray)
-		{}
-		const Drawable* GetDrawablePointer() const { return m_Drawable; }
-	};
-
-	struct DrawCallComparator{
-		bool operator()(const DrawableDrawCall& a, const DrawableDrawCall& b) const;
-	};
-
 	std::priority_queue<DrawableDrawCall, std::vector<DrawableDrawCall>, DrawCallComparator> m_DrawCallQueue;
-
-	//		BATCHES
-	
-	struct BatchDrawCall: DrawCall {
-	private:
-		const BaseBatch* m_Base = nullptr;
-	public:
-		BatchDrawCall(const BaseBatch* _softBatch, float x, float y, float z, const UniformDataVector* _uniformDataArray)
-			: m_Base(_softBatch), DrawCall(x, y, z, _uniformDataArray)
-		{}
-		//	RECAST AS APPROPRIATE
-		const BaseBatch* GetBaseBatchPointer() const { return m_Base; }
-	};
-
 	std::vector<BatchDrawCall> m_StrictBatchArray;
 	std::vector<BatchDrawCall> m_SoftBatchArray;
 	std::vector<BatchDrawCall> m_FreeBatchArray;
-
-	//		TEXT
-
-	struct TextDrawCall : DrawCall {
-	private:
-		const Text* m_Text = nullptr;
-	public:
-		TextDrawCall(const Text* _text, float x, float y, float z, const UniformDataVector* _uniformDataArray)
-			:m_Text(_text), DrawCall(x, y, z, _uniformDataArray)
-		{}
-		const Text* GetTextPointer() const { return m_Text; }
-	};
-
 	std::vector<TextDrawCall> m_TextArray;
-
-	//		UI
-
-	struct UIDrawCall : DrawCall {
-	private:
-		const UIBatch* m_UIBatch = nullptr;
-	public:	//	Point is that UI elements will always have the relevant positions in the batch itself
-			//	since those batches are supposed to be used en-masse, i.e. one such batch for each primitive
-			//	That is to say, all Panes, or all Buttons for rendering, will be done so with one batch for each.
-		UIDrawCall(const UIBatch* _uiBatch, float _cameraXpos, float _cameraYpos,float _furthestZcoord,const UniformDataVector* _uniformDataArray)
-			:m_UIBatch(_uiBatch), DrawCall(_cameraXpos, _cameraYpos, _furthestZcoord, _uniformDataArray)
-		{}
-		const UIBatch* GetUIBatchPointer() const { return m_UIBatch; }
-	};
-
 	std::vector<UIDrawCall> m_UIBatchArray;
 
 private:	//	Methods to render queued Drawcalls
@@ -257,53 +257,16 @@ public:		//	Exposed functions
 		int _indexInSpriteSheet
 	);
 
-
-	bool IsRunning() const;
-
-public:		//	Loading functions, which append loading parameters to the queues.
-			//	All necessary resources must pass through those, after which we
-			//	call StartLoadingProcess() to turn them into usable objects.
-			//
-			//	Note:	At calling StartLoadingProcess(), all necessary data must 
-			//	be in the queues, even previously allocated, if you'll be switching scenes
-			//	or similar.
-
-	void UploadShaderParameters(
-		const char* _location,
-		const char* _shaderName
-	);
-
-	void UploadSpriteSheetParameters(
-		const char* _locationRawImage,
-		const char* _sheetName,
-		const char* _preferredShader,
-		int _spritesPerRow,
-		int _spritesPerCol
-	);
-
-	void StartLoadingProcess();
-
 private:
 
 	void PerClassVAOinitialisationFunction();
 
-private:
+public:
 
 	void SendStandardUniforms(
 		const Shader* _targetShader,
 		const glm::vec3& _positionVector
 	) const;
-
-public:		// getters and setters, 
-
-	const Shader* GetShaderByName(
-		const char* _shaderName
-	);
-
-
-	const SpriteSheet* GetSpriteSheetByName(
-		const char* _spriteSheetName
-	);
 
 	//	Gets the single instance governing OpenGL objects like 
 	//	VBOs, IBO and VAO used for rendering

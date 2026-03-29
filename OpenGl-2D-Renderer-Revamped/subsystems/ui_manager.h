@@ -1,6 +1,4 @@
 #pragma once
-
-
 #include "../../subsystems/main_renderer.h"
 #include "../../subsystems/resource_service.h"
 
@@ -14,7 +12,10 @@
 
 #include "../components/ui/window.h"
 
-
+struct CapturedStates {
+	bool capturedMouse = false;
+	bool capturedKeyboard = false;
+};
 
 class UIManager {
 
@@ -38,9 +39,11 @@ class UIManager {
 
 	ID m_UniqueWindowIDCounter = 0;
 
+private:
+
 	const Renderer2D* m_Renderer = nullptr;
-	const InputController* m_Input = nullptr;
 	const ResourceService* m_ResService = nullptr;
+	const PaneFactory* m_PaneFactory = nullptr;
 
 private:	//	Windows
 	
@@ -147,6 +150,10 @@ public:
 		ID _winId
 	);
 
+	CapturedStates InterpretInput(
+		const GameInput& engineWideInput
+	);
+
 	void SetDistributionBounds(float _low, float _high);
 
 	const UIBatch* GetUIBatch() { return m_UIBatch; }
@@ -155,10 +162,10 @@ public:
 	const std::vector<Window>& GetWindows() const { return m_WindowArray; }
 
 	const Renderer2D* GetRenderer() const { return m_Renderer; }
-	const InputController* GetInput() const { return m_Input; }
 	const ResourceService* GetResources() const { return m_ResService; }
+	const PaneFactory* GetPaneFactory() const { return m_PaneFactory; }
 
 	void SetRenderer(const Renderer2D* rend) { m_Renderer = rend; }
-	void SetInputController(const InputController* input) { m_Input = input; }
 	void SetResService(const ResourceService* res) { m_ResService = res; }
+	void SetPaneFactory(const PaneFactory* fac) { m_PaneFactory = fac; }
 };

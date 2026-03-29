@@ -7,10 +7,27 @@
 #include "batch_instance_primitives.h"
 
 /*
-TODO:
-This batch rendering technique will be repurposed use custom quad coord 
-vertices per instance. It'd be very useful for future UI developments.
+This batch rendering technique will use custom quad coord 
+vertices per instance. 
+
+What must be improved is the addition of a type, which can be 'added'/'appended' to this batch's arrays to make the user experience better.
+This must be incorporated at the base batch level and further extended to each batch function later.
+For now, this will work only for FreeBatch since it's the most flexible of all types of batches.
 */
+
+//	Prototype for now
+struct Sprite {
+	std::string SheetName;
+	//	 OR
+	size_t SheetIndex;
+
+
+	size_t IndexWithinSheet;
+	
+	glm::vec2 Dims;
+
+	float Rotation = 0.f;
+};
 
 
 class FreeBatch : public BaseBatch {

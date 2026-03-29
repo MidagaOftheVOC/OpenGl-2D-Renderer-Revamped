@@ -35,6 +35,10 @@ private:
 
 	bool m_IsRunning = false;
 
+private:
+
+	float m_ElapsedTimeSeconds = 0.00f;
+
 public:
 
 	Engine2D() {}
@@ -55,6 +59,10 @@ public:
 	}
 
 	void Init();
+
+	void ExecuteFrame(
+		std::function<GameLoopReturnType(float, GameInput)> gameLoop
+	);
 
 private:
 

@@ -1,3 +1,4 @@
+#pragma once
 #include "../resource_service.h"
 
 class FactoryInterface {

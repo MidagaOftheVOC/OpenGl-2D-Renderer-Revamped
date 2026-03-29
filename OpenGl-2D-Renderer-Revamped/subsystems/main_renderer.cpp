@@ -1,17 +1,4 @@
-﻿
-#include "main_renderer.h"
-
-
-Drawable Renderer2D::GenerateDrawable(
-	const char* _spriteSheetName,
-	int _indexInSpriteSheet
-) {
-	const SpriteSheet* SheetOfTarget = GetSpriteSheetByName(_spriteSheetName);
-
-	DEBUG_ASSERT(SheetOfTarget != nullptr, "Indexing Drawable from non-existant SpriteSheet object or name.");
-
-	return Drawable(SheetOfTarget, _indexInSpriteSheet);
-}
+﻿#include "main_renderer.h"
 
 
 void Renderer2D::Draw(
@@ -165,7 +152,6 @@ void Renderer2D::ExecuteDraws() {
 	//	-- RENDERING ENDS	--	//
 
 	glfwSwapBuffers(GetWinHandle());
-	glfwPollEvents();
 }
 
 
@@ -575,7 +561,7 @@ void Renderer2D::Draw(
 	);
 }
 
-bool Renderer2D::DrawCallComparator::operator()(const DrawableDrawCall& a, const DrawableDrawCall& b) const {
+bool DrawCallComparator::operator()(const DrawableDrawCall& a, const DrawableDrawCall& b) const {
 
 	const Shader* aS = a.GetDrawablePointer()->GetAsociatedSpriteSheet()->GetShader();
 	const Shader* bS = b.GetDrawablePointer()->GetAsociatedSpriteSheet()->GetShader();

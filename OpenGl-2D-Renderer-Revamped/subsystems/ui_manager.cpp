@@ -12,7 +12,7 @@ Window UIManager::CreateWindow(
 	Window Result(GetNextUniqueWindowID());
 	
 	if(_uiSkinName) {
-		Pane WindowPane = m_ThePaneFactory.CreatePane(
+		Pane WindowPane = GetPaneFactory()->CreatePane(
 			_windowDimensions.x,
 			_windowDimensions.y,
 			_cornerLengthPx,
@@ -264,62 +264,70 @@ void UIManager::MoveWindowToFront(
 	MoveWindowToLayer(_windowID, 0);
 }
 
-const ID UIManager::HasClickedOnUIElement(
-	float xMousePos,
-	float yMousePos
-) const {
-	std::vector<uint32_t> WindowIDsWithOverlap;
-
-	for (const auto& win : m_WindowArray) {
-		auto LowerBounds = win.GetWinPosition();
-		auto UpperBounds = win.GetWinDimensions() + LowerBounds;
-		if (xMousePos >= LowerBounds.x && xMousePos <= UpperBounds.x
-			&& yMousePos >= LowerBounds.y && yMousePos <= UpperBounds.y) {
-			WindowIDsWithOverlap.emplace_back(win.GetID());
-			//std::cout << "Window with ID [" << win.GetID() << "] overlaps with click at [X: " << xMousePos << " Y: " << yMousePos << "]\n";
-		}
-	}
-
-	ID TargetWindow = 0;
-
-	for(size_t i = 0; i < m_WindowIDArrayForRendering.size(); i++) {
-		for (auto id : WindowIDsWithOverlap) {
-			if (id == m_WindowIDArrayForRendering[i] ) {
-				TargetWindow = id;
-				break;
-			}
-		}
-		if (TargetWindow) break;
-	}
-
-	return TargetWindow;
-}
-
-
-void UIManager::ProvokeUIActionWithMouseCoords(
-	const InputController* _input,
-	ID _winId
+CapturedStates UIManager::InterpretInput(
+	const GameInput& engineWideInput
 ) {
-	const Window* window = GetWindowByID(_winId);
-	float xMouse, yMouse;
-	_input->GetMousePosition(xMouse, yMouse);
-
-	auto MouseCoordsRelativeToWindow = window->GetWinPosition();
-	MouseCoordsRelativeToWindow.x = xMouse - MouseCoordsRelativeToWindow.x;
-	MouseCoordsRelativeToWindow.y = yMouse - MouseCoordsRelativeToWindow.y;
-
-	//	Input must give mouse coord changes
-
-	MoveWindowToFront(_winId);
-
-	//std::cout << "Relative to window [X: " << MouseCoordsRelativeToWindow.x << " Y: " << MouseCoordsRelativeToWindow.y << "]\n";
-
-	for (const auto& widget : window->GetWidgets()) {
-		if (!widget->IsClickable()) continue;
-
-		if (PointInRect(MouseCoordsRelativeToWindow, widget->GetPositionRelativeToWindow(), widget->GetDimensions())) {
-			widget->DoAction();
-			break;
-		}
-	}
+	CapturedStates self;
+	
+	return self;
 }
+
+//const ID UIManager::HasClickedOnUIElement(
+//	float xMousePos,
+//	float yMousePos
+//) const {
+//	std::vector<uint32_t> WindowIDsWithOverlap;
+//
+//	for (const auto& win : m_WindowArray) {
+//		auto LowerBounds = win.GetWinPosition();
+//		auto UpperBounds = win.GetWinDimensions() + LowerBounds;
+//		if (xMousePos >= LowerBounds.x && xMousePos <= UpperBounds.x
+//			&& yMousePos >= LowerBounds.y && yMousePos <= UpperBounds.y) {
+//			WindowIDsWithOverlap.emplace_back(win.GetID());
+//			//std::cout << "Window with ID [" << win.GetID() << "] overlaps with click at [X: " << xMousePos << " Y: " << yMousePos << "]\n";
+//		}
+//	}
+//
+//	ID TargetWindow = 0;
+//
+//	for(size_t i = 0; i < m_WindowIDArrayForRendering.size(); i++) {
+//		for (auto id : WindowIDsWithOverlap) {
+//			if (id == m_WindowIDArrayForRendering[i] ) {
+//				TargetWindow = id;
+//				break;
+//			}
+//		}
+//		if (TargetWindow) break;
+//	}
+//
+//	return TargetWindow;
+//}
+//
+//
+//void UIManager::ProvokeUIActionWithMouseCoords(
+//	const InputController* _input,
+//	ID _winId
+//) {
+//	const Window* window = GetWindowByID(_winId);
+//	float xMouse, yMouse;
+//	_input->GetMousePosition(xMouse, yMouse);
+//
+//	auto MouseCoordsRelativeToWindow = window->GetWinPosition();
+//	MouseCoordsRelativeToWindow.x = xMouse - MouseCoordsRelativeToWindow.x;
+//	MouseCoordsRelativeToWindow.y = yMouse - MouseCoordsRelativeToWindow.y;
+//
+//	//	Input must give mouse coord changes
+//
+//	MoveWindowToFront(_winId);
+//
+//	//std::cout << "Relative to window [X: " << MouseCoordsRelativeToWindow.x << " Y: " << MouseCoordsRelativeToWindow.y << "]\n";
+//
+//	for (const auto& widget : window->GetWidgets()) {
+//		if (!widget->IsClickable()) continue;
+//
+//		if (PointInRect(MouseCoordsRelativeToWindow, widget->GetPositionRelativeToWindow(), widget->GetDimensions())) {
+//			widget->DoAction();
+//			break;
+//		}
+//	}
+//}

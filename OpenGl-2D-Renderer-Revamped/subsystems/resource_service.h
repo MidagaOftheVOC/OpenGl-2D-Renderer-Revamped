@@ -3,7 +3,7 @@
 #include "../components/shader.h"
 #include "../components/sprite_sheet.h"
 #include "../components/ui/font.h"
-#include "factories/pane_factory.h"
+#include "../components/ui/primitives/types/pane.h"
 
 struct ShaderLoadingParameters {
 	const std::string m_ShaderName;

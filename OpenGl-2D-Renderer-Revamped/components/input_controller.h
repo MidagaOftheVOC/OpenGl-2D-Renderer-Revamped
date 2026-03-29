@@ -12,9 +12,7 @@ static constexpr int MAXIMUM_BITSET_SIZE = 512;
 
 typedef unsigned int TrackingBit;
 
-class InputController {
-
-	GLFWwindow* m_MainWinHandle = nullptr;
+struct GameInput {
 
 	std::bitset<MAXIMUM_BITSET_SIZE> m_RecentKeystateBitmask;
 	std::bitset<MAXIMUM_BITSET_SIZE> m_PreviousKeystateBitmask;
@@ -22,6 +20,68 @@ class InputController {
 	float m_xMouseCoord = 0.f;
 	float m_yMouseCoord = 0.f;
 
+	bool m_KeyboardCaptured = false;
+	bool m_MouseCaptured = false;
+
+public:
+
+	void SetKeyboardCapturedFlag();
+	void SetMouseCapturedFlag();
+	void ClearCapturedFlags();
+
+public:
+
+	bool IsReleased(
+		GLuint _openglKeyCode
+	) const;
+
+	bool IsHeld(
+		GLuint _openglKeyCode
+	) const;
+
+	bool IsPressed(
+		GLuint _openglKeyCode
+	) const;
+
+	bool IsDown(
+		GLuint _openglKeyCode
+	) const;
+
+	bool IsUp(
+		GLuint _openglKeyCode
+	) const;
+
+	void GetMousePosition(
+		float& OUT_xMouseCoord,
+		float& OUT_yMouseCoord
+	) const;
+
+	glm::vec2 GetMousePosition() const;
+
+public:
+
+	bool AccessBitmask(
+		int _index,
+		const std::bitset<MAXIMUM_BITSET_SIZE>& _bitmask
+	) const;
+
+
+	bool AccessPreviousKeystateBitmask(
+		int _index
+	) const;
+
+
+	bool AccessRecentKeystateBitmask(
+		int _index
+	) const;
+};
+
+
+class InputController {
+
+	GLFWwindow* m_MainWinHandle = nullptr;
+
+	GameInput m_Input;
 	
 private:
 
@@ -88,34 +148,23 @@ public:
 
 	void CaptureKeystates();
 
-	void CaptureMouseButtons();
-
-	bool IsPressed(GLuint _openglKeyCode) const;
-
-	bool IsHeld(GLuint _openglKeyCode) const;
-
-	bool IsReleased(GLuint _openglKeyCode) const;
-
 	void SetTrackedKeystatesBitmask(
 		TrackingBit _trackingBitmask
 	);
 
 public:
 
-	void GetMousePosition(
-		float &OUT_xMouseCoord,
-		float &OUT_yMouseCoord
-	) const;
+	GameInput& ExposeGameInput() { return m_Input; }
 
 #if DEBUG__CODE
 
 	void	DEBUG_ForceHoldKeyState(GLuint _openglKeycode) {
-		m_RecentKeystateBitmask.set(_openglKeycode);
-		m_PreviousKeystateBitmask.set(_openglKeycode);
+		m_Input.m_RecentKeystateBitmask.set(_openglKeycode);
+		m_Input.m_PreviousKeystateBitmask.set(_openglKeycode);
 	}
 
 	void	DEBUG_ForcePressKeyState(GLuint _openglKeycode) {
-		m_RecentKeystateBitmask.set(_openglKeycode);
+		m_Input.m_RecentKeystateBitmask.set(_openglKeycode);
 	}
 
 #else
@@ -128,21 +177,4 @@ public:
 
 #endif
 
-private:
-
-	bool AccessPreviousKeystateBitmask(
-		int _index
-	) const;
-
-	bool AccessRecentKeystateBitmask(
-		int _index
-	) const;
-
-	bool AccessBitmask(
-		int _index,
-		const std::bitset<MAXIMUM_BITSET_SIZE>& _bitmask
-	) const;
-
 };
-
-

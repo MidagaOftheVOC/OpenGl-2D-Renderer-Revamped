@@ -25,9 +25,8 @@ int main(int argc, char** argv) {
 	resService.UploadSpriteSheetParameters("test\\res\\gui.cfg",				"uib_std",							"uib_std",							0, 0);
 	resService.UploadSpriteSheetParameters("test\\res\\gui.cfg",				resService.c_SpecialUISheetName,	"uib_std",							0, 0);
 
-	
-	eng.Init();
-
+	//	This is terrible, but it's supposed to represent just a skin from the first sprite sheet loaded in the special UI batch for the UI manager
+	//	and the first 9 sprites defined inside it.
 	PaneSkin skin;
 	skin.m_Name = "default";
 	SpriteInformation SIarray[] = {
@@ -44,22 +43,11 @@ int main(int argc, char** argv) {
 		{0, 8}
 	};
 
+	eng.Init();
+
 	memcpy(skin.m_SIArray, SIarray, 9 * sizeof(SpriteInformation));
 	
 	eng.GetResourceService().AddSkin(skin);
-
-	/*
-	
-		IMPROVE BATCHES
-		They should know when to update their buffers. They should have a fn DrawSprite(...) or something which takes SpriteInfo or something.
-		Before rendering, update arrays if needed.
-
-		Also make a struct to unify those 1-4 OUT_ arrays to make them easier to use.
-	
-		MAKE SEPARATE FACTORIES FOR EACH TYPE THAT NEEDS FACTORIES
-		(and make them depend on res service)
-	*/
-
 
 	InputController& input = eng.GetInputController();
 	
@@ -87,27 +75,11 @@ int main(int argc, char** argv) {
 	ui.OpenWindow(winID2, 560, 250);
 
 	while (eng.IsRunning()) {
-		input.CaptureKeystates();
-		//input.CaptureMouseButtons();
+		eng.ExecuteFrame([](float f, GameInput l) {
+			GameLoopReturnType self;
 
-		//r.Draw(&rando,	300, 700, 1, nullptr);
-
-		if (input.IsHeld(GLFW_KEY_RIGHT)) {
-			std::cout << "right pressed\n";
-		}
-
-		if (input.IsPressed(GLFW_KEY_ESCAPE)) {
-
-			return 0;
-		}
-
-		//if(r.GetInputController().IsHeld(GLFW_MOUSE_BUTTON_1)) {		std::cout << "Mouse is   HELD	\n"; }
-		//if (r.GetInputController().IsPressed(GLFW_MOUSE_BUTTON_1)) {	std::cout << "Mouse is   PRESSED\n"; }
-		//if (r.GetInputController().IsReleased(GLFW_MOUSE_BUTTON_1)) {	std::cout << "Mouse is   RELEASED\n"; }
-
-		
-
-		r.ExecuteDraws();
+			return self;
+		});
 	}
 
 	return 0;
