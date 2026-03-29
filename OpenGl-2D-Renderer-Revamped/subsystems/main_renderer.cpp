@@ -223,7 +223,7 @@ void Renderer2D::RenderText() {
 
 	Text::BindCommonVAO();
 
-	const Shader& Shader = GetTextShader();
+	const Shader& Shader = GetResources()->GetTextShader();
 	Shader.UseShader();
 	Shader.SetStandardView(GetCamera().GetViewMatrix());
 	Shader.SetStandardProjection(GetCamera().GetProjectionMatrix());
@@ -514,8 +514,6 @@ void Renderer2D::RenderDrawables() {
 
 
 bool Renderer2D::Init() {
-
-	GLFWInitialisation();
 	glEnable(GL_DEPTH_TEST);
 	//	Component initialisation
 
@@ -533,6 +531,18 @@ bool Renderer2D::Init() {
 	return true;
 }
 
+void Renderer2D::PerClassVAOinitialisationFunction() {
+	SpriteInformation::InitialiseMasks();
+
+	StrictBatch::InitialiseCommonVAO();
+	SoftBatch::InitialiseCommonVAO();
+	FreeBatch::InitialiseCommonVAO();
+	UIBatch::InitialiseCommonVAO();
+
+
+	Font::InitialiseCommonFontSizeVBO(20);
+	Text::InitialiseCommonVAO();
+}
 
 Renderer2D::Renderer2D(
 	GLFWwindow* _initialisedWindow,
@@ -549,153 +559,6 @@ Renderer2D::Renderer2D(
 	m_Fullscreen(_fullscreen)
 {}
 
-
-void Renderer2D::LoadShader(
-	const std::string& _locationShaderFile,
-	const std::string& _shaderName
-) {
-	//	Special common shader used only by Text objects
-	if (!_shaderName.compare(c_SpecialTextShaderName)) {
-		m_TextRenderingShader = Shader(
-			_locationShaderFile,
-			_shaderName
-		);
-		return;
-	}
-
-	m_ShaderArray.emplace_back(
-		_locationShaderFile,
-		_shaderName
-	);
-}
-
-
-void Renderer2D::LoadSpriteSheet(
-	const std::string& _locationRawImage,
-	const std::string& _sheetName,
-	const Shader* _preferredShader,
-	int _spritesPerRow,
-	int _spritesPerCol
-) {
-	m_SpriteSheetArray.emplace_back(
-		_locationRawImage,
-		_sheetName,
-		_preferredShader,
-		_spritesPerRow,
-		_spritesPerCol
-	);
-}
-
-
-const SpriteSheet* Renderer2D::GetSpriteSheetByName(
-	const char* _spriteSheetName
-) {
-	if (!_spriteSheetName) return nullptr;
-	size_t len = m_SpriteSheetArray.size();
-	for (size_t i = 0; i < len; i++) {
-		if (
-			strcmp(_spriteSheetName, m_SpriteSheetArray[i].GetName().c_str()) == 0
-			) {
-			return &m_SpriteSheetArray[i];
-		}
-	}
-	DEBUG_WARN(0, "GetSpriteSheetByName() for name [%s] returned nullptr.", _spriteSheetName);
-	return nullptr;
-}
-
-
-const Shader* Renderer2D::GetShaderByName(
-	const char* _shaderName
-) {
-	if (!_shaderName) return nullptr;
-	size_t len = m_ShaderArray.size();
-	for (size_t i = 0; i < len; i++) {
-		if (
-			strcmp(_shaderName, m_ShaderArray[i].GetName().c_str()) == 0
-			) {
-			return &m_ShaderArray[i];
-		}
-	}
-	DEBUG_WARN(0, "GetShaderByName() for name [%s] returned nullptr.", _shaderName);
-	return nullptr;
-}
-
-
-void Renderer2D::UploadShaderParameters(
-	const char* _location,
-	const char* _shaderName
-) {
-	m_ShaderLoadQueue.emplace_back(_location, _shaderName);
-}
-
-
-void Renderer2D::UploadSpriteSheetParameters(
-	const char* _locationRawImage,
-	const char* _sheetName,
-	const char* _preferredShader,
-	int _spritesPerRow,
-	int _spritesPerCol
-) {
-	m_SpriteSheetLoadQueue.emplace_back(
-		_locationRawImage,
-		_sheetName,
-		_preferredShader,
-		_spritesPerRow,
-		_spritesPerCol
-	);
-}
-
-
-void Renderer2D::StartLoadingProcess() {
-
-	m_ShaderArray.clear();
-	m_SpriteSheetArray.clear();
-
-	if (m_ShaderArray.capacity() <= m_ShaderLoadQueue.size()) {
-		m_ShaderArray.reserve(m_ShaderLoadQueue.size());
-	}
-
-	for (size_t i = 0; i < m_ShaderLoadQueue.size(); i++) {
-		ShaderLoadingParameters& params = m_ShaderLoadQueue[i];
-		LoadShader(
-			std::string(params.m_LocationOfShaderFile),
-			std::string(params.m_ShaderName)
-		);
-	}
-	m_ShaderLoadQueue.clear();
-
-	
-	if (m_SpriteSheetArray.capacity() <= m_SpriteSheetLoadQueue.size()) {
-		m_SpriteSheetArray.reserve(m_SpriteSheetLoadQueue.size());
-	}
-
-	for (size_t i = 0; i < m_SpriteSheetLoadQueue.size(); i++) {
-		SpriteSheetLoadingParameters& params = m_SpriteSheetLoadQueue[i];
-
-		if (!params.m_PreferredShaderName.compare(c_SpecialTextShaderName)) {
-			
-			LoadSpriteSheet(
-				std::string(params.m_LocationOfImage),
-				std::string(params.m_SheetName),
-				&GetTextShader(),
-				params.m_SpritesPerRow,
-				params.m_SpritesPerCol
-			);
-		}
-
-		LoadSpriteSheet(
-			std::string(params.m_LocationOfImage),
-			std::string(params.m_SheetName),
-			GetShaderByName(params.m_PreferredShaderName.c_str()),
-			params.m_SpritesPerRow,
-			params.m_SpritesPerCol
-		);
-	}
-	m_SpriteSheetLoadQueue.clear();
-
-	LoadDefaultVariables();
-}
-
 void Renderer2D::Draw(
 	const Text* _text,
 	float _xPosition,
@@ -711,23 +574,6 @@ void Renderer2D::Draw(
 		_uniformArray
 	);
 }
-
-
-//	TODO: Add some configuration file/structure to take data from
-//	some file so we avoid hardcoding shit like the font size.
-void Renderer2D::PerClassVAOinitialisationFunction() {
-	SpriteInformation::InitialiseMasks();
-
-	StrictBatch::InitialiseCommonVAO();
-	SoftBatch::InitialiseCommonVAO();
-	FreeBatch::InitialiseCommonVAO();
-	UIBatch::InitialiseCommonVAO();
-
-
-	Font::InitialiseCommonFontSizeVBO(20);
-	Text::InitialiseCommonVAO();
-}
-
 
 bool Renderer2D::DrawCallComparator::operator()(const DrawableDrawCall& a, const DrawableDrawCall& b) const {
 

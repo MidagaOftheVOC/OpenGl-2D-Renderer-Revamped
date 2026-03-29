@@ -26,6 +26,12 @@ In total:
 -3 unique lengths
 
 */
+
+struct PaneSkin {
+	std::string m_Name;
+	SpriteInformation m_SIArray[9];
+};
+
 struct Pane : public UI_Primitive {
 private:
 

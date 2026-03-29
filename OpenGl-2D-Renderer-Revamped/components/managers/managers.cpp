@@ -60,68 +60,9 @@ struct FontLoadParams {
 	{}
 };
 
-
-
-
 const size_t ShaderLoadParams::s_RequiredKeyCount = 2;
 const size_t SheetLoadParams::s_RequiredKeyCount = 4;
 const size_t  FontLoadParams::s_RequiredKeyCount = 7;
-
-
-
-
-
-
-
-bool ResourceManager::LoadAssetsFromResourceConfigFile(
-	const char* _rcfgFileLocation
-) {
-	std::ifstream FileStream(_rcfgFileLocation, std::ios::in);
-
-	DEBUG_ASSERT(FileStream.is_open(), "Rconfig file cannot be opened at [%s].", _rcfgFileLocation);
-
-	m_LastLoadedRconfigFile.assign(
-		std::istreambuf_iterator<char>(FileStream),
-		std::istreambuf_iterator<char>()
-	);
-
-	m_DirectoryOfLastResConfigFile = fs::path(_rcfgFileLocation);
-	m_IndexOfLastReadCharacterFromRconfigFile = 0;
-
-	Trim(m_LastLoadedRconfigFile);
-
-	std::string_view CurrBlock;
-
-	while (!(CurrBlock = GetNextEntityBlock()).empty()) {
-
-		while (true) {
-
-			size_t 
-
-		}
-
-
-	}
-
-	return true;
-}
-
-
-void ResourceManager::ParseIndividualBlock(
-	std::string_view _blockString
-) {
-	BlockDescriptor SelfType = DetermineBlockType(_blockString);
-
-	m_ParsedEntityBlocks.emplace_back();
-
-	m_ParsedEntityBlocks.back().m_BlockType = SelfType;
-
-	std::string Line;
-	while()
-
-
-}
-
 
 std::string_view ResourceManager::GetNextEntityBlock() {
 	size_t FirstBracket = m_IndexOfLastReadCharacterFromRconfigFile;

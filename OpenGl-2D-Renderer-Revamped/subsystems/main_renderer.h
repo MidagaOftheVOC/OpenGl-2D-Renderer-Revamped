@@ -3,6 +3,8 @@
 #include <vector>
 #include <queue>
 
+#include "resource_service.h"
+
 #include "../common/common.h"
 #include "../common/standard_quad.h"
 #include "../components/sprite_sheet.h"
@@ -11,22 +13,21 @@
 #include "../components/camera.h"
 #include "../components/input_controller.h"
 #include "../components/file_handler.h"
+
 #include "../components/batch_types/strict_batch.h"
 #include "../components/batch_types/soft_batch.h"
 #include "../components/batch_types/free_batch.h"
 #include "../components/batch_types/ui_batch.h"
 #include "../components/uniform/uniform_data.h"
-#include "../components/ui/ui_manager.h"
-#include "../components/ui/text.h"
-#include "../components/managers/resource_manager.h"
 
+#include "../components/ui/text.h"
 
 class Renderer2D {
 private:	//	Window-related information
 
 	int m_ScreenWidth = -1;
 	int m_ScreenHeight = -1;
-	std::string m_WindowTitle = nullptr;
+	std::string m_WindowTitle = "";
 
 	bool m_Fullscreen = false;
 
@@ -34,29 +35,13 @@ private:	//	Window-related information
 	GLFWwindow* m_MainWindowHandle = nullptr;
 
 	const InputController* m_InputController = nullptr;
-	const UIManager* m_UIManager = nullptr;
+	const ResourceService* m_ResService = nullptr;
 
 private:	//	Logical components
 
 	StandardQuad m_StandardQuad;
 
 	Camera m_Camera;
-
-	std::vector<SpriteSheet> m_SpriteSheetArray;
-	std::vector<Shader> m_ShaderArray;
-
-private:
-
-	UIManager* m_UIManager = nullptr;
-
-	InputController* m_InputController = nullptr;
-
-private:
-
-	Shader m_TextRenderingShader;
-
-	Font m_DefaultFont;
-	TextOptions m_DefaultTextOptions;
 
 public:
 
@@ -298,65 +283,7 @@ public:		//	Loading functions, which append loading parameters to the queues.
 
 	void StartLoadingProcess();
 
-private:	//	Following functions executer the load params for shaders and
-			//	SpriteSheets and properly linking them.
-
-	struct ShaderLoadingParameters {
-		const std::string m_ShaderName;
-		const std::string m_LocationOfShaderFile;
-		ShaderLoadingParameters(
-			const char* _location,
-			const char* _shaderName
-		)
-			: m_ShaderName(_shaderName), m_LocationOfShaderFile(_location) {}
-	};
-
-	std::vector<ShaderLoadingParameters> m_ShaderLoadQueue;
-
-	void LoadShader(
-		const std::string& _locationShaderFile,
-		const std::string& _shaderName
-	);
-
-
-	struct SpriteSheetLoadingParameters {
-		const std::string m_LocationOfImage;
-		const std::string m_SheetName;
-		const std::string m_PreferredShaderName;
-		int m_SpritesPerRow;
-		int m_SpritesPerCol;
-		
-		SpriteSheetLoadingParameters(
-			const char* _locationRawImage,
-			const char* _sheetName,
-			const char* _preferredShader,
-			int _spritesPerRow,
-			int _spritesPerCol
-		) :
-			m_LocationOfImage(_locationRawImage),
-			m_SheetName(_sheetName),
-			m_PreferredShaderName(_preferredShader),
-			m_SpritesPerRow(_spritesPerRow),
-			m_SpritesPerCol(_spritesPerCol)
-		{}
-	};
-
-	std::vector<SpriteSheetLoadingParameters> m_SpriteSheetLoadQueue;
-
-	void LoadSpriteSheet(
-		const std::string& _locationRawImage,
-		const std::string& _sheetName, 
-		const Shader* _preferredShader,
-		int _spritesPerRow,
-		int _spritesPerCol
-	);
-
-	void LoadDefaultVariables();
-
 private:
-
-	bool GLFWInitialisation();
-	
 
 	void PerClassVAOinitialisationFunction();
 
@@ -368,11 +295,6 @@ private:
 	) const;
 
 public:		// getters and setters, 
-
-	void SetBaseDirectory(
-		const char* _pathToMain
-	);
-
 
 	const Shader* GetShaderByName(
 		const char* _shaderName
@@ -387,21 +309,16 @@ public:		// getters and setters,
 	//	VBOs, IBO and VAO used for rendering
 	GLFWwindow*			GetWinHandle() const { return m_MainWindowHandle; }	// always required to be non-const
 	Camera&				GetCamera() { return m_Camera; }
-	Shader&				GetTextShader() { return m_TextRenderingShader; }
 
 
 	const Camera&			GetCamera() const { return m_Camera; }
-	const Shader&			GetTextShader() const { return m_TextRenderingShader; }
 
 
 	const InputController* GetInput() const { return m_InputController; }
-	const UIManager* GetUI() const { return m_UIManager; }
+	const ResourceService* GetResources() const { return m_ResService; }
 
 	void SetInputController(const InputController* input) { m_InputController = input; }
-	void SetUIManager(const UIManager* ui) { m_UIManager = ui; }
+	void SetResService(const ResourceService* res) { m_ResService = res; }
 
 	StandardQuad& GetQuad() { return m_StandardQuad; }
 };
-
-
-

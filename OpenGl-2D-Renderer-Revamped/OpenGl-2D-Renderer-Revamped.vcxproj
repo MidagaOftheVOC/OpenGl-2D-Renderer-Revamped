@@ -152,16 +152,19 @@
     <ClCompile Include="components\shader.cpp" />
     <ClCompile Include="components\sprite_sheet.cpp" />
     <ClCompile Include="components\ui\font.cpp" />
-    <ClCompile Include="components\ui\primitives\factories\factories.cpp" />
     <ClCompile Include="components\ui\primitives\types\label.h" />
     <ClCompile Include="components\ui\primitives\types\primitives.cpp" />
     <ClCompile Include="components\ui\text.cpp" />
-    <ClCompile Include="components\ui\ui_manager.cpp" />
+    <ClCompile Include="subsystems\ui_manager.cpp" />
     <ClCompile Include="components\ui\window.cpp" />
     <ClCompile Include="components\uniform\uniform_data.cpp" />
     <ClCompile Include="engine.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="subsystems\factories\factory_interface.h" />
+    <ClCompile Include="subsystems\factories\pane_factory.cpp" />
+    <ClCompile Include="subsystems\factories\text_factory.cpp" />
     <ClCompile Include="subsystems\main_renderer.cpp" />
+    <ClCompile Include="subsystems\resource_service.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="common\common.h" />
@@ -181,16 +184,18 @@
     <ClInclude Include="components\shader.h" />
     <ClInclude Include="components\sprite_sheet.h" />
     <ClInclude Include="components\ui\font.h" />
-    <ClInclude Include="components\ui\primitives\factories\pane_factory.h" />
+    <ClInclude Include="subsystems\factories\pane_factory.h" />
     <ClInclude Include="components\ui\primitives\types\button.h" />
     <ClInclude Include="components\ui\primitives\types\pane.h" />
     <ClInclude Include="components\ui\text.h" />
-    <ClInclude Include="components\ui\ui_manager.h" />
+    <ClInclude Include="subsystems\ui_manager.h" />
     <ClInclude Include="components\ui\primitives\ui_primitive.h" />
     <ClInclude Include="components\ui\window.h" />
     <ClInclude Include="components\uniform\uniform_data.h" />
     <ClInclude Include="engine.h" />
+    <ClInclude Include="subsystems\factories\text_factory.h" />
     <ClInclude Include="subsystems\main_renderer.h" />
+    <ClInclude Include="subsystems\resource_service.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

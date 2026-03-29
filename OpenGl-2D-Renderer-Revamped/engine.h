@@ -1,6 +1,11 @@
 #pragma once
 
 #include "subsystems/main_renderer.h"
+#include "subsystems/resource_service.h"
+#include "subsystems/ui_manager.h"
+
+#include "subsystems/factories/text_factory.h"
+#include "subsystems/factories/pane_factory.h"
 
 class Engine2D {
 
@@ -9,6 +14,14 @@ class Engine2D {
 	UIManager m_UIManager;
 
 	InputController m_InputController;
+
+	ResourceService m_ResourceService;
+
+private:
+
+	TextFactory m_TextFactory;
+
+	PaneFactory m_PaneFactory;
 
 private:
 
@@ -39,15 +52,26 @@ public:
 		m_Fullscreen(fullscreen)
 	{
 		PreInit();
-		Init();
 	}
+
+	void Init();
 
 private:
 
 	void PreInit();
 
-	void Init();
 
 	bool GLFWInitialisation();
+
+public:
+
+	bool IsRunning() const { return !glfwWindowShouldClose(m_MainWindowContext); }
+
+	const TextFactory& GetTextFactory() { return m_TextFactory; }
+	const PaneFactory& GetPaneFactory() { return m_PaneFactory; }
+
+	ResourceService& GetResourceService() { return m_ResourceService; }
+	InputController& GetInputController() { return m_InputController; }
+	UIManager& GetUIManager() { return m_UIManager; }
 
 };

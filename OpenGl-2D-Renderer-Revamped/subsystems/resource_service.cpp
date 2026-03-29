@@ -1,4 +1,4 @@
-#include "resource_service.h"
+﻿#include "resource_service.h"
 
 void ResourceService::LoadShader(
 	const std::string& _locationShaderFile,
@@ -19,7 +19,6 @@ void ResourceService::LoadShader(
 	);
 }
 
-
 void ResourceService::LoadSpriteSheet(
 	const std::string& _locationRawImage,
 	const std::string& _sheetName,
@@ -35,7 +34,6 @@ void ResourceService::LoadSpriteSheet(
 		_spritesPerCol
 	);
 }
-
 
 const SpriteSheet* ResourceService::GetSpriteSheetByName(
 	const char* _spriteSheetName
@@ -53,7 +51,6 @@ const SpriteSheet* ResourceService::GetSpriteSheetByName(
 	return nullptr;
 }
 
-
 const Shader* ResourceService::GetShaderByName(
 	const char* _shaderName
 ) {
@@ -70,14 +67,12 @@ const Shader* ResourceService::GetShaderByName(
 	return nullptr;
 }
 
-
 void ResourceService::UploadShaderParameters(
 	const char* _location,
 	const char* _shaderName
 ) {
 	m_ShaderLoadQueue.emplace_back(_location, _shaderName);
 }
-
 
 void ResourceService::UploadSpriteSheetParameters(
 	const char* _locationRawImage,
@@ -95,14 +90,12 @@ void ResourceService::UploadSpriteSheetParameters(
 	);
 }
 
-
 void ResourceService::StartLoadingProcess() {
+	m_Shaders.clear();
+	m_Sheets.clear();
 
-	m_ShaderArray.clear();
-	m_SpriteSheetArray.clear();
-
-	if (m_ShaderArray.capacity() <= m_ShaderLoadQueue.size()) {
-		m_ShaderArray.reserve(m_ShaderLoadQueue.size());
+	if (m_Shaders.capacity() <= m_ShaderLoadQueue.size()) {
+		m_Shaders.reserve(m_ShaderLoadQueue.size());
 	}
 
 	for (size_t i = 0; i < m_ShaderLoadQueue.size(); i++) {
@@ -115,8 +108,8 @@ void ResourceService::StartLoadingProcess() {
 	m_ShaderLoadQueue.clear();
 
 	
-	if (m_SpriteSheetArray.capacity() <= m_SpriteSheetLoadQueue.size()) {
-		m_SpriteSheetArray.reserve(m_SpriteSheetLoadQueue.size());
+	if (m_Sheets.capacity() <= m_SpriteSheetLoadQueue.size()) {
+		m_Sheets.reserve(m_SpriteSheetLoadQueue.size());
 	}
 
 	for (size_t i = 0; i < m_SpriteSheetLoadQueue.size(); i++) {
@@ -144,4 +137,39 @@ void ResourceService::StartLoadingProcess() {
 	m_SpriteSheetLoadQueue.clear();
 
 	LoadDefaultVariables();
+}
+
+void ResourceService::LoadDefaultVariables() {
+	Font m_DefaultFont = Font(GetSpriteSheetByName("test_font"), "cyrillic");
+
+	unsigned short off[] = { 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, };
+	m_DefaultFont.Init(
+		U"абвгдежзийклмнопрстуфхцчшщъьюяѝ .,+-!?;:&><#/",
+		off,
+		50
+	);
+
+	m_DefaultTextOptions.m_Font = &m_DefaultFont;
+}
+
+const PaneSkin* ResourceService::GetSkinByName(
+	const char* _name
+) const {
+	if (!_name) return nullptr;
+	size_t len = m_PaneSkins.size();
+	for (size_t i = 0; i < len; i++) {
+		if (
+			strcmp(_name, m_PaneSkins[i].m_Name.c_str()) == 0
+			) {
+			return &m_PaneSkins[i];
+		}
+	}
+	DEBUG_WARN(0, "GetShaderByName() for name [%s] returned nullptr.", _name);
+	return nullptr;
+}
+
+void ResourceService::AddSkin(
+	const PaneSkin& _skin
+) {
+	m_PaneSkins.emplace_back(_skin);
 }

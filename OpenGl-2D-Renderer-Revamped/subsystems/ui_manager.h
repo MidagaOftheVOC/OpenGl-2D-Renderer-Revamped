@@ -1,19 +1,18 @@
 #pragma once
 
 
-#include "../../common/common.h"
-#include "../../common/standard_quad.h"
+#include "../../subsystems/main_renderer.h"
+#include "../../subsystems/resource_service.h"
 
-#include "../input_controller.h"
+#include "../components/input_controller.h"
 
-#include "../batch_types/ui_batch.h"
+#include "../components/batch_types/ui_batch.h"
 
+#include "factories/pane_factory.h"
+#include "../components/ui/primitives/types/label.h"
+#include "../components/ui/primitives/types/button.h"
 
-#include "primitives/factories/pane_factory.h"
-#include "primitives/types/label.h"
-#include "primitives/types/button.h"
-
-#include "window.h"
+#include "../components/ui/window.h"
 
 
 
@@ -41,6 +40,7 @@ class UIManager {
 
 	const Renderer2D* m_Renderer = nullptr;
 	const InputController* m_Input = nullptr;
+	const ResourceService* m_ResService = nullptr;
 
 private:	//	Windows
 	
@@ -52,7 +52,6 @@ private:	//	Windows
 
 private:	//	Factories for UI primitives
 
-	PaneFactory m_ThePaneFactory;
 
 private:	//	Batches
 
@@ -151,14 +150,15 @@ public:
 	void SetDistributionBounds(float _low, float _high);
 
 	const UIBatch* GetUIBatch() { return m_UIBatch; }
-	PaneFactory& GetPaneFactory() { return m_ThePaneFactory; }
 	const std::vector<TextWithZLayer>& GetUITexts() const { return m_CachedTexts; }
 
 	const std::vector<Window>& GetWindows() const { return m_WindowArray; }
 
 	const Renderer2D* GetRenderer() const { return m_Renderer; }
-	void SetRenderer(const Renderer2D* rend) { m_Renderer = rend; }
-
 	const InputController* GetInput() const { return m_Input; }
+	const ResourceService* GetResources() const { return m_ResService; }
+
+	void SetRenderer(const Renderer2D* rend) { m_Renderer = rend; }
 	void SetInputController(const InputController* input) { m_Input = input; }
+	void SetResService(const ResourceService* res) { m_ResService = res; }
 };

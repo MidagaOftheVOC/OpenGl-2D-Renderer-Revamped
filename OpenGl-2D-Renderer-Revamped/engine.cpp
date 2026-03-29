@@ -2,7 +2,7 @@
 
 void Engine2D::PreInit() {
 	if (!GLFWInitialisation()) {
-		throw new std::exception("nigg");
+		throw new std::exception("idk bro");
 	}
 
 	m_Renderer = Renderer2D(
@@ -14,10 +14,12 @@ void Engine2D::PreInit() {
 	);
 
 	m_InputController = InputController(m_MainWindowContext);
+
+	m_ResourceService = ResourceService(m_MainWindowContext);
+
 }
 
 void Engine2D::Init() {
-	m_Renderer.SetUIManager(&m_UIManager);
 	m_Renderer.SetInputController(&m_InputController);
 
 	m_UIManager.SetRenderer(&m_Renderer);
@@ -34,9 +36,11 @@ void Engine2D::Init() {
 		InputController::c_SpecialTrackBit
 	);
 
+	m_Renderer.Init();
+	m_ResourceService.StartLoadingProcess();
 
+	m_TextFactory = TextFactory(&GetResourceService());
 }
-
 
 bool Engine2D::GLFWInitialisation() {
 	//	Window and GLFW context initialisation
@@ -64,39 +68,4 @@ bool Engine2D::GLFWInitialisation() {
 		std::cout << glewGetErrorString(glewReturnCode);
 		return false;
 	}
-}
-
-
-void Renderer2D::LoadDefaultVariables() {
-	m_DefaultFont = Font(
-		GetSpriteSheetByName("test_font"),
-		"cyrillic"
-	);
-
-	unsigned short off[] = { 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, };
-	m_DefaultFont.Init(
-		U"абвгдежзийклмнопрстуфхцчшщъьюяѝ .,+-!?;:&><#/",
-		off,
-		50
-	);
-
-	m_DefaultTextOptions.m_Font = &m_DefaultFont;
-}
-
-Text Renderer2D::GenText(
-	const char32_t* _string,
-	TextOptions _textOptions
-) const {
-
-	if (_textOptions.m_Font == nullptr) {
-		//	default;
-		return Text(_string, m_DefaultTextOptions);
-	}
-
-	return Text(_string, _textOptions);
-}
-
-
-bool Renderer2D::IsRunning() const {
-	return glfwWindowShouldClose(GetWinHandle());
 }
