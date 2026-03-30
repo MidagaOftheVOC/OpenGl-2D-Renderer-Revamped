@@ -96,18 +96,18 @@ void Engine2D::ExecuteFrame(
 
 	Low prio:
 	We should probably check if the Camera type var works as it should inside the renderer and how moving it affects the screen.
-	
+
 	*/
 
 	/*
-		IMPROVE BATCHES
-		They should know when to update their buffers. They should have a fn DrawSprite(...) or something which takes SpriteInfo or something.
-		Before rendering, update arrays if needed.
+	IMPROVE BATCHES
+	They should know when to update their buffers. They should have a fn DrawSprite(...) or something which takes SpriteInfo or something.
+	Before rendering, update arrays if needed.
 
-		Also make a struct to unify those 1-4 OUT_ arrays to make them easier to use.
+	Also make a struct to unify those 1-4 OUT_ arrays to make them easier to use.
 
-		MAKE SEPARATE FACTORIES FOR EACH TYPE THAT NEEDS FACTORIES
-		(and make them depend on res service)
+	MAKE SEPARATE FACTORIES FOR EACH TYPE THAT NEEDS FACTORIES
+	(and make them depend on res service)
 	*/
 
 	glfwPollEvents();

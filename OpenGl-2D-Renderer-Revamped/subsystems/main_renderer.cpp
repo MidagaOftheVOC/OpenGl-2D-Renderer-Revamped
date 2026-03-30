@@ -536,8 +536,7 @@ Renderer2D::Renderer2D(
 	int _screenHeight,
 	const char* _windowTitle,
 	bool _fullscreen
-)
-	:
+):
 	m_MainWindowHandle(_initialisedWindow),
 	m_ScreenWidth(_screenWidth),
 	m_ScreenHeight(_screenHeight),
