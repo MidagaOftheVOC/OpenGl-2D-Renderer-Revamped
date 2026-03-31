@@ -2,7 +2,7 @@
 
 
 void Renderer2D::Draw(
-	const SoftBatch* _batch,
+	SoftBatch* _batch,
 	float _xPosition,
 	float _yPosition,
 	float _zLayer,
@@ -13,30 +13,15 @@ void Renderer2D::Draw(
 		_xPosition,
 		_yPosition,
 		_zLayer,
-		_uniformArray
+		_uniformArray,
+		_batch->GetInstanceCount()
 	);
+	_batch->SendSpriteDataToGPU();
 }
 
 
 void Renderer2D::Draw(
-	const Drawable* _drawable,
-	float _xPosition,
-	float _yPosition,
-	float _zLayer,
-	UniformDataVector* _uniformArray
-) {
-	m_DrawCallQueue.emplace(
-		_drawable,
-		_xPosition,
-		_yPosition,
-		_zLayer,
-		_uniformArray
-	);
-}
-
-
-void Renderer2D::Draw(
-	const FreeBatch* _batch,
+	FreeBatch* _batch,
 	float _xPosition,
 	float _yPosition,
 	float _zLayer,
@@ -47,13 +32,14 @@ void Renderer2D::Draw(
 		_xPosition,
 		_yPosition,
 		_zLayer,
-		_uniformArray
+		_uniformArray,
+		_batch->SendSpriteDataToGPU()
 	);
 }
 
 
 void Renderer2D::Draw(
-	const StrictBatch* _batch,
+	StrictBatch* _batch,
 	float _initialXpos,
 	float _initialYpos,
 	float _zLayer,
@@ -64,13 +50,15 @@ void Renderer2D::Draw(
 		_initialXpos,
 		_initialYpos,
 		_zLayer,
-		_uniformArray
+		_uniformArray,
+		_batch->GetInstanceCount()
 	);
+	_batch->SendSpriteDataToGPU();
 }
 
 
 void Renderer2D::Draw(
-	const UIBatch* _uiBatch,
+	UIBatch* _uiBatch,
 	float _furthestZcoord,
 	UniformDataVector* _uniformArray
 ) {
@@ -80,8 +68,10 @@ void Renderer2D::Draw(
 		CameraPosition.x,
 		CameraPosition.y,
 		0.f,	//	default is 0, since UI manager distributes final Z coordinates for the components
-		_uniformArray
+		_uniformArray,
+		_uiBatch->GetInstanceCount()
 	);
+	_uiBatch->SendSpriteDataToGPU();
 }
 
 
@@ -113,11 +103,11 @@ void Renderer2D::ExecuteDraws() {
 	RenderDrawables();
 	RenderStrictBatches();
 	RenderSoftBatches();
-	RenderFreeBatches();
 	
-
 	glBindBufferBase(GL_UNIFORM_BUFFER, 0, 0);
 	glBindBufferBase(GL_UNIFORM_BUFFER, 1, 0);
+
+	RenderFreeBatches();
 
 	//const std::vector<TextWithZLayer>& UITexts = m_UIManager.GetUITexts();
 	//for (size_t i = 0; i < UITexts.size(); i++) {
@@ -171,7 +161,7 @@ void Renderer2D::RenderGUI() {
 		const SpriteSheet* SheetObject = Batch->GetSpecialSheetPointer();
 		const Shader* ShaderObject = SheetObject->GetShader();
 
-		const int InstanceCount = Batch->GetInstanceCount();
+		const int InstanceCount = static_cast<const int>(DrawCall.GetInstances());
 
 		Batch->BindUniqueBuffers();
 
@@ -287,7 +277,7 @@ void Renderer2D::RenderFreeBatches() {
 		const FreeBatch* Free = dynamic_cast<const FreeBatch*>(BatchDrawCallObject.GetBaseBatchPointer());
 		const Shader* ShaderObject = Free->GetSpecialSheetPointer()->GetShader();
 
-		int InstanceCount = Free->GetInstanceCount();
+		int InstanceCount = static_cast<const int>(BatchDrawCallObject.GetInstances());
 
 		Free->BindUniqueBuffers();
 
@@ -330,7 +320,7 @@ void Renderer2D::RenderSoftBatches() {
 		const SpriteSheet* Sheet = Soft->GetSpecialSheetPointer();
 		const Shader* Shader = Sheet->GetShader();
 
-		int InstanceCount = Soft->GetInstanceCount();
+		int InstanceCount = static_cast<const int>(DrawCall.GetInstances());
 
 		Soft->BindUniqueBuffers();
 
@@ -383,7 +373,7 @@ void Renderer2D::RenderStrictBatches() {
 		const SpriteSheet* SheetCurrent = Strict->GetSpecialSheetPointer();
 		const Shader* ShaderCurrent = SheetCurrent->GetShader();
 
-		int InstanceCount = Strict->GetInstanceCount();
+		int InstanceCount = static_cast<const int>(DrawCallCurrent.GetInstances());
 
 		// SHEET SET UP
 		glBindTexture(GL_TEXTURE_2D, SheetCurrent->GetTextureBufferID());
@@ -545,7 +535,7 @@ Renderer2D::Renderer2D(
 {}
 
 void Renderer2D::Draw(
-	const Text* _text,
+	Text* _text,
 	float _xPosition,
 	float _yPosition,
 	float _zLayer,

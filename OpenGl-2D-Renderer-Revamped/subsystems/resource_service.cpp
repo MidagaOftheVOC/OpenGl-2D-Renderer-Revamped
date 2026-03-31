@@ -116,7 +116,6 @@ void ResourceService::StartLoadingProcess() {
 		SpriteSheetLoadingParameters& params = m_SpriteSheetLoadQueue[i];
 
 		if (!params.m_PreferredShaderName.compare(c_SpecialTextShaderName)) {
-			
 			LoadSpriteSheet(
 				std::string(params.m_LocationOfImage),
 				std::string(params.m_SheetName),
@@ -124,6 +123,7 @@ void ResourceService::StartLoadingProcess() {
 				params.m_SpritesPerRow,
 				params.m_SpritesPerCol
 			);
+			continue;
 		}
 
 		LoadSpriteSheet(
@@ -140,7 +140,7 @@ void ResourceService::StartLoadingProcess() {
 }
 
 void ResourceService::LoadDefaultVariables() {
-	Font m_DefaultFont = Font(GetSpriteSheetByName("test_font"), "cyrillic");
+	m_DefaultFont = Font(GetSpriteSheetByName("test_font"), "cyrillic");
 
 	unsigned short off[] = { 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, };
 	m_DefaultFont.Init(

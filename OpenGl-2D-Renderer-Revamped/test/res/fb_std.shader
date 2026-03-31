@@ -5,7 +5,7 @@ layout(location = 0) in vec2 b_VertexBuffer;
 layout(location = 1) in vec2 b_TexBuffer;
 layout(location = 2) in uint b_SpriteInformationBuffer;
 layout(location = 3) in float b_Rotations;
-layout(location = 4) in vec2 b_PositionsRelativeToModel;
+layout(location = 4) in vec2 b_PositionsRelativeToModel;    //  relative to batch origin
 layout(location = 5) in vec2 b_QuadDimensions;
 
 layout(std140, binding = 0) uniform ubo_UVRegions {
@@ -24,7 +24,7 @@ uniform mat4 u_Projection;
 out vec2 v_TextureVertex;
 flat out uint v_SheetIndex;
 
-
+//  NOTE: THIS SHADER IS THE MAIN SHADER THAT WILL BE USED FOR THE FREEBATCH TYPE
 
 void main(){
 
@@ -59,7 +59,7 @@ void main(){
 		PointOfRotation.x * sine + PointOfRotation.y * cosine
 	);
 
-    vec2 WorldPosition = RotatedPosition + b_PositionsRelativeToModel;
+    vec2 WorldPosition = RotatedPosition + b_PositionsRelativeToModel + b_QuadDimensions / 2.0;
 
 	gl_Position = u_Projection * u_View * u_Model * vec4(WorldPosition, 0.f, 1.f);
 }
@@ -79,7 +79,8 @@ uniform sampler2D u_Textures[32];
 out vec4 FragColour;
 
 void main(){
-	FragColour = mix(texture(u_Textures[v_SheetIndex], v_TextureVertex), vec4(1.0, 0, 0, 1.0), 0.5);
+	//FragColour = mix(texture(u_Textures[v_SheetIndex], v_TextureVertex), vec4(1.0, 0, 0, 1.0), 0.5);
+    FragColour = texture(u_Textures[v_SheetIndex], v_TextureVertex);
 }
 
 

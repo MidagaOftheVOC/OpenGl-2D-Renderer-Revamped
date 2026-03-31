@@ -29,7 +29,7 @@ private:
 
 	int m_ScreenWidth = -1;
 	int m_ScreenHeight = -1;
-	std::string m_WindowTitle = nullptr;
+	std::string m_WindowTitle;
 
 	bool m_Fullscreen = false;
 
@@ -68,8 +68,11 @@ private:
 
 	void PreInit();
 
-
 	bool GLFWInitialisation();
+
+	void QueueFreebatchesToRenderer(
+		const GameLoopReturnType& gameLoopRetVal
+	);
 
 public:
 

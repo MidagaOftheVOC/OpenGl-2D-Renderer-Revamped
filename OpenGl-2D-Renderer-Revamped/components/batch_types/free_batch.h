@@ -15,21 +15,6 @@ This must be incorporated at the base batch level and further extended to each b
 For now, this will work only for FreeBatch since it's the most flexible of all types of batches.
 */
 
-//	Prototype for now
-struct Sprite {
-	std::string SheetName;
-	//	 OR
-	size_t SheetIndex;
-
-
-	size_t IndexWithinSheet;
-	
-	glm::vec2 Dims;
-
-	float Rotation = 0.f;
-};
-
-
 class FreeBatch : public BaseBatch {
 
 	unsigned int m_VertexDimensionsVBO = 0;
@@ -37,11 +22,25 @@ class FreeBatch : public BaseBatch {
 	unsigned int m_RotationsVBO = 0;
 	unsigned int m_PositionsVBO = 0;
 
+	std::vector<SpriteInformation> m_SIArray;
+	std::vector<xyPosition> m_Positions;
+	std::vector<float> m_Rotations;
+	std::vector<SpriteDimensions> m_Dimensions;
+
 public:
 
 	FreeBatch(
 		int _instanceCount
 	);
+
+
+	//	TODO AFTER REFACTOR:
+	//	THIS MUST BE COMMON LOGIC, IT MAKES NO SENSE FOR THIS TO BE FREEBATCH-SPECIFIC
+	virtual void DrawSpriteInstance(
+		const SpriteInstance& spriteInstance
+	);
+
+	virtual int SendSpriteDataToGPU();
 
 
 	virtual void InitialiseBuffers();
@@ -107,7 +106,7 @@ public:
 	unsigned int GetPositionsVBO() const { return m_PositionsVBO; }
 
 
-	int GetElementCount() const { return m_InstanceCount * 6; }
+	int GetElementCount() const { return m_MaxInstanceCapacity * 6; }
 
 	virtual ~FreeBatch() {}
 };

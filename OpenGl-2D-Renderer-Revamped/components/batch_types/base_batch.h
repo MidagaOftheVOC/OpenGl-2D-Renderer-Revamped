@@ -9,12 +9,29 @@
 
 //	Common batch methods and data
 
+struct xyPosition {
+	float x = 0, y = 0;
+};
+
+struct SpriteDimensions {
+	float w = 0, h = 0;
+};
+
+struct SpriteInstance {
+	SpriteInformation SpriteInfo;
+	float x = 0, y = 0;
+	float w = 0, h = 0;
+	float Rotation = 0.f;
+};
+
+
 class BaseBatch {
 protected:
 	
 	std::vector<const SpriteSheet*> m_SpriteSheets;
 	
-	int m_InstanceCount = 0;
+	int m_SpriteInstancesSinceLastDraw = 0;
+	int m_MaxInstanceCapacity = 0;
 	int m_BufferedInstanceCount = 0;
 
 	FlagTracker m_Flags = FlagTracker(c_NotInitialised);
@@ -56,6 +73,15 @@ public:
 	void AddSheetToBatch(
 		const SpriteSheet* _spriteSheet
 	);
+
+
+	virtual void DrawSpriteInstance(
+		const SpriteInstance& spriteInstance
+	);
+
+	virtual int SendSpriteDataToGPU();
+
+
 
 
 	virtual void InitialiseBuffers() = 0;
@@ -121,8 +147,7 @@ public:
 
 public:
 
-	//const std::vector<const SpriteSheet*> GetSpriteSheets() const { return m_SpriteSheets; }
-	const int GetInstanceCount() const { return m_InstanceCount; }
+	const int GetInstanceCount() const { return m_MaxInstanceCapacity > m_SpriteInstancesSinceLastDraw ? m_SpriteInstancesSinceLastDraw : m_MaxInstanceCapacity; }
 	
 	//	Returns the maximum number of per-instance data pieces the current buffers can 
 	//	hold without overflowing, indicating it's safe to rebuffer the VBOs with bytes

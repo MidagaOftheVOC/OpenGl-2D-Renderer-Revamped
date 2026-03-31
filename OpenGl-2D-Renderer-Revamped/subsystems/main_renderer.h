@@ -23,7 +23,7 @@
 #include "../components/ui/text.h"
 
 struct GameLoopReturnType {
-	const FreeBatch* batches = nullptr;
+	FreeBatch* batches = nullptr;
 	int count = 0;
 };
 
@@ -36,18 +36,19 @@ protected:
 	float m_xScreenCoord;
 	float m_yScreenCoord;
 	float m_zLayer;
+	size_t m_MaxInstanceCapacity = 0;
 
 	//	If value is left at nullptr, no additional uniforms will be applied
 	const UniformDataVector* m_AppliedUniforms = nullptr;
 
 public:
-	DrawCall(float x, float y, float z, const UniformDataVector* _uniformDataArray)
-		: m_xScreenCoord(x), m_yScreenCoord(y), m_zLayer(z), m_AppliedUniforms(_uniformDataArray)
-	{
-	}
+	DrawCall(float x, float y, float z, const UniformDataVector* _uniformDataArray, size_t _instances)
+		: m_xScreenCoord(x), m_yScreenCoord(y), m_zLayer(z), m_AppliedUniforms(_uniformDataArray), m_MaxInstanceCapacity(_instances)
+	{}
 
 	const UniformDataVector* GetAppliedUniforms() const { return m_AppliedUniforms; }
 	glm::vec3 GetPositionVector() const { return glm::vec3(m_xScreenCoord, m_yScreenCoord, m_zLayer); }
+	const size_t GetInstances() const { return m_MaxInstanceCapacity; }
 };
 
 //		DRAWABLE
@@ -56,8 +57,8 @@ struct DrawableDrawCall : DrawCall {
 private:
 	const Drawable* m_Drawable = nullptr;
 public:
-	DrawableDrawCall(const Drawable* _drawable, float x, float y, float z, const UniformDataVector* _uniformDataArray)
-		: m_Drawable(_drawable), DrawCall(x, y, z, _uniformDataArray)
+	DrawableDrawCall(const Drawable* _drawable, float x, float y, float z, const UniformDataVector* _uniformDataArray, size_t _instances)
+		: m_Drawable(_drawable), DrawCall(x, y, z, _uniformDataArray, _instances)
 	{
 	}
 	const Drawable* GetDrawablePointer() const { return m_Drawable; }
@@ -73,8 +74,8 @@ struct BatchDrawCall : DrawCall {
 private:
 	const BaseBatch* m_Base = nullptr;
 public:
-	BatchDrawCall(const BaseBatch* _softBatch, float x, float y, float z, const UniformDataVector* _uniformDataArray)
-		: m_Base(_softBatch), DrawCall(x, y, z, _uniformDataArray)
+	BatchDrawCall(const BaseBatch* _softBatch, float x, float y, float z, const UniformDataVector* _uniformDataArray, size_t _instances)
+		: m_Base(_softBatch), DrawCall(x, y, z, _uniformDataArray, _instances)
 	{
 	}
 	//	RECAST AS APPROPRIATE
@@ -88,7 +89,7 @@ private:
 	const Text* m_Text = nullptr;
 public:
 	TextDrawCall(const Text* _text, float x, float y, float z, const UniformDataVector* _uniformDataArray)
-		:m_Text(_text), DrawCall(x, y, z, _uniformDataArray)
+		:m_Text(_text), DrawCall(x, y, z, _uniformDataArray, 0)
 	{
 	}
 	const Text* GetTextPointer() const { return m_Text; }
@@ -102,8 +103,8 @@ private:
 public:	//	Point is that UI elements will always have the relevant positions in the batch itself
 	//	since those batches are supposed to be used en-masse, i.e. one such batch for each primitive
 	//	That is to say, all Panes, or all Buttons for rendering, will be done so with one batch for each.
-	UIDrawCall(const UIBatch* _uiBatch, float _cameraXpos, float _cameraYpos, float _furthestZcoord, const UniformDataVector* _uniformDataArray)
-		:m_UIBatch(_uiBatch), DrawCall(_cameraXpos, _cameraYpos, _furthestZcoord, _uniformDataArray)
+	UIDrawCall(const UIBatch* _uiBatch, float _cameraXpos, float _cameraYpos, float _furthestZcoord, const UniformDataVector* _uniformDataArray, size_t _instances)
+		:m_UIBatch(_uiBatch), DrawCall(_cameraXpos, _cameraYpos, _furthestZcoord, _uniformDataArray, _instances)
 	{
 	}
 	const UIBatch* GetUIBatchPointer() const { return m_UIBatch; }
@@ -193,7 +194,7 @@ public:		//	Exposed functions
 	//	In essence, all the positions given to the SoftBatch object at creation
 	//	are relative to the X and Y coordinates given here.
 	void Draw(
-		const SoftBatch* _batch,
+		SoftBatch* _batch,
 		float _xPosition,
 		float _yPosition,
 		float _zLayer,
@@ -202,7 +203,7 @@ public:		//	Exposed functions
 
 
 	void Draw(
-		const FreeBatch* _batch,
+		FreeBatch* _batch,
 		float _xPosition,
 		float _yPosition,
 		float _zLayer,
@@ -211,7 +212,7 @@ public:		//	Exposed functions
 
 
 	void Draw(
-		const StrictBatch* _batch,
+		StrictBatch* _batch,
 		float _initialXpos,
 		float _initialYpos,
 		float _zLayer,
@@ -220,7 +221,7 @@ public:		//	Exposed functions
 
 
 	void Draw(
-		const Drawable* _drawable,
+		Drawable* _drawable,
 		float _xPosition,
 		float _yPosition,
 		float _zLayer,
@@ -229,7 +230,7 @@ public:		//	Exposed functions
 
 
 	void Draw(
-		const Text* _text,
+		Text* _text,
 		float _xPosition,
 		float _yPosition,
 		float _zLayer,
@@ -238,23 +239,9 @@ public:		//	Exposed functions
 
 
 	void Draw(
-		const UIBatch* _uiBatch,
+		UIBatch* _uiBatch,
 		float _furthestZcoord,
 		UniformDataVector* _uniformArray
-	);
-
-
-	//	Returns a brand new Drawable object derived from an existing SpriteSheet object.
-	// 
-	//	!!! This, used anywhere else other than a loading process that exposes
-	//	all Drawable instances from each SpriteSheet, violates the Drawable doctrine
-	//	of being a one-for-all templates.
-	//
-	//	Note: To be frank, this is pretty shit. You're better off pooling things in 
-	//	soft batches with floating quads.
-	Drawable GenerateDrawable(
-		const char* _spriteSheetName,
-		int _indexInSpriteSheet
 	);
 
 private:

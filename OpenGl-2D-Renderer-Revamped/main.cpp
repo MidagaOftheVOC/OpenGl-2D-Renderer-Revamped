@@ -1,5 +1,7 @@
 ﻿#include "engine.h"
 
+#include <print>
+
 int main(int argc, char** argv) {
 
 	Engine2D eng(1600, 900, "nog", false);
@@ -21,7 +23,9 @@ int main(int argc, char** argv) {
 	resService.UploadSpriteSheetParameters("test\\res\\test.cfg",				"sb_fq",							"sb_floating_quads",				0, 0);
 	resService.UploadSpriteSheetParameters("test\\res\\panda.cfg",				"sb_panda",							"sb_floating_quads",				0, 0);
 	resService.UploadSpriteSheetParameters("test\\res\\test.cfg",				"fd_std1",							"fd_std",							0, 0);
+	
 	resService.UploadSpriteSheetParameters("test\\res\\panda.cfg",				"fd_std2",							"fd_std",							0, 0);
+	
 	resService.UploadSpriteSheetParameters("test\\res\\gui.cfg",				"uib_std",							"uib_std",							0, 0);
 	resService.UploadSpriteSheetParameters("test\\res\\gui.cfg",				resService.c_SpecialUISheetName,	"uib_std",							0, 0);
 
@@ -49,10 +53,52 @@ int main(int argc, char** argv) {
 	
 	eng.GetResourceService().AddSkin(skin);
 
+	FreeBatch freebatch = FreeBatch(0);
+	SpriteInstance instance;
+	freebatch.AddSheetToBatch(eng.GetResourceService().GetSpriteSheetByName("fd_std2"));
+
+	instance.w = 50;
+	instance.h = 50;
+
+	instance.x = 150;
+	instance.y = 101;
+
+	instance.Rotation = 0.f;
+	instance.SpriteInfo = freebatch.DeriveSprite("fb_sheet", "nose");
+
+	freebatch.InitialiseBuffers();
+
+	while (eng.IsRunning()) {
+		eng.ExecuteFrame([&](float f, GameInput l) {
+			GameLoopReturnType self;
+			self.batches = &freebatch;
+			self.count = 1;
+
+			if (l.IsHeld(GLFW_KEY_LEFT)) {
+				instance.x -= 1;
+				std::println("NEW X: {}", instance.x);
+			}
+
+			if (l.IsHeld(GLFW_KEY_RIGHT)) {
+				instance.x += 1;
+				std::println("NEW X: {}", instance.x);
+			}
+
+			freebatch.DrawSpriteInstance(instance);
+
+			return self;
+		});
+	}
+
+	return 0;
+}
+
+
+/*
 	InputController& input = eng.GetInputController();
-	
+
 	UIManager& ui = eng.GetUIManager();
-	
+
 	Window win  = ui.CreateWindow({	600, 300 },	20);
 	Window win2 = ui.CreateWindow({ 400, 200 }, 20);
 
@@ -73,14 +119,4 @@ int main(int argc, char** argv) {
 
 	ui.OpenWindow(winID1, 200, 200);
 	ui.OpenWindow(winID2, 560, 250);
-
-	while (eng.IsRunning()) {
-		eng.ExecuteFrame([](float f, GameInput l) {
-			GameLoopReturnType self;
-
-			return self;
-		});
-	}
-
-	return 0;
-}
+*/

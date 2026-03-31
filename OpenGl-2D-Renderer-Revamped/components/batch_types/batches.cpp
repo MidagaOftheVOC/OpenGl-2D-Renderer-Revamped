@@ -110,13 +110,13 @@ void BaseBatch::AddSheetToBatch(
 bool BaseBatch::SetInstanceCount(
 	int _newInstanceCount
 ) {
-	DEBUG_ASSERT(_newInstanceCount > 0 && _newInstanceCount < 0x7fffffff, "SoftBatch setting invalid value for Instance count.");
+	DEBUG_ASSERT(_newInstanceCount >= 0 && _newInstanceCount < 0x7fffffff, "SoftBatch setting invalid value for Instance count.");
 	//DEBUG_WARN(_newInstanceCount == GetInstanceCount(), "Setting Instance count to the same number in SoftBatch with name [%s].", dm_BatchName.c_str());
 
 
-	if (_newInstanceCount == m_InstanceCount) return true;
+	if (_newInstanceCount == m_MaxInstanceCapacity) return true;
 
-	if (_newInstanceCount <= 0 || _newInstanceCount > 0x7fffffff) {
+	if (_newInstanceCount < 0 || _newInstanceCount > 0x7fffffff) {
 		return false;
 	}
 
@@ -125,7 +125,7 @@ bool BaseBatch::SetInstanceCount(
 		m_BufferedInstanceCount = _newInstanceCount;
 	}
 
-	m_InstanceCount = _newInstanceCount;
+	m_MaxInstanceCapacity = _newInstanceCount;
 	return true;
 }
 
@@ -223,11 +223,23 @@ void BaseBatch::BindUBOs() const {
 }
 
 
+void BaseBatch::DrawSpriteInstance(
+	const SpriteInstance& spriteInstance
+) {
+	std::cout << "DrawSpriteInstance() called when not defined.\n\n\n\n";
+}
+
+
+int BaseBatch::SendSpriteDataToGPU() {
+	m_SpriteInstancesSinceLastDraw = 0;
+	return 0;
+}
+
+
 SpriteInformation BaseBatch::DeriveSprite(
 	const char* _sheetName,
 	const char* _spriteNameWithinSheet
 ) const {
-
 	for (size_t i = 0; i < m_SpriteSheets.size(); i++) {
 		if (FastStringCompare(m_SpriteSheets[i]->GetName().c_str(), _sheetName)) {
 			unsigned short Result = m_SpriteSheets[i]->GetSpriteIndexByName(_spriteNameWithinSheet);
@@ -240,9 +252,6 @@ SpriteInformation BaseBatch::DeriveSprite(
 
 	return SpriteInformation(0, 0);
 }
-
-
-
 /*		STRICT BATCH		*/
 
 
@@ -682,6 +691,40 @@ void FreeBatch::UnbindCommonVAO() {
 	glBindVertexArray(0);
 }
 
+
+void FreeBatch::DrawSpriteInstance(
+	const SpriteInstance& spriteInstance
+) {
+	if(m_SpriteInstancesSinceLastDraw < m_MaxInstanceCapacity){
+		m_Positions.at(m_SpriteInstancesSinceLastDraw) = { spriteInstance.x, spriteInstance.y };
+		m_Dimensions.at(m_SpriteInstancesSinceLastDraw) = { spriteInstance.w, spriteInstance.h };
+		m_Rotations.at(m_SpriteInstancesSinceLastDraw) = spriteInstance.Rotation;
+		m_SIArray.at(m_SpriteInstancesSinceLastDraw) = spriteInstance.SpriteInfo;
+	}
+	else {
+		m_Positions.push_back({ spriteInstance.x, spriteInstance.y });
+		m_Dimensions.push_back({ spriteInstance.w, spriteInstance.h });
+		m_Rotations.emplace_back(spriteInstance.Rotation);
+		m_SIArray.emplace_back(spriteInstance.SpriteInfo);
+	}
+
+	m_SpriteInstancesSinceLastDraw++;
+}
+
+int FreeBatch::SendSpriteDataToGPU() {
+	UpdateBuffers(
+		m_SIArray.data(),
+		m_Rotations.data(),
+		reinterpret_cast<float*>(m_Positions.data()),
+		reinterpret_cast<float*>(m_Dimensions.data()),
+		m_SpriteInstancesSinceLastDraw
+	);
+
+	int retVal = GetInstanceCount();
+	m_SpriteInstancesSinceLastDraw = 0;
+
+	return retVal;
+}
 
 /*		UI	BATCH		*/
 
