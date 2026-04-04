@@ -168,4 +168,6 @@ public:
 	void SetRenderer(const Renderer2D* rend) { m_Renderer = rend; }
 	void SetResService(const ResourceService* res) { m_ResService = res; }
 	void SetPaneFactory(const PaneFactory* fac) { m_PaneFactory = fac; }
+
+	const float GetFurthestReservedZ() const { return m_UpperBoundOfZlayerDistribution; }
 };

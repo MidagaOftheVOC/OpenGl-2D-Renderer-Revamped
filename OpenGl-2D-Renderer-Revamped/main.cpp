@@ -8,20 +8,11 @@ int main(int argc, char** argv) {
 	auto& resService = eng.GetResourceService();
 
 	resService.UploadShaderParameters("test\\res\\text.shader",					resService.c_SpecialTextShaderName);
-	resService.UploadShaderParameters("test\\res\\batch_test.shader",			"strict_batch");
-	resService.UploadShaderParameters("test\\res\\sb_std.shader",				"soft_batch");
-	resService.UploadShaderParameters("test\\res\\free_batch.shader",			"fb_shader");	//	W/O UBO
-	resService.UploadShaderParameters("test\\res\\sb_floating_quads.shader",	"sb_floating_quads");
 	resService.UploadShaderParameters("test\\res\\fb_std.shader",				"fd_std");		//	WITH UBO
 	resService.UploadShaderParameters("test\\res\\uib_std.shader",				"uib_std");
 
 
 	resService.UploadSpriteSheetParameters("test\\res\\cyrillic.png",			"test_font",						resService.c_SpecialTextShaderName, 9, 9);
-	resService.UploadSpriteSheetParameters("test\\res\\test.cfg",				"fox",								"strict_batch",						0, 0);
-	resService.UploadSpriteSheetParameters("test\\res\\test.cfg",				"soft_sheet",						"soft_batch",						0, 0);
-	resService.UploadSpriteSheetParameters("test\\res\\test.cfg",				"fb_sheet",							"fb_shader",						0, 0);
-	resService.UploadSpriteSheetParameters("test\\res\\test.cfg",				"sb_fq",							"sb_floating_quads",				0, 0);
-	resService.UploadSpriteSheetParameters("test\\res\\panda.cfg",				"sb_panda",							"sb_floating_quads",				0, 0);
 	resService.UploadSpriteSheetParameters("test\\res\\test.cfg",				"fd_std1",							"fd_std",							0, 0);
 	
 	resService.UploadSpriteSheetParameters("test\\res\\panda.cfg",				"fd_std2",							"fd_std",							0, 0);
@@ -54,39 +45,51 @@ int main(int argc, char** argv) {
 	eng.GetResourceService().AddSkin(skin);
 
 	FreeBatch freebatch = FreeBatch(0);
-	SpriteInstance instance;
+	FreeBatch freebatch1 = FreeBatch(0);
+	SpriteInstance instance, instance1;
 	freebatch.AddSheetToBatch(eng.GetResourceService().GetSpriteSheetByName("fd_std2"));
+	freebatch1.AddSheetToBatch(eng.GetResourceService().GetSpriteSheetByName("fd_std2"));
 
 	instance.w = 50;
 	instance.h = 50;
 
-	instance.x = 150;
-	instance.y = 101;
+	float x = 150;
+	float y = 101;
 
-	instance.Rotation = 0.f;
-	instance.SpriteInfo = freebatch.DeriveSprite("fb_sheet", "nose");
+	float Rotation = 0.f;
+	instance.SpriteInfo = freebatch.DeriveSprite("fd_std2", "nose");
+	instance1 = instance;
+	instance1.SpriteInfo = freebatch1.DeriveSprite("fd_std2", "eye");
 
-	freebatch.InitialiseBuffers();
+	freebatch.BufferUBOs();
+	freebatch1.BufferUBOs();
+	constexpr float oneDef = 1.f / 3.1418f;
 
 	while (eng.IsRunning()) {
-		eng.ExecuteFrame([&](float f, GameInput l) {
-			GameLoopReturnType self;
-			self.batches = &freebatch;
-			self.count = 1;
+		eng.ExecuteFrame([&](float elapsedTimeSeconds, GameInput input, GameLoopReturnType& renderComms) {
+			renderComms.QueueRenderObject(&freebatch, 2);
+			renderComms.QueueRenderObject(&freebatch1, 1);
 
-			if (l.IsHeld(GLFW_KEY_LEFT)) {
-				instance.x -= 1;
-				std::println("NEW X: {}", instance.x);
+			if (input.IsHeld(GLFW_KEY_LEFT)) {
+				x -= 1;
+				std::println("NEW X: {}", x);
 			}
 
-			if (l.IsHeld(GLFW_KEY_RIGHT)) {
-				instance.x += 1;
-				std::println("NEW X: {}", instance.x);
+			if (input.IsHeld(GLFW_KEY_RIGHT)) {
+				x += 1;
+				std::println("NEW X: {}", x);
 			}
 
-			freebatch.DrawSpriteInstance(instance);
+			if (input.IsHeld(GLFW_KEY_R)) {
+				Rotation += oneDef;
+			}
 
-			return self;
+			if (input.IsHeld(GLFW_KEY_DOWN)) {
+				instance.w += 5;
+			}
+
+			freebatch.DrawSpriteInstance(instance, x, y, Rotation);
+			freebatch1.DrawSpriteInstance(instance1, x + 20, y + 20, Rotation);
 		});
 	}
 

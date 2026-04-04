@@ -22,9 +22,35 @@
 
 #include "../components/ui/text.h"
 
+//	This must hold dyn array of FreeBatches
+//	and a dyn array of TextDrawCalls so they 
+
+//	OR
+
+//	expose the renderer to the game loop so the lambda can queue those itself
+//	maybe limit drawing freebatches to 0/0/z and texts to whereever x/y/z
+
+//	Abstract layer system. 0 is the closest to us. Negative values are undefined behaviour
+
+struct RenderCommand {
+	enum class Type {
+		FBatchDC,
+		TextDC
+	} StoredValueType;
+
+	union {
+		FreeBatch* Batch;
+		Text* Text;
+	};
+
+	unsigned int IssuedZLayer;
+};
+
 struct GameLoopReturnType {
-	FreeBatch* batches = nullptr;
-	int count = 0;
+	std::vector<RenderCommand> RenderCommands;
+
+	void QueueRenderObject(FreeBatch* ptr, unsigned int zLayer);
+	void QueueRenderObject(Text* ptr, unsigned int zLayer);
 };
 
 //	Base class for DrawCall-like structures
@@ -271,4 +297,7 @@ public:
 	void SetResService(const ResourceService* res) { m_ResService = res; }
 
 	StandardQuad& GetQuad() { return m_StandardQuad; }
+
+	float GetCloserZCoord() const { return 1.f; }
+	float GetFarZCoord() const { return 10.f; }
 };

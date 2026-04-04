@@ -1,4 +1,5 @@
 ﻿#include "engine.h"
+#include <ranges>
 
 void Engine2D::PreInit() {
 	if (!GLFWInitialisation()) {
@@ -73,18 +74,40 @@ bool Engine2D::GLFWInitialisation() {
 }
 
 void Engine2D::QueueFreebatchesToRenderer(
-	const GameLoopReturnType& gameLoopRetVal
+	GameLoopReturnType& gameLoopRetVal
 ) {
-	DEBUG_ASSERT(gameLoopRetVal.batches, "Game loop returned nullptr instead of FreeBatch array.");
+	size_t CommCount = gameLoopRetVal.RenderCommands.size();
 
-	for (int i = 0; i < gameLoopRetVal.count; i++) {
-		m_Renderer.Draw(&gameLoopRetVal.batches[i], 0.f, 0.f, 2.f, nullptr);
+	float nearZ = GetUIManager().GetFurthestReservedZ();
+	float farZ = GetRenderer().GetFarZCoord();
+
+	float range = farZ - nearZ;
+	float layerStep = range / static_cast<float>(CommCount);
+	
+	std::ranges::stable_sort(gameLoopRetVal.RenderCommands, [](const RenderCommand& a, const RenderCommand& b) {
+		return a.IssuedZLayer < b.IssuedZLayer;
+	});
+
+	for (size_t i = 0; i < gameLoopRetVal.RenderCommands.size(); i++) {
+		const auto& rCommand = gameLoopRetVal.RenderCommands.at(i);
+		float calculatedZcoord = nearZ + i * layerStep;
+		switch (rCommand.StoredValueType) {
+			case RenderCommand::Type::FBatchDC: {
+				GetRenderer().Draw(rCommand.Batch, 0, 0, calculatedZcoord, nullptr);
+				break;
+			}
+			case RenderCommand::Type::TextDC: {
+				GetRenderer().Draw(rCommand.Text, 0, 0, calculatedZcoord, nullptr);
+				break;
+			}
+		}
 	}
 }
 
 void Engine2D::ExecuteFrame(
-	std::function<GameLoopReturnType(float, GameInput)> gameLoop
+	std::function<void(float, GameInput, GameLoopReturnType&)> gameLoop
 ) {
+	GameLoopReturnType StoredRenderCommands;
 	using Clock = std::chrono::steady_clock;
 	auto start = Clock::now();
 
@@ -139,10 +162,15 @@ void Engine2D::ExecuteFrame(
 	//if (uiCapturedStates.capturedKeyboard)	m_InputController.ExposeGameInput().SetKeyboardCapturedFlag();
 	//if (uiCapturedStates.capturedMouse)		m_InputController.ExposeGameInput().SetMouseCapturedFlag();
 
-	GameLoopReturnType gameLoopRenderData = gameLoop(m_ElapsedTimeSeconds, m_InputController.ExposeGameInput());
+	gameLoop(m_ElapsedTimeSeconds, m_InputController.ExposeGameInput(), StoredRenderCommands);
 
 	//	Figure out layer
-	QueueFreebatchesToRenderer(gameLoopRenderData);
+	//	Idea for the layer, we can make it so the renderer autmatically calculate sthe Z layer based on the amount of batches
+	//	This idea can be further improved if we removed the Z layer entirely, since if this is done, we've no need for it
+	//	as the order of putting the batches in the GameLoopReturnType var will determine the order to draw.
+
+	//	Also, we must allow for other things to be queued for drawing.
+	QueueFreebatchesToRenderer(StoredRenderCommands);
 	//m_Renderer.Draw(...);		//<<< FOR UI BATR
 
 	m_Renderer.ExecuteDraws();

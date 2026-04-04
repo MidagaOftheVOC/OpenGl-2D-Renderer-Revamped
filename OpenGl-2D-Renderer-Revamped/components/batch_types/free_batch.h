@@ -29,6 +29,8 @@ class FreeBatch : public BaseBatch {
 
 public:
 
+	FreeBatch();
+
 	FreeBatch(
 		int _instanceCount
 	);
@@ -37,7 +39,10 @@ public:
 	//	TODO AFTER REFACTOR:
 	//	THIS MUST BE COMMON LOGIC, IT MAKES NO SENSE FOR THIS TO BE FREEBATCH-SPECIFIC
 	virtual void DrawSpriteInstance(
-		const SpriteInstance& spriteInstance
+		const SpriteInstance& spriteInstance,
+		float x,
+		float y,
+		float rotation
 	);
 
 	virtual int SendSpriteDataToGPU();

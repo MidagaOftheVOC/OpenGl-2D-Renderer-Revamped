@@ -61,7 +61,7 @@ public:
 	void Init();
 
 	void ExecuteFrame(
-		std::function<GameLoopReturnType(float, GameInput)> gameLoop
+		std::function<void(float, GameInput, GameLoopReturnType&)> gameLoop
 	);
 
 private:
@@ -71,7 +71,7 @@ private:
 	bool GLFWInitialisation();
 
 	void QueueFreebatchesToRenderer(
-		const GameLoopReturnType& gameLoopRetVal
+		GameLoopReturnType& gameLoopRetVal
 	);
 
 public:
@@ -84,5 +84,6 @@ public:
 	ResourceService& GetResourceService() { return m_ResourceService; }
 	InputController& GetInputController() { return m_InputController; }
 	UIManager& GetUIManager() { return m_UIManager; }
+	Renderer2D& GetRenderer() { return m_Renderer; }
 
 };

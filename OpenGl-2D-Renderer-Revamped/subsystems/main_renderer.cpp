@@ -566,3 +566,22 @@ bool DrawCallComparator::operator()(const DrawableDrawCall& a, const DrawableDra
 const bool Renderer2D::HasClicked() {
 	return m_HasClickedThisFrame;
 }
+
+
+void GameLoopReturnType::QueueRenderObject(FreeBatch* ptr, unsigned int zLayer){
+	RenderCommand self;
+	self.Batch = ptr;
+	self.StoredValueType = RenderCommand::Type::FBatchDC;
+	self.IssuedZLayer = zLayer;
+
+	RenderCommands.emplace_back(self);
+}
+
+void GameLoopReturnType::QueueRenderObject(Text* ptr, unsigned int zLayer){
+	RenderCommand self;
+	self.Text = ptr;
+	self.StoredValueType = RenderCommand::Type::TextDC;
+	self.IssuedZLayer = zLayer;
+
+	RenderCommands.emplace_back(self);
+}

@@ -19,7 +19,7 @@ Text::Text(
 void Text::UpdateTextValue(
 	std::u32string&& _stringToMove
 ) {
-	m_TextContent = _stringToMove;
+	m_TextContent = std::move(_stringToMove);
 	UpdateGlyphOffsets();
 	UpdateVBO();
 	CalculateWordWraps();
@@ -197,8 +197,8 @@ void Text::CalculateWordWraps() {
 	std::vector<int>& LineBreaks = m_LineBreaks;
 	std::vector<float>& LineLengths = m_LineLengths;
 
-	float TotalProccessedLinesLength = 0.f;
-	int TotalLinesProcessed = 0;
+	//float TotalProccessedLinesLength = 0.f;	//	same as  below
+	//int TotalLinesProcessed = 0;		//<<< This was unused for some reason
 	float CurrentLineLength = 0.f;
 
 	int IndexOfSpace = -1;
@@ -232,9 +232,9 @@ void Text::CalculateWordWraps() {
 				LineBreaks.emplace_back(static_cast<int>(i));
 				//m_TextContent.insert(m_TextContent.begin() + i, '\t');
 
-				TotalProccessedLinesLength += CurrentLineLength;
+				//TotalProccessedLinesLength += CurrentLineLength;
 				CurrentLineLength = 0.f;
-				TotalLinesProcessed++;
+				//TotalLinesProcessed++;
 				//	important, fist wrapped char needs to be redone on the new line
 				i--;
 			}

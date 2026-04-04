@@ -19,9 +19,7 @@ struct SpriteDimensions {
 
 struct SpriteInstance {
 	SpriteInformation SpriteInfo;
-	float x = 0, y = 0;
 	float w = 0, h = 0;
-	float Rotation = 0.f;
 };
 
 
@@ -52,6 +50,8 @@ protected:	//	UBOs
 
 public:
 
+	BaseBatch() {}
+
 	BaseBatch(
 		int _instanceCount
 	);
@@ -76,7 +76,10 @@ public:
 
 
 	virtual void DrawSpriteInstance(
-		const SpriteInstance& spriteInstance
+		const SpriteInstance& spriteInstance,
+		float x, 
+		float y,
+		float rotation = 0.f
 	);
 
 	virtual int SendSpriteDataToGPU();

@@ -224,7 +224,10 @@ void BaseBatch::BindUBOs() const {
 
 
 void BaseBatch::DrawSpriteInstance(
-	const SpriteInstance& spriteInstance
+	const SpriteInstance& spriteInstance,
+	float x,
+	float y,
+	float rotation
 ) {
 	std::cout << "DrawSpriteInstance() called when not defined.\n\n\n\n";
 }
@@ -543,12 +546,17 @@ void SoftBatch::UnbindCommonVAO() {
 
 unsigned int FreeBatch::s_VAO = 0;
 
+FreeBatch::FreeBatch()
+	: BaseBatch()
+{}
 
 FreeBatch::FreeBatch(
 	int _instanceCount
 ) :
 	BaseBatch(_instanceCount)
-{}
+{
+	InitialiseBuffers();
+}
 
 
 void FreeBatch::InitialiseBuffers() {
@@ -693,18 +701,21 @@ void FreeBatch::UnbindCommonVAO() {
 
 
 void FreeBatch::DrawSpriteInstance(
-	const SpriteInstance& spriteInstance
+	const SpriteInstance& spriteInstance,
+	float x,
+	float y,
+	float rotation
 ) {
 	if(m_SpriteInstancesSinceLastDraw < m_MaxInstanceCapacity){
-		m_Positions.at(m_SpriteInstancesSinceLastDraw) = { spriteInstance.x, spriteInstance.y };
+		m_Positions.at(m_SpriteInstancesSinceLastDraw) = { x, y };
 		m_Dimensions.at(m_SpriteInstancesSinceLastDraw) = { spriteInstance.w, spriteInstance.h };
-		m_Rotations.at(m_SpriteInstancesSinceLastDraw) = spriteInstance.Rotation;
+		m_Rotations.at(m_SpriteInstancesSinceLastDraw) = rotation;
 		m_SIArray.at(m_SpriteInstancesSinceLastDraw) = spriteInstance.SpriteInfo;
 	}
 	else {
-		m_Positions.push_back({ spriteInstance.x, spriteInstance.y });
+		m_Positions.push_back({x, y});
 		m_Dimensions.push_back({ spriteInstance.w, spriteInstance.h });
-		m_Rotations.emplace_back(spriteInstance.Rotation);
+		m_Rotations.emplace_back(rotation);
 		m_SIArray.emplace_back(spriteInstance.SpriteInfo);
 	}
 
