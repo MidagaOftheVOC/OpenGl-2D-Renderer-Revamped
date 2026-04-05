@@ -125,7 +125,7 @@ void Engine2D::ExecuteFrame(
 	
 	!!! Work on program until Free batches confirmed working with .cfg files	//	Technically fulfilled, but better to take care of problems for earlier
 
-	UIBatch inside UIManager and how to queues the render commands
+	UIBatch inside UIManager and how to queues the render commands	//<<< Render comms complete
 	Rework the widgets
 		-	Windows should hold an array of widgets
 		-	Widgets need to maintain a list of widgets themselves to allow nesting

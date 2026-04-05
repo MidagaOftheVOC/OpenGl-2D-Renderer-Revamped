@@ -535,7 +535,7 @@ Renderer2D::Renderer2D(
 {}
 
 void Renderer2D::Draw(
-	Text* _text,
+	const Text* _text,
 	float _xPosition,
 	float _yPosition,
 	float _zLayer,

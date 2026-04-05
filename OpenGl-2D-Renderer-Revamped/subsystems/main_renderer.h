@@ -256,7 +256,7 @@ public:		//	Exposed functions
 
 
 	void Draw(
-		Text* _text,
+		const Text* _text,
 		float _xPosition,
 		float _yPosition,
 		float _zLayer,

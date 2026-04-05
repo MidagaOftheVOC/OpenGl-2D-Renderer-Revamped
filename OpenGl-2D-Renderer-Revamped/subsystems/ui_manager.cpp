@@ -47,8 +47,6 @@ void UIManager::UpdateAllBatches() {
 
 	int PaneTotalSubsprites = 0;
 
-	m_CachedTexts.clear();	//	reset texts for labels;
-
 
 	for (size_t i = 0; i < m_WindowIDArrayForRendering.size(); i++) {
 		Window* CurrWindow = GetWindowByID(m_WindowIDArrayForRendering[i]);
@@ -82,17 +80,20 @@ void UIManager::UpdateAllBatches() {
 
 		const std::vector<UI_Primitive*>& CurrWinWidgets = CurrWindow->GetWidgets();
 
+		Renderer2D* Renderer = GetRenderer();
+
 		for (size_t i = 0; i < CurrWinWidgets.size(); i++) {
 			if (Label* label = dynamic_cast<Label*>(CurrWinWidgets[i])) {
 				auto labelOffset = label->GetPositionRelativeToWindow();
-				m_CachedTexts.push_back(
-					TextWithZLayer(
-						label->GetText(),
-						WinPos.x + labelOffset.x,
-						WinPos.y + labelOffset.y,
-						BaseWindowZLayer - SubStep
-					)
+
+				Renderer->Draw(
+					label->GetText(),
+					WinPos.x + labelOffset.x,
+					WinPos.y + labelOffset.y,
+					BaseWindowZLayer - SubStep,
+					nullptr
 				);
+
 			}
 			if (const Button* btn = dynamic_cast<Button*>(CurrWinWidgets[i])) {
 				auto btnOffSet = btn->GetPositionRelativeToWindow();
@@ -110,15 +111,6 @@ void UIManager::UpdateAllBatches() {
 				);
 
 				PaneTotalSubsprites += 9;
-
-				m_CachedTexts.push_back(
-					TextWithZLayer(
-						btn->GetLabel().GetText(),
-						WinPos.x + btnOffSet.x,
-						WinPos.y + btnOffSet.y,
-						BaseWindowZLayer - 2 * SubStep
-					)
-				);
 			}
 		}
 	}

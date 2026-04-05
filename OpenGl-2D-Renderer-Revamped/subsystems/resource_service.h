@@ -60,6 +60,8 @@ private:
 	Font m_DefaultFont;
 	TextOptions m_DefaultTextOptions;
 
+	UIBatch m_UIBatch;
+
 public:
 
 	ResourceService() {}

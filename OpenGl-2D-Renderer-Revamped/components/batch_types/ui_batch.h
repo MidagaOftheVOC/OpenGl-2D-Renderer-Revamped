@@ -32,16 +32,15 @@ class UIBatch : public BaseBatch {
 
 public:
 
+	UIBatch() : BaseBatch() {}
+
 	UIBatch(
 		int _instanceCount
 	);
 
-
 	virtual void InitialiseBuffers();
 
-
 	virtual void DeleteBuffers();
-
 
 	void UpdateBuffers(
 		const SpriteInformation* _spriteInformation,
@@ -50,7 +49,6 @@ public:
 		const float* _zLayers,
 		const size_t _arrayElementCount = 0
 	);
-
 
 	void BindUniqueBuffers() const;
 
@@ -62,9 +60,7 @@ public:
 
 	static void InitialiseCommonVAO();
 
-
 	static void BindCommonVAO();
-
 
 	static void UnbindCommonVAO();
 

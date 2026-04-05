@@ -41,7 +41,7 @@ class UIManager {
 
 private:
 
-	const Renderer2D* m_Renderer = nullptr;
+	Renderer2D* m_Renderer = nullptr;
 	const ResourceService* m_ResService = nullptr;
 	const PaneFactory* m_PaneFactory = nullptr;
 
@@ -50,8 +50,6 @@ private:	//	Windows
 	std::vector<Window> m_WindowArray;
 
 	std::vector<ID> m_WindowIDArrayForRendering;
-
-	std::vector<TextWithZLayer> m_CachedTexts;
 
 private:	//	Factories for UI primitives
 
@@ -156,16 +154,13 @@ public:
 
 	void SetDistributionBounds(float _low, float _high);
 
-	const UIBatch* GetUIBatch() { return m_UIBatch; }
-	const std::vector<TextWithZLayer>& GetUITexts() const { return m_CachedTexts; }
-
 	const std::vector<Window>& GetWindows() const { return m_WindowArray; }
 
-	const Renderer2D* GetRenderer() const { return m_Renderer; }
+	Renderer2D* GetRenderer() const { return m_Renderer; }
 	const ResourceService* GetResources() const { return m_ResService; }
 	const PaneFactory* GetPaneFactory() const { return m_PaneFactory; }
 
-	void SetRenderer(const Renderer2D* rend) { m_Renderer = rend; }
+	void SetRenderer(Renderer2D* rend) { m_Renderer = rend; }
 	void SetResService(const ResourceService* res) { m_ResService = res; }
 	void SetPaneFactory(const PaneFactory* fac) { m_PaneFactory = fac; }
 
