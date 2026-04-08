@@ -20,7 +20,7 @@ private:	// UI PRIMITIVE DATA
 
 	bool m_HasPane = false;
 	Pane m_WindowPane;
-	std::vector<UI_Primitive*> m_WidgetsArray;
+	std::vector<std::unique_ptr<UI_Primitive>> m_WidgetsArray;
 
 public:
 
@@ -56,12 +56,12 @@ public:
 		glm::vec2 _position
 	);
 
-	void AttachWidget(UI_Primitive* _widget) {
+	void AttachWidget(std::unique_ptr<UI_Primitive> _widget) {
 		_widget->PostAttachment(GenerateWidgetData());
-		m_WidgetsArray.push_back(_widget);
+		m_WidgetsArray.emplace_back(std::move(_widget));
 	}
 
-	const std::vector<UI_Primitive*>& GetWidgets() const { return m_WidgetsArray; }
+	const std::vector <std::unique_ptr< UI_Primitive >>& GetWidgets() const { return m_WidgetsArray; }
 
 	ID GetID() const { return m_ID; }
 	const Pane& GetPane() const { return m_WindowPane; }

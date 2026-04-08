@@ -12,9 +12,6 @@
 //		--		UI	PRIMITIVE		--		//
 
 
-void* UI_Primitive::FUTURE_POINTER_TO_STRING_MANAGER_AND_ALLOCATOR = nullptr;
-
-
 UI_Primitive::UI_Primitive(
 	glm::vec2 _dimensions,
 	glm::vec2 _relativeToWindow
@@ -31,6 +28,19 @@ UI_Primitive::UI_Primitive(
 {}
 
 
+bool UI_Primitive::ContainsMouseClick(
+	glm::vec2 point,
+	glm::vec2 windowOrigin
+) const {
+	auto position = windowOrigin + m_PositionRelativeToWindow;
+	auto size = m_Dimensions;
+	return point.x >= position.x &&
+		point.x <= position.x + size.x &&
+		point.y >= position.y &&
+		point.y <= position.y + size.y;
+}
+
+
 void UI_Primitive::SetDimensions(const glm::vec2& _dimensions){
 	DEBUG_ASSERT(_dimensions.x > 0 || _dimensions.y > 0, "Non-positive dimensions passed to Pane object.");
 	m_Dimensions = _dimensions;
@@ -39,6 +49,24 @@ void UI_Primitive::SetDimensions(const glm::vec2& _dimensions){
 
 void UI_Primitive::SetPositionRelativeToWindow(const glm::vec2& _posRelativeToWindow){
 	m_PositionRelativeToWindow = _posRelativeToWindow;
+}
+
+const UI_Primitive* UI_Primitive::DetermineIfClicked(
+	const glm::vec2 parentOrigin,
+	const glm::vec2 mouseCoords
+) const {
+	const UI_Primitive* result = nullptr;
+	glm::vec2 selfOrigin = parentOrigin + m_PositionRelativeToWindow;
+
+
+	for (size_t i = 0; i < m_WidgetComposition.size(); i++) {
+		result = m_WidgetComposition.at(i)->DetermineIfClicked(selfOrigin, mouseCoords);
+		if (result) return result;
+	}
+
+	if (IsClickable() && ContainsMouseClick(mouseCoords, parentOrigin)) return this;
+
+	return nullptr;
 }
 
 
@@ -51,8 +79,7 @@ Pane::Pane(
 	bool _clickable
 ) :
 	UI_Primitive(_dimensions, glm::vec2(0.f, 0.f)),
-	m_CornerSidePx(_cornerLengthPx),
-	m_Clickable(_clickable)
+	m_CornerSidePx(_cornerLengthPx)
 {
 	UpdateArrays();
 }
@@ -182,8 +209,7 @@ Button::Button(
 		relativeToWindow
 	),
 	m_StoredActionLambda(actionLambda),
-	m_Label(label, glm::vec2(2, 2)),
-	m_Pane(pane)
+	m_Label(label, glm::vec2(2, 2))
 {}
 
 void Button::PostAttachment(WidgetWindowData _data) {}

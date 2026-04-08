@@ -5,6 +5,8 @@
 #include "../components/ui/font.h"
 #include "../components/ui/primitives/types/pane.h"
 
+#include "../components/batch_types/ui_batch.h"
+
 struct ShaderLoadingParameters {
 	const std::string m_ShaderName;
 	const std::string m_LocationOfShaderFile;

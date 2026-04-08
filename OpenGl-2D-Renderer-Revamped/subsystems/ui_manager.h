@@ -1,6 +1,6 @@
 #pragma once
-#include "../../subsystems/main_renderer.h"
-#include "../../subsystems/resource_service.h"
+#include "main_renderer.h"
+#include "resource_service.h"
 
 #include "../components/input_controller.h"
 
@@ -82,7 +82,7 @@ public:
 
 	//	Adds window to the GUI
 	ID AddWindow(
-		Window _window
+		Window&& _window
 	);
 
 	void RemoveWindow(

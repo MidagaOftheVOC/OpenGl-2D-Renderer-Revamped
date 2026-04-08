@@ -20,10 +20,3 @@ void Window::SetPosition(
 ) {
 	m_WindowPosition = _position;
 }
-
-void Window::SetPane(
-	Pane&& _pane
-) {
-	m_HasPane = true;
-	m_WindowPane = std::move(_pane);
-}

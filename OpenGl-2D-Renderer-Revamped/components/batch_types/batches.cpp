@@ -742,6 +742,10 @@ int FreeBatch::SendSpriteDataToGPU() {
 unsigned int UIBatch::s_VAO = 0;
 
 
+UIBatch::UIBatch()
+	: BaseBatch()
+{}
+
 UIBatch::UIBatch(
 	int _instanceCount
 ) :

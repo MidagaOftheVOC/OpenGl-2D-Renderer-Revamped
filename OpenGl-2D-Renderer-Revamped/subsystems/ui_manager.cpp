@@ -18,7 +18,8 @@ Window UIManager::CreateWindow(
 			_cornerLengthPx,
 			_uiSkinName
 		);
-		Result.SetPane(std::move(WindowPane));
+		DEBUG_LOG("ADD PANE HERE IN WINDOW.H");
+		//Result.SetPane(std::move(WindowPane));
 	}
 
 	Result.SetDimensions(_windowDimensions);
@@ -28,9 +29,9 @@ Window UIManager::CreateWindow(
 
 //	TODO: track for identical IDs
 ID UIManager::AddWindow(
-	Window _window
+	Window&& _window
 ) {
-	m_WindowArray.emplace_back(_window);
+	m_WindowArray.emplace_back(std::move(_window));
 	return m_WindowArray.back().GetID();
 }
 
@@ -78,12 +79,12 @@ void UIManager::UpdateAllBatches() {
 		//	Here come loops who will take care of any primitive arrays within each window
 		//	I.e. they will utilise the Micro steps adn the more precise layer distribution
 
-		const std::vector<UI_Primitive*>& CurrWinWidgets = CurrWindow->GetWidgets();
+		const auto& CurrWinWidgets = CurrWindow->GetWidgets();
 
 		Renderer2D* Renderer = GetRenderer();
 
 		for (size_t i = 0; i < CurrWinWidgets.size(); i++) {
-			if (Label* label = dynamic_cast<Label*>(CurrWinWidgets[i])) {
+			/*if (Label* label = dynamic_cast<Label*>(CurrWinWidgets[i])) {
 				auto labelOffset = label->GetPositionRelativeToWindow();
 
 				Renderer->Draw(
@@ -111,7 +112,7 @@ void UIManager::UpdateAllBatches() {
 				);
 
 				PaneTotalSubsprites += 9;
-			}
+			}*/
 		}
 	}
 

@@ -42,8 +42,6 @@ private:
 
 	float m_CornerSidePx = 20.f;
 
-	bool m_Clickable = false;
-
 public:
 
 	Pane() : UI_Primitive() {}

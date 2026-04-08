@@ -32,7 +32,7 @@ class UIBatch : public BaseBatch {
 
 public:
 
-	UIBatch() : BaseBatch() {}
+	UIBatch();
 
 	UIBatch(
 		int _instanceCount
