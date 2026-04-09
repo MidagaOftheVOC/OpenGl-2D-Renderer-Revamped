@@ -27,7 +27,6 @@ Window UIManager::CreateWindow(
 }
 
 
-//	TODO: track for identical IDs
 ID UIManager::AddWindow(
 	Window&& _window
 ) {
@@ -62,17 +61,6 @@ void UIManager::UpdateAllBatches() {
 
 		const glm::vec2& WinPos = CurrWindow->GetWinPosition();
 
-		//	TODO: test if Z layering is proper.
-		for (int i = 0; i < 9; i++) {
-			WidgetData_zLayers.emplace_back(BaseWindowZLayer);
-		}
-		CurrWindow->GetPane().AppendPaneBatchingData(
-			WidgetData_Dimensions,
-			WidgetData_Positions,
-			WidgetData_Skins,
-			WinPos.x,
-			WinPos.y
-		);
 
 		PaneTotalSubsprites += 9;
 

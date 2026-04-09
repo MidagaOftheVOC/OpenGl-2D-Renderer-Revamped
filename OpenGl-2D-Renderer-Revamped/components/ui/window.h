@@ -4,7 +4,6 @@
 #include "../../common/standard_quad.h"
 
 #include <vector>
-#include <memory>
 #include <unordered_map>
 
 #include "primitives/types/pane.h"
@@ -20,7 +19,7 @@ private:	// UI PRIMITIVE DATA
 
 	bool m_HasPane = false;
 	Pane m_WindowPane;
-	std::vector<std::unique_ptr<UI_Primitive>> m_WidgetsArray;
+	std::vector<UI_Primitive*> m_WidgetsArray;
 
 public:
 
@@ -56,16 +55,19 @@ public:
 		glm::vec2 _position
 	);
 
-	void AttachWidget(std::unique_ptr<UI_Primitive> _widget) {
+	void AttachWidget(UI_Primitive* _widget) {
 		_widget->PostAttachment(GenerateWidgetData());
-		m_WidgetsArray.emplace_back(std::move(_widget));
+		m_WidgetsArray.emplace_back(_widget);
 	}
 
-	const std::vector <std::unique_ptr< UI_Primitive >>& GetWidgets() const { return m_WidgetsArray; }
+	const std::vector<UI_Primitive*>& GetWidgets() const { return m_WidgetsArray; }
 
 	ID GetID() const { return m_ID; }
 	const Pane& GetPane() const { return m_WindowPane; }
 	const bool HasPane() const { return m_HasPane; }
 	const glm::vec2& GetWinPosition() const { return m_WindowPosition; }
 	const glm::vec2& GetWinDimensions() const { return m_WindowDimensions; }
+
+	~Window();
+
 };

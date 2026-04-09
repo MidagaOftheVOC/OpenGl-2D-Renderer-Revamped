@@ -60,11 +60,11 @@ protected:
 	//	therefore primitives require offset from that point.
 	glm::vec2 m_PositionRelativeToWindow = { 0.f, 0.f };
 
-	std::vector<std::unique_ptr<UI_Primitive>> m_WidgetComposition;
+	std::vector<UI_Primitive*> m_WidgetComposition;
 
 public:
 
-	virtual ~UI_Primitive() = default; // ADDED: virtual dtor for safe polymorphic deletion
+	virtual ~UI_Primitive(); // ADDED: virtual dtor for safe polymorphic deletion
 
 	UI_Primitive() {}
 
@@ -92,6 +92,18 @@ public:
 	) const;
 
 public:
+	/*
+	
+		Consider the common rendering function to upload straight to the Renderer.
+		something like
+		OR: just the common dump for UI elements
+
+		( Renderer* / UIBatch* , WinBaseZ, zSubstep )
+		
+		
+		*/
+
+	std::vector<UI_Primitive*> GetWidgetComposition() const { return m_WidgetComposition; }
 
 	const glm::vec2 GetPositionRelativeToWindow() const { return m_PositionRelativeToWindow; }
 	const glm::vec2 GetDimensions() const { return m_Dimensions; }
@@ -104,7 +116,19 @@ public:
 
 	//	Develop this idea. Also, needs centralised way of acquiring resources for each widget, they need to hold
 	//	only ptrs to rendering data and append it when commanded to.
-	virtual void AppendWidgetRenderDataToArray(std::vector<float> &OUT_rects, std::vector<TextWithZLayer> &OUT_texts, float zLayer) = 0;
+	//virtual void AppendWidgetRenderDataToArray(std::vector<float> &OUT_rects, std::vector<TextWithZLayer> &OUT_texts, float zLayer) = 0;
+
+	virtual void AppendWidgetRenderDataToArrays(
+		std::vector<float>& OUT_batchPairsOfXYdimensions,
+		std::vector<float>& OUT_batchPairsOfXYpositions,
+		std::vector<SpriteInformation>& OUT_batchSpriteInformation,
+		float _xOffset,
+		float _yOffset
+	) = 0;
+
+	virtual void AppendWidgetTextDataToArray(
+		std::vector<Text>& OUT_textArraysToRender
+	) = 0;
 
 	const UI_Primitive* DetermineIfClicked(
 		const glm::vec2 parentOrigin,

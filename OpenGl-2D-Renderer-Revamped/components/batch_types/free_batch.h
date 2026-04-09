@@ -111,6 +111,7 @@ public:
 	unsigned int GetPositionsVBO() const { return m_PositionsVBO; }
 
 
+	//	TODO: wtf?
 	int GetElementCount() const { return m_MaxInstanceCapacity * 6; }
 
 	virtual ~FreeBatch() {}

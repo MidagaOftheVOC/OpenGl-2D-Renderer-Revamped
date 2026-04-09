@@ -9,26 +9,34 @@
 class Button : public UI_Primitive {
 
 	std::function<void()> m_StoredActionLambda;
-	Pane m_Pane;
-	Label m_Label;
 
 public:
 
 	Button(
+		glm::vec2 dimensions,
 		glm::vec2 relativeToWindow,
 		Text label,
-		Pane pane,
 		std::function<void()> actionLambda
 	);
 
 public:
 
-	virtual void DoAction();
-	virtual void AppendWidgetRenderDataToArray(std::vector<float>& OUT_rects, std::vector<TextWithZLayer>& OUT_texts, float zLayer);
-	virtual void PostAttachment(WidgetWindowData _data);
+	virtual void AppendWidgetRenderDataToArrays(
+		std::vector<float>& OUT_batchPairsOfXYdimensions,
+		std::vector<float>& OUT_batchPairsOfXYpositions,
+		std::vector<SpriteInformation>& OUT_batchSpriteInformation,
+		float _xOffset,
+		float _yOffset
+	) {
+	}
 
-	const Label& GetLabel() const { return m_Label; }
-	const Pane& GetPane() const { return m_Pane; }
+	virtual void AppendWidgetTextDataToArray(
+		std::vector<Text>& OUT_textArraysToRender
+	) {
+	}
+
+
+	virtual void OnClick();
 
 	virtual ~Button() {}
 };

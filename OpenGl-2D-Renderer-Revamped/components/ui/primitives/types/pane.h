@@ -56,6 +56,9 @@ public:
 	//	SpriteInformation data will be added by the UI manager immediately after.
 	//	This is made to avoid unnecessary complication while allowing the UI managre to set
 	//	custom indices for the corners, sides, and so on.
+
+private:
+
 	void AppendPaneBatchingData(
 		std::vector<float>& OUT_batchPairsOfXYdimensions,
 		std::vector<float>& OUT_batchPairsOfXYpositions,
@@ -63,8 +66,6 @@ public:
 		float _xOffset,
 		float _yOffset
 	) const;
-
-private:
 
 	void UpdateArrays();
 
@@ -77,7 +78,17 @@ public:
 	virtual void PostAttachment(WidgetWindowData _data) {}
 	virtual void DoAction() {}
 
-	virtual void AppendWidgetRenderDataToArray(std::vector<float>& OUT_rects, std::vector<TextWithZLayer>& OUT_texts, float zLayer);
+	virtual void AppendWidgetRenderDataToArrays(
+		std::vector<float>& OUT_batchPairsOfXYdimensions,
+		std::vector<float>& OUT_batchPairsOfXYpositions,
+		std::vector<SpriteInformation>& OUT_batchSpriteInformation,
+		float _xOffset,
+		float _yOffset
+	);
+
+	virtual void AppendWidgetTextDataToArray(
+		std::vector<Text>& OUT_textArraysToRender
+	) {}
 
 	virtual ~Pane() {}
 };

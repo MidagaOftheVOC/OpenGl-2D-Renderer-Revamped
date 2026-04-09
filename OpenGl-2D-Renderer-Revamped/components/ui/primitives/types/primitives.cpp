@@ -69,6 +69,14 @@ const UI_Primitive* UI_Primitive::DetermineIfClicked(
 	return nullptr;
 }
 
+UI_Primitive::~UI_Primitive() {
+	for (size_t i = 0; i < m_WidgetComposition.size(); i++) {
+		DEBUG_LOG("Deleting widget from another widget.\n");
+		delete m_WidgetComposition[i];
+		DEBUG_LOG("Deletion successful");
+	}
+}
+
 
 //		--			PANE			--		//
 
@@ -82,6 +90,23 @@ Pane::Pane(
 	m_CornerSidePx(_cornerLengthPx)
 {
 	UpdateArrays();
+}
+
+
+void Pane::AppendWidgetRenderDataToArrays(
+	std::vector<float>& OUT_batchPairsOfXYdimensions,
+	std::vector<float>& OUT_batchPairsOfXYpositions,
+	std::vector<SpriteInformation>& OUT_batchSpriteInformation,
+	float _xOffset,
+	float _yOffset
+) {
+	AppendPaneBatchingData(
+		OUT_batchPairsOfXYdimensions,
+		OUT_batchPairsOfXYpositions,
+		OUT_batchSpriteInformation,
+		_xOffset,
+		_yOffset
+	);
 }
 
 
@@ -172,9 +197,7 @@ void Pane::OnDimensionChange() {
 	UpdateArrays();
 }
 
-void Pane::AppendWidgetRenderDataToArray(std::vector<float>& OUT_rects, std::vector<TextWithZLayer>& OUT_texts, float zLayer) {
 
-}
 
 //		--			LABEL			--		//
 
@@ -192,32 +215,36 @@ void Label::PostAttachment(WidgetWindowData _data) {
 }
 
 
-void Label::AppendWidgetRenderDataToArray(std::vector<float>& OUT_rects, std::vector<TextWithZLayer>& OUT_texts, float zLayer) {
-
+void Label::AppendWidgetTextDataToArray(
+	std::vector<Text>& OUT_textArraysToRender
+) {
+	OUT_textArraysToRender.push_back(m_TextObject);
 }
+
 
 //		--			BUTTON			--		//
 
 Button::Button(
+	glm::vec2 dimensions,
 	glm::vec2 relativeToWindow,
 	Text label,
-	Pane pane,
 	std::function<void()> actionLambda
 ) :
 	UI_Primitive(
-		pane.GetDimensions(),
+		dimensions,
 		relativeToWindow
 	),
-	m_StoredActionLambda(actionLambda),
-	m_Label(label, glm::vec2(2, 2))
-{}
+	m_StoredActionLambda(actionLambda)
+{
+	DEBUG_ASSERT(label.GetLineLengthsArray().size() > 0, "Passed Text object without text for Button widget.");
+	DEBUG_ASSERT(label.GetLineLengthsArray()[0] <= dimensions.x, "Passed Text object has too long lines for Button widget.");
+	float textCenterX = abs( label.GetLineLengthsArray()[0] - dimensions.x ) / 2;
+	float textCenterY = abs( 20 - dimensions.y ) / 2;
 
-void Button::PostAttachment(WidgetWindowData _data) {}
-
-void Button::DoAction() {
-	m_StoredActionLambda();
+	Label* labelWidget = new Label(label, glm::vec2(textCenterX, textCenterY));
+	m_WidgetComposition.emplace_back(labelWidget);
 }
 
-void Button::AppendWidgetRenderDataToArray(std::vector<float>& OUT_rects, std::vector<TextWithZLayer>& OUT_texts, float zLayer) {
-
+void Button::OnClick() {
+	m_StoredActionLambda();
 }

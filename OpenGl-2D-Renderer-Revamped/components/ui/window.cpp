@@ -20,3 +20,11 @@ void Window::SetPosition(
 ) {
 	m_WindowPosition = _position;
 }
+
+Window::~Window() {
+	for (size_t i = 0; i < m_WidgetsArray.size(); i++) {
+		DEBUG_LOG("Deleting widget from window with ID [%ud]\n", GetID());
+		delete m_WidgetsArray[i];
+		DEBUG_LOG("Deletion successful");
+	}
+}
