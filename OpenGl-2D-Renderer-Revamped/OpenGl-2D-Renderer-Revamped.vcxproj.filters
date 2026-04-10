@@ -18,9 +18,6 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="components\drawable.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="common\common.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -92,9 +89,6 @@
     <ClInclude Include="subsystems\main_renderer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="components\drawable.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="common\common.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -110,13 +104,7 @@
     <ClInclude Include="components\uniform\uniform_data.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="components\batch_types\strict_batch.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="common\standard_quad.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="components\batch_types\soft_batch.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="components\input_controller.h">
@@ -137,16 +125,10 @@
     <ClInclude Include="components\ui\window.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="components\batch_types\free_batch.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="components\batch_types\base_batch.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="components\batch_types\batch_instance_primitives.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="components\batch_types\ui_batch.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="components\ui\primitives\types\pane.h">

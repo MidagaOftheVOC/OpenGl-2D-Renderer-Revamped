@@ -1,6 +1,6 @@
 #include "ui_manager.h"
 
-UIManager::UIManager(UIBatch* _uiBatch)
+UIManager::UIManager(Batch* _uiBatch)
 	: m_UIBatch(_uiBatch)
 {}
 
@@ -104,13 +104,13 @@ void UIManager::UpdateAllBatches() {
 		}
 	}
 
-	m_UIBatch->UpdateBuffers(
-		WidgetData_Skins.data(),
-		WidgetData_Positions.data(),
-		WidgetData_Dimensions.data(),
-		WidgetData_zLayers.data(),
-		PaneTotalSubsprites
-	);
+	//m_UIBatch->UpdateBuffers(
+	//	WidgetData_Skins.data(),
+	//	WidgetData_Positions.data(),
+	//	WidgetData_Dimensions.data(),
+	//	WidgetData_zLayers.data(),
+	//	PaneTotalSubsprites
+	//);
 }
 
 void UIManager::SetDistributionBounds(
@@ -235,7 +235,7 @@ size_t UIManager::GetIndexOfWindowByIDInRenderArray(
 }
 
 
-void UIManager::SetUiBatchPointer(UIBatch* _uiBatch) {
+void UIManager::SetUiBatchPointer(Batch* _uiBatch) {
 	m_UIBatch = _uiBatch;
 }
 

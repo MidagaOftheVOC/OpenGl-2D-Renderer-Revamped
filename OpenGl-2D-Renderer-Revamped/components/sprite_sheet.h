@@ -19,6 +19,7 @@
 #include <vector>
 
 #include "../common/common.h"
+#include "batch_types/batch_instance_primitives.h"
 
 #include "shader.h"
 
@@ -56,6 +57,11 @@ struct TextureParamsDataStruct {
 };
 
 
+struct xyDimensions {
+	float x = 0, y = 0;
+};
+
+
 class SpriteSheet {
 
 	int m_SheetWidth = -1;
@@ -82,6 +88,7 @@ private:
 
 	std::vector<UVRegion> m_UVregionsFromConfigFile;
 	std::vector<std::string> m_UVregionNamesFromConfigFile;
+	std::vector<xyDimensions> m_SpriteDimensionsPx;
 
 public:
 
@@ -162,6 +169,17 @@ private:
 	void SetTextureParametersToGL();
 
 public:
+
+	SpriteInstance GetSpriteInstance(
+		const char* spriteName,
+		size_t sheetIndex
+	) const;
+
+
+	void GetSpriteInstances(
+		std::vector<SpriteInstance>& OUT_spriteArray,
+		size_t sheetIndex
+	) const;
 
 	const UVRegion* GetUVRegionByName ( const char* _assetName ) const;
 	SpriteSheetType GetType() const { return m_Type; }

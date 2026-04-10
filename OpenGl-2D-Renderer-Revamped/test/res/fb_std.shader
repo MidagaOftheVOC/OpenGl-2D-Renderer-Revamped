@@ -33,13 +33,7 @@ void main(){
     uint SpriteIndex = uint( b_SpriteInformationBuffer & 0x07FFu );
     v_SheetIndex = SheetIndex;
 
-    
-    int TotalOffset = 0;
-	for(int i = 0; i < SheetIndex; i ++){
-		TotalOffset += u_SheetOffsets[i];
-	}
-
-    vec4 UVRegion = u_UVRegions[TotalOffset + SpriteIndex];
+    vec4 UVRegion = u_UVRegions[u_SheetOffsets[SheetIndex] + SpriteIndex];
 
     vec2 MinUV = UVRegion.xy;
     vec2 MaxUV = UVRegion.zw;

@@ -4,7 +4,7 @@
 
 #include "../components/input_controller.h"
 
-#include "../components/batch_types/ui_batch.h"
+#include "../components/batch_types/base_batch.h"
 
 #include "factories/pane_factory.h"
 #include "../components/ui/primitives/types/label.h"
@@ -56,7 +56,7 @@ private:	//	Factories for UI primitives
 
 private:	//	Batches
 
-	UIBatch* m_UIBatch = nullptr;
+	Batch* m_UIBatch = nullptr;
 	
 
 	void UpdateAllBatches();
@@ -69,9 +69,9 @@ public:
 
 	UIManager() {}
 
-	UIManager(UIBatch* _uiBatch);
+	UIManager(Batch* _uiBatch);
 
-	void SetUiBatchPointer(UIBatch* _uiBatch);
+	void SetUiBatchPointer(Batch* _uiBatch);
 
 	//	If nullptr is passed as skin name, the window won't have a background
 	Window CreateWindow(

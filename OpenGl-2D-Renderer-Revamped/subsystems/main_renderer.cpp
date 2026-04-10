@@ -2,32 +2,13 @@
 
 
 void Renderer2D::Draw(
-	SoftBatch* _batch,
+	Batch* _batch,
 	float _xPosition,
 	float _yPosition,
 	float _zLayer,
 	UniformDataVector* _uniformArray
 ) {
-	m_SoftBatchArray.emplace_back(
-		_batch,
-		_xPosition,
-		_yPosition,
-		_zLayer,
-		_uniformArray,
-		_batch->GetInstanceCount()
-	);
-	_batch->SendSpriteDataToGPU();
-}
-
-
-void Renderer2D::Draw(
-	FreeBatch* _batch,
-	float _xPosition,
-	float _yPosition,
-	float _zLayer,
-	UniformDataVector* _uniformArray
-) {
-	m_FreeBatchArray.emplace_back(
+	m_BatchArray.emplace_back(
 		_batch,
 		_xPosition,
 		_yPosition,
@@ -36,44 +17,6 @@ void Renderer2D::Draw(
 		_batch->SendSpriteDataToGPU()
 	);
 }
-
-
-void Renderer2D::Draw(
-	StrictBatch* _batch,
-	float _initialXpos,
-	float _initialYpos,
-	float _zLayer,
-	UniformDataVector* _uniformArray
-) {
-	m_StrictBatchArray.emplace_back(
-		_batch,
-		_initialXpos,
-		_initialYpos,
-		_zLayer,
-		_uniformArray,
-		_batch->GetInstanceCount()
-	);
-	_batch->SendSpriteDataToGPU();
-}
-
-
-void Renderer2D::Draw(
-	UIBatch* _uiBatch,
-	float _furthestZcoord,
-	UniformDataVector* _uniformArray
-) {
-	glm::vec2 CameraPosition = m_Camera.GetPosition();
-	m_UIBatchArray.emplace_back(
-		_uiBatch,
-		CameraPosition.x,
-		CameraPosition.y,
-		0.f,	//	default is 0, since UI manager distributes final Z coordinates for the components
-		_uniformArray,
-		_uiBatch->GetInstanceCount()
-	);
-	_uiBatch->SendSpriteDataToGPU();
-}
-
 
 void Renderer2D::ExecuteDraws() {
 
@@ -99,44 +42,8 @@ void Renderer2D::ExecuteDraws() {
 
 	//	-- RENDERING STARTS --	//
 
-
-	RenderDrawables();
-	RenderStrictBatches();
-	RenderSoftBatches();
-	
-	glBindBufferBase(GL_UNIFORM_BUFFER, 0, 0);
-	glBindBufferBase(GL_UNIFORM_BUFFER, 1, 0);
-
-	RenderFreeBatches();
-
-	//const std::vector<TextWithZLayer>& UITexts = m_UIManager.GetUITexts();
-	//for (size_t i = 0; i < UITexts.size(); i++) {
-	//	TextWithZLayer text = UITexts[i];
-	//	Draw(text.text, text.xLayer, text.yLayer, text.zLayer, nullptr);
-	//}
-
-	//if ((
-	//	GetInputController().IsHeld(GLFW_MOUSE_BUTTON_1) ||
-	//	GetInputController().IsPressed(GLFW_MOUSE_BUTTON_1) ||
-	//	GetInputController().IsReleased(GLFW_MOUSE_BUTTON_1)
-	//	)) {
-	//	m_HasClickedThisFrame = true;
-
-	//	float xMousePos, yMousePos;
-	//	GetInputController().GetMousePosition(xMousePos, yMousePos);
-
-	//	ID ClickedWindowID = GetUIManager().HasClickedOnUIElement(xMousePos, yMousePos);
-	//	if (ClickedWindowID) {
-	//		m_UIManager.ProvokeUIActionWithMouseCoords(&m_InputController, ClickedWindowID);
-	//		m_HasClickedThisFrame = false;	//	gameplay-wise, UI-related clicks will be ignored
-	//	}
-	//}
-	//else {
-	//	m_HasClickedThisFrame = false;
-	//}
-
+	RenderBatches();
 	RenderText();
-	RenderGUI();
 
 
 	//	-- RENDERING ENDS	--	//
@@ -145,49 +52,49 @@ void Renderer2D::ExecuteDraws() {
 }
 
 
-void Renderer2D::RenderGUI() {
-	std::vector<UIDrawCall>& Arr = m_UIBatchArray;
-
-	if (Arr.empty()) return;
-
-	size_t ArraySize = Arr.size();
-
-	UIBatch::BindCommonVAO();
-
-	for (size_t i = 0; i < ArraySize; i++) {
-
-		const UIDrawCall& DrawCall = Arr[i];
-		const UIBatch* Batch = DrawCall.GetUIBatchPointer();
-		const SpriteSheet* SheetObject = Batch->GetSpecialSheetPointer();
-		const Shader* ShaderObject = SheetObject->GetShader();
-
-		const int InstanceCount = static_cast<const int>(DrawCall.GetInstances());
-
-		Batch->BindUniqueBuffers();
-
-
-		ShaderObject->UseShader();
-		SendStandardUniforms(ShaderObject, DrawCall.GetPositionVector());
-
-		ShaderObject->ApplyUniforms(DrawCall.GetAppliedUniforms());
-		
-		Batch->ActivateTextures("u_Textures");
-		Batch->BindUBOs();
-
-
-#ifdef DEBUG__CODE
-		CheckGLErrors();
-#endif
-
-		glDrawElementsInstanced(GL_TRIANGLES, 6ui64, GL_UNSIGNED_SHORT, nullptr, InstanceCount);
-
-#ifdef DEBUG__CODE
-		CheckGLErrors();
-#endif
-	}
-	
-	UIBatch::UnbindCommonVAO();
-}
+//void Renderer2D::RenderGUI() {
+//	std::vector<UIDrawCall>& Arr = m_UIBatchArray;
+//
+//	if (Arr.empty()) return;
+//
+//	size_t ArraySize = Arr.size();
+//
+//	UIBatch::BindCommonVAO();
+//
+//	for (size_t i = 0; i < ArraySize; i++) {
+//
+//		const UIDrawCall& DrawCall = Arr[i];
+//		const UIBatch* Batch = DrawCall.GetUIBatchPointer();
+//		const SpriteSheet* SheetObject = Batch->GetSpecialSheetPointer();
+//		const Shader* ShaderObject = SheetObject->GetShader();
+//
+//		const int InstanceCount = static_cast<const int>(DrawCall.GetInstances());
+//
+//		Batch->BindUniqueBuffers();
+//
+//
+//		ShaderObject->UseShader();
+//		SendStandardUniforms(ShaderObject, DrawCall.GetPositionVector());
+//
+//		ShaderObject->ApplyUniforms(DrawCall.GetAppliedUniforms());
+//		
+//		Batch->ActivateTextures("u_Textures");
+//		Batch->BindUBOs();
+//
+//
+//#ifdef DEBUG__CODE
+//		CheckGLErrors();
+//#endif
+//
+//		glDrawElementsInstanced(GL_TRIANGLES, 6ui64, GL_UNSIGNED_SHORT, nullptr, InstanceCount);
+//
+//#ifdef DEBUG__CODE
+//		CheckGLErrors();
+//#endif
+//	}
+//	
+//	UIBatch::UnbindCommonVAO();
+//}
 
 
 void Renderer2D::RenderText() {
@@ -264,30 +171,30 @@ void Renderer2D::RenderText() {
 }
 
 
-void Renderer2D::RenderFreeBatches() {
-	std::vector<BatchDrawCall>& Arr = m_FreeBatchArray;
+void Renderer2D::RenderBatches() {
+	std::vector<BatchDrawCall>& Arr = m_BatchArray;
 
 	if (Arr.empty()) return;
 
-	FreeBatch::BindCommonVAO();
+	Batch::BindCommonVAO();
 
 	for (size_t i = 0; i < Arr.size(); i++) {
 
 		const BatchDrawCall& BatchDrawCallObject = Arr[i];
-		const FreeBatch* Free = dynamic_cast<const FreeBatch*>(BatchDrawCallObject.GetBaseBatchPointer());
-		const Shader* ShaderObject = Free->GetSpecialSheetPointer()->GetShader();
+		const Batch* BatchObject = BatchDrawCallObject.GetBaseBatchPointer();
+		const Shader* ShaderObject = BatchObject->GetSpecialSheetPointer()->GetShader();
 
-		int InstanceCount = static_cast<const int>(BatchDrawCallObject.GetInstances());
+		size_t InstanceCount = BatchDrawCallObject.GetInstances();
 
-		Free->BindUniqueBuffers();
+		BatchObject->BindUniqueBuffer();
 
 		ShaderObject->UseShader();
 		SendStandardUniforms(ShaderObject, BatchDrawCallObject.GetPositionVector());
 
 		ShaderObject->ApplyUniforms(BatchDrawCallObject.GetAppliedUniforms());
 
-		Free->ActivateTextures("u_Textures");
-		Free->BindUBOs();
+		BatchObject->ActivateTextures("u_Textures");
+		BatchObject->BindUBOs();
 		
 
 #ifdef DEBUG__CODE
@@ -301,110 +208,7 @@ void Renderer2D::RenderFreeBatches() {
 #endif
 	}
 
-	FreeBatch::UnbindCommonVAO();
-	Arr.clear();
-}
-
-
-void Renderer2D::RenderSoftBatches() {
-	std::vector<BatchDrawCall>& Arr = m_SoftBatchArray;
-	
-	if (Arr.empty()) return;
-
-	SoftBatch::BindCommonVAO();
-
-	for (size_t i = 0; i < Arr.size(); i++) {
-		const BatchDrawCall& DrawCall = Arr[i];
-
-		const SoftBatch* Soft = dynamic_cast<const SoftBatch*>(DrawCall.GetBaseBatchPointer());
-		const SpriteSheet* Sheet = Soft->GetSpecialSheetPointer();
-		const Shader* Shader = Sheet->GetShader();
-
-		int InstanceCount = static_cast<const int>(DrawCall.GetInstances());
-
-		Soft->BindUniqueBuffers();
-
-		Shader->UseShader();
-		SendStandardUniforms(Shader, DrawCall.GetPositionVector());
-
-		Soft->ActivateTextures("u_Textures");
-
-		if (Soft->GetType() == SoftBatchType::FloatingQuad) {	//	needed if quad dims must fit sampled texture region to the pixel
-			Shader->SetFloat("u_TexWidth", static_cast<float>(Sheet->GetSpriteSheetWidth()));
-			Shader->SetFloat("u_TexHeight", static_cast<float>(Sheet->GetSpriteSheetHeight()));
-		}
-
-		Soft->BindUBOs();
-
-		Shader->ApplyUniforms(DrawCall.GetAppliedUniforms());
-
-#ifdef DEBUG__CODE
-		CheckGLErrors();
-#endif
-
-		glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr, InstanceCount);
-
-#ifdef DEBUG__CODE
-		CheckGLErrors();
-#endif
-
-	}
-	SoftBatch::UnbindCommonVAO();
-	Arr.clear();
-}
-
-
-void Renderer2D::RenderStrictBatches() {
-
-	//	Since these batches are guaranteed to use
-	//	unique sprite sheets paired with unique shaders
-	//	there's not much point in trying to optimise this part
-
-	std::vector<BatchDrawCall>& Arr = m_StrictBatchArray;
-
-	if (Arr.empty()) return;
-
-	StrictBatch::BindCommonVAO();
-
-	for (size_t i = 0; i < Arr.size(); i++) {
-		const BatchDrawCall& DrawCallCurrent = Arr[i];
-		
-		const StrictBatch* Strict = dynamic_cast<const StrictBatch*>(DrawCallCurrent.GetBaseBatchPointer());
-		const SpriteSheet* SheetCurrent = Strict->GetSpecialSheetPointer();
-		const Shader* ShaderCurrent = SheetCurrent->GetShader();
-
-		int InstanceCount = static_cast<const int>(DrawCallCurrent.GetInstances());
-
-		// SHEET SET UP
-		glBindTexture(GL_TEXTURE_2D, SheetCurrent->GetTextureBufferID());
-		
-		Strict->BindUniqueBuffers();
-
-		// SHADER SET UP
-		ShaderCurrent->UseShader();
-		SendStandardUniforms(ShaderCurrent, DrawCallCurrent.GetPositionVector());
-
-		CheckGLErrors();
-		Strict->ActivateTextures("u_Texture");
-		CheckGLErrors();
-
-		ShaderCurrent->SetInt("u_RowSpriteCount", Strict->GetSpriteCountPerRow());
-		ShaderCurrent->SetInt("u_SpriteSideLengthPx", GetQuad().m_StandardSpritePixelLength);
-
-		ShaderCurrent->ApplyUniforms(DrawCallCurrent.GetAppliedUniforms());
-
-#ifdef DEBUG__CODE
-		CheckGLErrors();
-#endif
-
-		glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr, InstanceCount);
-
-#ifdef DEBUG__CODE
-		CheckGLErrors();
-#endif
-	}
-
-	StrictBatch::UnbindCommonVAO();
+	Batch::UnbindCommonVAO();
 	Arr.clear();
 }
 
@@ -416,76 +220,6 @@ void Renderer2D::SendStandardUniforms(
 	_targetShader->SetStandardModel(glm::translate(glm::mat4(1.f), _positionVector));
 	_targetShader->SetStandardView(GetCamera().GetViewMatrix());
 	_targetShader->SetStandardProjection(GetCamera().GetProjectionMatrix());
-}
-
-
-void Renderer2D::RenderDrawables() {
-
-#ifdef DEBUG__CODE
-	bool d_Print = false;
-	int d_SheetChanges = 0;
-	int d_ShaderChanges = 0;
-#endif
-
-
-	GetQuad().Bind();
-	const Shader* LastUsedShader = nullptr;
-	const SpriteSheet* LastUsedSheet = nullptr;
-
-	size_t DrawQueueOriginalSize = m_DrawCallQueue.size();
-	for (size_t i = 0; i < DrawQueueOriginalSize; i++)
-	{
-		DrawableDrawCall DrawcallCurrent = m_DrawCallQueue.top();
-		m_DrawCallQueue.pop();
-
-		const SpriteSheet* SheetCurrent = nullptr;
-		const Shader* ShaderCurrent = nullptr;
-
-		SheetCurrent = DrawcallCurrent.GetDrawablePointer()->GetAsociatedSpriteSheet();
-		ShaderCurrent = SheetCurrent->GetShader();
-
-		DEBUG_ASSERT(SheetCurrent != nullptr, "SpriteSheet* set to nullptr when executing draw calls.\n\tDrawable object has initial index [%llu] in queue.", i);
-		DEBUG_ASSERT(ShaderCurrent != nullptr, "Shader* set to nullptr when executing draw calls.\n\t-- from SpriteSheet with name [%s]", SheetCurrent->GetName().c_str());
-
-		if (LastUsedSheet != SheetCurrent) {	//	SHADER CHANGE
-			LastUsedSheet = SheetCurrent;
-			glBindTexture(GL_TEXTURE_2D, SheetCurrent->GetTextureBufferID());
-			GetQuad().BufferTexCoords(SheetCurrent);
-
-#ifdef DEBUG__CODE
-			d_SheetChanges++;
-#endif
-		}
-
-		if (LastUsedShader != ShaderCurrent) {	//	SPRITESHEET CHANGE
-			LastUsedShader = ShaderCurrent;
-			ShaderCurrent->UseShader();
-			ShaderCurrent->SetStandardView(m_Camera.GetViewMatrix());
-			ShaderCurrent->SetStandardProjection(m_Camera.GetProjectionMatrix());
-
-#ifdef DEBUG__CODE
-			d_ShaderChanges++;
-#endif
-		}
-
-		//	per-instance data, unskippable
-		ShaderCurrent->SetStandardModel(glm::translate(glm::mat4(1.f), DrawcallCurrent.GetPositionVector()));
-		ShaderCurrent->SetVec2("u_SpriteOffsets",
-			SheetCurrent->GetCalculatedSpriteOffsets(DrawcallCurrent.GetDrawablePointer()->GetSpriteIndex()));
-
-		ShaderCurrent->ApplyUniforms(DrawcallCurrent.GetAppliedUniforms());
-
-		GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr));
-	}
-
-#ifdef DEBUG__CODE
-	if(d_Print)
-	fprintf(stdout, "RenderDrawables() stats for [%lld] DrawCall objects:\n\tSheet changes: %d\n\tShader changes: %d\n",
-		DrawQueueOriginalSize, d_SheetChanges, d_ShaderChanges);
-#endif
-
-	//	CLEAN UP
-	GetQuad().Unbind();
 }
 
 
@@ -510,11 +244,9 @@ bool Renderer2D::Init() {
 void Renderer2D::PerClassVAOinitialisationFunction() {
 	SpriteInformation::InitialiseMasks();
 
-	StrictBatch::InitialiseCommonVAO();
-	SoftBatch::InitialiseCommonVAO();
-	FreeBatch::InitialiseCommonVAO();
-	UIBatch::InitialiseCommonVAO();
+	g_StandardQuad.Init();
 
+	Batch::InitialiseCommonVAO();
 
 	Font::InitialiseCommonFontSizeVBO(20);
 	Text::InitialiseCommonVAO();
@@ -550,25 +282,12 @@ void Renderer2D::Draw(
 	);
 }
 
-bool DrawCallComparator::operator()(const DrawableDrawCall& a, const DrawableDrawCall& b) const {
-
-	const Shader* aS = a.GetDrawablePointer()->GetAsociatedSpriteSheet()->GetShader();
-	const Shader* bS = b.GetDrawablePointer()->GetAsociatedSpriteSheet()->GetShader();
-
-
-	if (aS == bS) {
-		return a.GetDrawablePointer()->GetAsociatedSpriteSheet() > b.GetDrawablePointer()->GetAsociatedSpriteSheet();
-	}
-
-	return aS > bS;
-}
-
 const bool Renderer2D::HasClicked() {
 	return m_HasClickedThisFrame;
 }
 
 
-void GameLoopReturnType::QueueRenderObject(FreeBatch* ptr, unsigned int zLayer){
+void GameLoopReturnType::QueueRenderObject(Batch* ptr, unsigned int zLayer){
 	RenderCommand self;
 	self.Batch = ptr;
 	self.StoredValueType = RenderCommand::Type::FBatchDC;
