@@ -1,9 +1,6 @@
 #pragma once
 
 #include "../../common/common.h"
-#include "../../common/standard_quad.h"
-
-
 
 //	Instance-related primitive structs for sets of data
 
@@ -41,39 +38,19 @@ private:
 
 };
 
-
-//	Position information struct
-//	Note: Position here is relative to where the drawcall for the batch was made
-struct PositionInformation {
-
-	PositionInformation(
-		float _xRelPosition,
-		float _yRelPosition
-	);
-
-
-	void UpdateValues(
-		float _xChange,
-		float _yChange
-	);
-
-public:	//	Get offsets for setting up formats
-
-	static size_t GetPositionPairValuesOffset() { return offsetof(PositionInformation, m_xRelativePosition); }
-	static size_t GetRotationValueOffset() { return offsetof(PositionInformation, m_RotationRad);}
-
-private:	
-
-	float m_xRelativePosition = 0.f;
-	float m_yRelativePosition = 0.f;
-
-	float m_RotationRad = 0.f;
+struct xyPair {
+	float x = -1, y = -1;
 };
 
+struct SpriteInstance {
+	SpriteInformation SpriteInfo;	//	ushort
+	xyPair dimensions;				//	float *2
 
-struct DimensionInformation {
-
-
-
+	bool IsNull() { return fEqual(dimensions.x, -1) || fEqual(dimensions.y, -1); }
 };
 
+struct FullSprite {
+	SpriteInstance instance;		//	SpriteInstance
+	xyPair position;				//	float *2;
+	float rotation;					//	float
+};

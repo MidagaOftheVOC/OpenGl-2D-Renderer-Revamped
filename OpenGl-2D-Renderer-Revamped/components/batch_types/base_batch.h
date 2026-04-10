@@ -7,32 +7,20 @@
 #include "batch_instance_primitives.h"
 
 
-//	Common batch methods and data
+constexpr size_t MIN_SPRITES_WITH_RESERVED_MEM = 50;
 
-struct xyPosition {
-	float x = 0, y = 0;
-};
-
-struct SpriteDimensions {
-	float w = 0, h = 0;
-};
-
-struct SpriteInstance {
-	SpriteInformation SpriteInfo;
-	float w = 0, h = 0;
-};
-
-
-class BaseBatch {
-protected:
+class Batch {
 	
 	std::vector<const SpriteSheet*> m_SpriteSheets;
 	
-	int m_SpriteInstancesSinceLastDraw = 0;
-	int m_MaxInstanceCapacity = 0;
-	int m_BufferedInstanceCount = 0;
-
 	FlagTracker m_Flags = FlagTracker(c_NotInitialised);
+
+private:
+
+	static unsigned int s_VAO;
+	size_t m_CurrentlyQueuedSprites = 0;
+	std::vector<FullSprite> m_QueuedSpritesForRender;
+	unsigned int m_BatchBuffer = 0;
 
 protected:	//	Flags
 
@@ -48,25 +36,29 @@ protected:	//	UBOs
 	unsigned int m_SheetUVRegionsUBO = 0;
 	unsigned int m_SheetIndexOffsetsUBO = 0;
 
-public:
+private:
 
-	BaseBatch() {}
-
-	BaseBatch(
-		int _instanceCount
+	void IncreaseBufferMemoryTo(
+		size_t spriteCount
 	);
 
+public:
+
+	Batch() {}
+
+	Batch(
+		bool initialiseGLObjects
+	);
+
+	void BindUniqueBuffer() const;
 
 	void BindUBOs() const;
 
-
 	void BufferUBOs();
 
-
-	virtual void ActivateTextures(
+	void ActivateTextures(
 		const char* _sampler2DArrayUniformName
 	) const;
-
 
 	//	Add a SpriteSheet* to this batch. It will be used in every
 	//	draw call made with this batch.
@@ -74,62 +66,33 @@ public:
 		const SpriteSheet* _spriteSheet
 	);
 
-
-	virtual void DrawSpriteInstance(
+	void DrawSpriteInstance(
 		const SpriteInstance& spriteInstance,
 		float x, 
 		float y,
 		float rotation = 0.f
 	);
 
-	virtual int SendSpriteDataToGPU();
+	//	Note: figure out a way to remove this
+	int SendSpriteDataToGPU();
 
+	void InitialiseBuffers();
 
-
-
-	virtual void InitialiseBuffers() = 0;
-
-
-	virtual void DeleteBuffers() = 0;
-
-
-	//	Can raise the c_MaximumInstanceCountExceeded flag if _newInstanceCount 
-	//	exceeds the maximum instance count, which indicates buffer resizing is mandatory
-	//
-	//	If 0 is passed, the instance count isn't changed.
-	bool SetInstanceCount(
-		int _newInstanceCount
-	);
-
-
-	//	This function is used to pack sprite and sheet index data into (unsigned short) types.
-	//	Arrays _spriteIndices and _sheetIndices with element counts equal to _arrayElementCount
-	//	are passed. Then, the OUT_finishedArray, which is an array with size at least 
-	//	_arrayElementCount, is filled with the finished data.
-	//
-	//	Current non-flexible format:
-	//	Bits 0-8 : Sprite index
-	//	Bits 9-15: Sheet index
-	//
-	//	TODO: Make this more flexible, maximum sampler2D count in one drawcall is system dependant.
-	//	Currently, the sampler2D array in the shaders has a maximum size of 32.
-	//
-	//	Returns:	[false], if either array pointer is null OR _arrayElementCount > m_BufferedInstanceCount
-	//				[true], otherwise
-	bool PackIndicesTogether(
-		const unsigned short* _spriteIndices,
-		const unsigned short* _sheetIndices,
-		const size_t _arrayElementCount,
-		unsigned short* OUT_finishedArray
-	) const;
-
+	void DeleteBuffers();
 	
 	//	If the sheet or sprite is missing, it'll return an SI with values (0, 0)
-	SpriteInformation DeriveSprite(
-		const char* _sheetName,
-		const char* _spriteNameWithinSheet
+	SpriteInstance GetSprite(
+		const char* sheetName,
+		const char* spriteNameWithinSheet
 	) const;
 
+	//	Get all sprites for a certain sprite sheet.
+	//	If sheetName is not found in batch, OUT_spriteArray will be cleared.
+	//	If sheetName is nullptr, returns all sprites from first to last for each sheet, where sheets are also from first to last
+	void GetSprites(
+		std::vector<SpriteInstance>& OUT_spriteArray,
+		const char* sheetName = nullptr
+	) const;
 
 #ifdef DEBUG__CODE
 
@@ -150,21 +113,22 @@ public:
 
 public:
 
-	const int GetInstanceCount() const { return m_MaxInstanceCapacity > m_SpriteInstancesSinceLastDraw ? m_SpriteInstancesSinceLastDraw : m_MaxInstanceCapacity; }
-	
-	//	Returns the maximum number of per-instance data pieces the current buffers can 
-	//	hold without overflowing, indicating it's safe to rebuffer the VBOs with bytes
-	//	from their beginning, up to this value, times the size of their respective
-	//	elements in bytes, without overflowing into uninitialised memory regions.
-	const size_t GetBufferedInstanceCount() const { return static_cast<size_t>(m_BufferedInstanceCount); }
+	const size_t GetInstanceCount() const { return m_CurrentlyQueuedSprites; }
 
 	const SpriteSheet* GetSpecialSheetPointer() const;
 
-
 	const size_t GetSheetCount() const { return m_SpriteSheets.size(); }
 
+	static void InitialiseCommonVAO();
 
-	virtual ~BaseBatch() {}
+	static void BindCommonVAO();
+	static void UnbindCommonVAO();
+
+	virtual ~Batch();
+
+private:
+	
+	const unsigned int GetBufferID() const { return m_BatchBuffer; }
 
 };
 

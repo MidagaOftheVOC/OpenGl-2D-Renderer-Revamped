@@ -9,15 +9,11 @@
 #include "../common/standard_quad.h"
 #include "../components/sprite_sheet.h"
 #include "../components/shader.h"
-#include "../components/drawable.h"
 #include "../components/camera.h"
 #include "../components/input_controller.h"
 #include "../components/file_handler.h"
 
-#include "../components/batch_types/strict_batch.h"
-#include "../components/batch_types/soft_batch.h"
-#include "../components/batch_types/free_batch.h"
-#include "../components/batch_types/ui_batch.h"
+#include "../components/batch_types/base_batch.h"
 #include "../components/uniform/uniform_data.h"
 
 #include "../components/ui/text.h"
@@ -39,7 +35,7 @@ struct RenderCommand {
 	} StoredValueType;
 
 	union {
-		FreeBatch* Batch;
+		Batch* Batch;
 		Text* Text;
 	};
 
@@ -49,14 +45,10 @@ struct RenderCommand {
 struct GameLoopReturnType {
 	std::vector<RenderCommand> RenderCommands;
 
-	void QueueRenderObject(FreeBatch* ptr, unsigned int zLayer);
+	void QueueRenderObject(Batch* ptr, unsigned int zLayer);
 	void QueueRenderObject(Text* ptr, unsigned int zLayer);
 };
 
-//	Base class for DrawCall-like structures
-//	This contains required data for all draw calls like positions and a uniform array
-//	This class should not(and cannot as of now) be used anywhere else, one should only
-//	derive from it to create specialised draw calls.
 struct DrawCall {
 protected:
 	float m_xScreenCoord;
@@ -77,35 +69,17 @@ public:
 	const size_t GetInstances() const { return m_MaxInstanceCapacity; }
 };
 
-//		DRAWABLE
-
-struct DrawableDrawCall : DrawCall {
-private:
-	const Drawable* m_Drawable = nullptr;
-public:
-	DrawableDrawCall(const Drawable* _drawable, float x, float y, float z, const UniformDataVector* _uniformDataArray, size_t _instances)
-		: m_Drawable(_drawable), DrawCall(x, y, z, _uniformDataArray, _instances)
-	{
-	}
-	const Drawable* GetDrawablePointer() const { return m_Drawable; }
-};
-
-struct DrawCallComparator {
-	bool operator()(const DrawableDrawCall& a, const DrawableDrawCall& b) const;
-};
-
 //		BATCHES
 
 struct BatchDrawCall : DrawCall {
 private:
-	const BaseBatch* m_Base = nullptr;
+	const Batch* m_Base = nullptr;
 public:
-	BatchDrawCall(const BaseBatch* _softBatch, float x, float y, float z, const UniformDataVector* _uniformDataArray, size_t _instances)
+	BatchDrawCall(const Batch* _softBatch, float x, float y, float z, const UniformDataVector* _uniformDataArray, size_t _instances)
 		: m_Base(_softBatch), DrawCall(x, y, z, _uniformDataArray, _instances)
 	{
 	}
-	//	RECAST AS APPROPRIATE
-	const BaseBatch* GetBaseBatchPointer() const { return m_Base; }
+	const Batch* GetBaseBatchPointer() const { return m_Base; }
 };
 
 //		TEXT
@@ -119,21 +93,6 @@ public:
 	{
 	}
 	const Text* GetTextPointer() const { return m_Text; }
-};
-
-//		UI
-
-struct UIDrawCall : DrawCall {
-private:
-	const UIBatch* m_UIBatch = nullptr;
-public:	//	Point is that UI elements will always have the relevant positions in the batch itself
-	//	since those batches are supposed to be used en-masse, i.e. one such batch for each primitive
-	//	That is to say, all Panes, or all Buttons for rendering, will be done so with one batch for each.
-	UIDrawCall(const UIBatch* _uiBatch, float _cameraXpos, float _cameraYpos, float _furthestZcoord, const UniformDataVector* _uniformDataArray, size_t _instances)
-		:m_UIBatch(_uiBatch), DrawCall(_cameraXpos, _cameraYpos, _furthestZcoord, _uniformDataArray, _instances)
-	{
-	}
-	const UIBatch* GetUIBatchPointer() const { return m_UIBatch; }
 };
 
 class Renderer2D {
@@ -167,31 +126,14 @@ public:
 
 private:	//	Structures for draw queue optimisation
 
-	std::priority_queue<DrawableDrawCall, std::vector<DrawableDrawCall>, DrawCallComparator> m_DrawCallQueue;
-	std::vector<BatchDrawCall> m_StrictBatchArray;
-	std::vector<BatchDrawCall> m_SoftBatchArray;
-	std::vector<BatchDrawCall> m_FreeBatchArray;
+	std::vector<BatchDrawCall> m_BatchArray;
 	std::vector<TextDrawCall> m_TextArray;
-	std::vector<UIDrawCall> m_UIBatchArray;
 
 private:	//	Methods to render queued Drawcalls
 
 	void RenderText();
 
-
-	void RenderDrawables();
-
-
-	void RenderStrictBatches();
-
-
-	void RenderSoftBatches();
-
-
-	void RenderFreeBatches();
-
-
-	void RenderGUI();
+	void RenderBatches();
 
 public:		//	Exposed functions
 
@@ -211,62 +153,22 @@ public:		//	Exposed functions
 	//	Returns false on fail.
 	bool Init();
 
-
 	//	Execute all draw calls.
 	void ExecuteDraws();
 
-
-	//	Here, the X and Y coordinates represent the anchor point for the SoftBatch.
-	//	In essence, all the positions given to the SoftBatch object at creation
-	//	are relative to the X and Y coordinates given here.
 	void Draw(
-		SoftBatch* _batch,
+		Batch* _batch,
 		float _xPosition,
 		float _yPosition,
 		float _zLayer,
 		UniformDataVector* _uniformArray
 	);
-
-
-	void Draw(
-		FreeBatch* _batch,
-		float _xPosition,
-		float _yPosition,
-		float _zLayer,
-		UniformDataVector* _uniformArray
-	);
-
-
-	void Draw(
-		StrictBatch* _batch,
-		float _initialXpos,
-		float _initialYpos,
-		float _zLayer,
-		UniformDataVector* _uniformArray
-	);
-
-
-	void Draw(
-		Drawable* _drawable,
-		float _xPosition,
-		float _yPosition,
-		float _zLayer,
-		UniformDataVector* _uniformArray
-	);
-
 
 	void Draw(
 		const Text* _text,
 		float _xPosition,
 		float _yPosition,
 		float _zLayer,
-		UniformDataVector* _uniformArray
-	);
-
-
-	void Draw(
-		UIBatch* _uiBatch,
-		float _furthestZcoord,
 		UniformDataVector* _uniformArray
 	);
 

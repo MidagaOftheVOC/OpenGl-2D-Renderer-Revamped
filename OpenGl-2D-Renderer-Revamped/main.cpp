@@ -44,31 +44,21 @@ int main(int argc, char** argv) {
 	
 	eng.GetResourceService().AddSkin(skin);
 
-	FreeBatch freebatch = FreeBatch(0);
-	FreeBatch freebatch1 = FreeBatch(0);
-	SpriteInstance instance, instance1;
+	Batch freebatch = Batch(true);
 	freebatch.AddSheetToBatch(eng.GetResourceService().GetSpriteSheetByName("fd_std2"));
-	freebatch1.AddSheetToBatch(eng.GetResourceService().GetSpriteSheetByName("fd_std2"));
-
-	instance.w = 50;
-	instance.h = 50;
+	freebatch.BufferUBOs();
 
 	float x = 150;
 	float y = 101;
-
 	float Rotation = 0.f;
-	instance.SpriteInfo = freebatch.DeriveSprite("fd_std2", "nose");
-	instance1 = instance;
-	instance1.SpriteInfo = freebatch1.DeriveSprite("fd_std2", "eye");
+	
+	SpriteInstance instance = freebatch.GetSprite("fd_std2", "nose");
 
-	freebatch.BufferUBOs();
-	freebatch1.BufferUBOs();
 	constexpr float oneDef = 1.f / 3.1418f;
 
 	while (eng.IsRunning()) {
 		eng.ExecuteFrame([&](float elapsedTimeSeconds, GameInput input, GameLoopReturnType& renderComms) {
 			renderComms.QueueRenderObject(&freebatch, 2);
-			renderComms.QueueRenderObject(&freebatch1, 1);
 
 			if (input.IsHeld(GLFW_KEY_LEFT)) {
 				x -= 1;
@@ -85,11 +75,11 @@ int main(int argc, char** argv) {
 			}
 
 			if (input.IsHeld(GLFW_KEY_DOWN)) {
-				instance.w += 5;
+				instance.dimensions.x += 5;
 			}
 
 			freebatch.DrawSpriteInstance(instance, x, y, Rotation);
-			freebatch1.DrawSpriteInstance(instance1, x + 20, y + 20, Rotation);
+			freebatch.DrawSpriteInstance(instance, x + 50, y + 50, Rotation);
 		});
 	}
 

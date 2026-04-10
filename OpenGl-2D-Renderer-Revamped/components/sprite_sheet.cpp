@@ -205,7 +205,7 @@ void SpriteSheet::ConfigurationPairLoadingMethod(
 
 
 	std::string AssetName;
-	AssetName.resize(100, '\0');
+	AssetName.resize(40, '\0');
 	while (std::getline(File, Line)) {
 
 		if (Line.empty()) continue;
@@ -216,7 +216,7 @@ void SpriteSheet::ConfigurationPairLoadingMethod(
 
 
 		if (sscanf(Line.c_str(), "[%100[^]]]", AssetName.data()) == 1) {
-			m_UVregionNamesFromConfigFile.emplace_back(AssetName);
+			m_UVregionNamesFromConfigFile.emplace_back(Line.substr(1, Line.size() - 2));
 			continue;
 		}
 
@@ -234,6 +234,13 @@ void SpriteSheet::ConfigurationPairLoadingMethod(
 			(xOffset + AssetWidth) / static_cast<float>(m_SheetWidth),
 			(yOffset + AssetHeight) / static_cast<float>(m_SheetHeight)
 		);
+
+		const xyDimensions dims = {
+			.x = static_cast<float>(AssetWidth),
+			.y = static_cast<float>(AssetHeight)
+		};
+
+		m_SpriteDimensionsPx.emplace_back(std::move(dims));
 	}
 }
 
@@ -368,7 +375,7 @@ void SpriteSheet::InterpretTextureParametersString(
 				}
 
 				ParamValueIsFound = true;
-				i += ParamNameLength - 1;	// accoutn for i++ from for loop
+				i += ParamNameLength - 1;	// account for i++ from for loop
 			}
 		}
 
@@ -432,6 +439,44 @@ bool UVRegion::operator==(const UVRegion& other) const {
 }
 
 
+SpriteInstance SpriteSheet::GetSpriteInstance(
+	const char* spriteName,
+	size_t sheetIndex
+) const {
+	DEBUG_ASSERT(m_UVregionNamesFromConfigFile.size() == m_SpriteDimensionsPx.size(),
+		"Sprite sheet [%s] has data corruption. Sprite names and sprite pxDimension arrays have differing sizes.", m_SheetName.c_str());
+
+	for (size_t i = 0; i < m_SpriteDimensionsPx.size(); i++) {
+		if (!m_UVregionNamesFromConfigFile[i].compare(spriteName)) {
+			SpriteInstance si;
+			si.SpriteInfo = SpriteInformation(sheetIndex, i);
+			si.dimensions.x = m_SpriteDimensionsPx[i].x;
+			si.dimensions.y = m_SpriteDimensionsPx[i].y;
+			
+			return si;
+		}
+	}
+
+	SpriteInstance badRetVal;
+	return badRetVal;
+}
 
 
+void SpriteSheet::GetSpriteInstances(
+	std::vector<SpriteInstance>& OUT_spriteArray,
+	size_t sheetIndex
+) const {
+	DEBUG_ASSERT(m_UVregionNamesFromConfigFile.size() == m_SpriteDimensionsPx.size(),
+		"Sprite sheet [%s] has data corruption. Sprite names and sprite pxDimension arrays have differing sizes.", m_SheetName.c_str());
+	
+	OUT_spriteArray.clear();
 
+	for (size_t i = 0; i < m_SpriteDimensionsPx.size(); i++) {
+		SpriteInstance si;
+		si.SpriteInfo = SpriteInformation(sheetIndex, i);
+		si.dimensions.x = m_SpriteDimensionsPx[i].x;
+		si.dimensions.y = m_SpriteDimensionsPx[i].y;
+
+		OUT_spriteArray.emplace_back(std::move(si));
+	}
+}

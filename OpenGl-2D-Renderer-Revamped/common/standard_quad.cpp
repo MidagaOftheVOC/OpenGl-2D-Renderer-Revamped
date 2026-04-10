@@ -4,8 +4,7 @@
 
 StandardQuad g_StandardQuad = StandardQuad();
 
-StandardQuad::StandardQuad() {
-}
+StandardQuad::StandardQuad() {}
 
 void StandardQuad::Unbind() {
 	glBindVertexArray(0);

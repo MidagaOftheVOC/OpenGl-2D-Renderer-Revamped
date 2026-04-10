@@ -1,11 +1,11 @@
 #pragma once
 
+#include "../components/batch_types/base_batch.h"
+
 #include "../components/shader.h"
 #include "../components/sprite_sheet.h"
 #include "../components/ui/font.h"
 #include "../components/ui/primitives/types/pane.h"
-
-#include "../components/batch_types/ui_batch.h"
 
 struct ShaderLoadingParameters {
 	const std::string m_ShaderName;
@@ -62,7 +62,7 @@ private:
 	Font m_DefaultFont;
 	TextOptions m_DefaultTextOptions;
 
-	UIBatch m_UIBatch;
+	Batch m_UIBatch;
 
 public:
 
