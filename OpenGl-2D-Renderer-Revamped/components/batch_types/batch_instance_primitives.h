@@ -52,5 +52,5 @@ struct SpriteInstance {
 struct FullSprite {
 	SpriteInstance instance;		//	SpriteInstance
 	xyPair position;				//	float *2;
-	float rotation;					//	float
+	float rotation = 0.f;			//	float
 };

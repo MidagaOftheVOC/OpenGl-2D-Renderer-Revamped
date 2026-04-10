@@ -13,8 +13,8 @@ int main(int argc, char** argv) {
 
 
 	resService.UploadSpriteSheetParameters("test\\res\\cyrillic.png",			"test_font",						resService.c_SpecialTextShaderName, 9, 9);
-	resService.UploadSpriteSheetParameters("test\\res\\test.cfg",				"fd_std1",							"fd_std",							0, 0);
 	
+	resService.UploadSpriteSheetParameters("test\\res\\test.cfg",				"fd_std1",							"fd_std",							0, 0);
 	resService.UploadSpriteSheetParameters("test\\res\\panda.cfg",				"fd_std2",							"fd_std",							0, 0);
 	
 	resService.UploadSpriteSheetParameters("test\\res\\gui.cfg",				"uib_std",							"uib_std",							0, 0);
@@ -45,6 +45,7 @@ int main(int argc, char** argv) {
 	eng.GetResourceService().AddSkin(skin);
 
 	Batch freebatch = Batch(true);
+	freebatch.AddSheetToBatch(eng.GetResourceService().GetSpriteSheetByName("fd_std1"));
 	freebatch.AddSheetToBatch(eng.GetResourceService().GetSpriteSheetByName("fd_std2"));
 	freebatch.BufferUBOs();
 
@@ -53,12 +54,15 @@ int main(int argc, char** argv) {
 	float Rotation = 0.f;
 	
 	SpriteInstance instance = freebatch.GetSprite("fd_std2", "nose");
+	SpriteInstance eye = freebatch.GetSprite("fd_std2", "eye");
+	SpriteInstance testedInstance = freebatch.GetSprite("fd_std1", "nose");
 
 	constexpr float oneDef = 1.f / 3.1418f;
 
 	while (eng.IsRunning()) {
 		eng.ExecuteFrame([&](float elapsedTimeSeconds, GameInput input, GameLoopReturnType& renderComms) {
 			renderComms.QueueRenderObject(&freebatch, 2);
+			std::println("FPS: {:.0f}", 1 / elapsedTimeSeconds);
 
 			if (input.IsHeld(GLFW_KEY_LEFT)) {
 				x -= 1;
@@ -79,7 +83,9 @@ int main(int argc, char** argv) {
 			}
 
 			freebatch.DrawSpriteInstance(instance, x, y, Rotation);
-			freebatch.DrawSpriteInstance(instance, x + 50, y + 50, Rotation);
+			freebatch.DrawSpriteInstance(instance, x + 50, y + 50, 0);
+			freebatch.DrawSpriteInstance(testedInstance, x + 100, y + 200, 0);
+			freebatch.DrawSpriteInstance(eye, x, y + 200, Rotation);
 		});
 	}
 

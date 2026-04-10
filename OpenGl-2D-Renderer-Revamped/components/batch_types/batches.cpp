@@ -1,9 +1,7 @@
 #include "base_batch.h"
 
 
-
 /*		DATA TYPES		*/
-
 
 uint16_t SpriteInformation::s_SheetSpriteBitmask = 0;
 
@@ -40,9 +38,6 @@ uint16_t SpriteInformation::GetSpriteIndex() const {
 	return uint16_t(m_SheetSpriteIndexData & ~s_SheetSpriteBitmask);
 }
 
-
-
-/*		BASE BATCH		*/
 
 unsigned int Batch::c_NotInitialised = 1 << 0;
 unsigned int Batch::c_MaximumInstanceCountExceeded = 1 << 16;
@@ -134,10 +129,11 @@ void Batch::BufferUBOs() {
 	};
 
 	glBindBuffer(GL_UNIFORM_BUFFER, m_SheetIndexOffsetsUBO);
-	//	TODO: check if it's necessary to record the last sheet's offset
 	std::vector<PaddedInteger> Offsets;
+	int TotalOffset = 0;
 	for (size_t i = 0; i < m_SpriteSheets.size(); i++) {
-		Offsets.emplace_back(static_cast<int>(m_SpriteSheets[i]->GetContainedSpriteCount()));
+		Offsets.emplace_back(static_cast<int>(TotalOffset));
+		TotalOffset += m_SpriteSheets[i]->GetContainedSpriteCount();
 	}
 
 	glBufferData(GL_UNIFORM_BUFFER, Offsets.size() * sizeof(PaddedInteger), Offsets.data(), GL_STATIC_DRAW);
