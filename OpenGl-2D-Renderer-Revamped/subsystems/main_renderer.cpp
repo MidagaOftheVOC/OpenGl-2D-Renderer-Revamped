@@ -31,14 +31,7 @@ void Renderer2D::ExecuteDraws() {
 
 #endif
 
-	//TODO:
-	//	At some point, all of these queues and arrays will be abstracted away into
-	//	"scenes" or similar objects, where we don't have to add, remove, readd and
-	//  so on draw call objects, but just maintain them and add/remove on necessity.
-	//
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	//Draw(&m_UIBatch, 0, nullptr);
 
 	//	-- RENDERING STARTS --	//
 
@@ -50,52 +43,6 @@ void Renderer2D::ExecuteDraws() {
 
 	glfwSwapBuffers(GetWinHandle());
 }
-
-
-//void Renderer2D::RenderGUI() {
-//	std::vector<UIDrawCall>& Arr = m_UIBatchArray;
-//
-//	if (Arr.empty()) return;
-//
-//	size_t ArraySize = Arr.size();
-//
-//	UIBatch::BindCommonVAO();
-//
-//	for (size_t i = 0; i < ArraySize; i++) {
-//
-//		const UIDrawCall& DrawCall = Arr[i];
-//		const UIBatch* Batch = DrawCall.GetUIBatchPointer();
-//		const SpriteSheet* SheetObject = Batch->GetSpecialSheetPointer();
-//		const Shader* ShaderObject = SheetObject->GetShader();
-//
-//		const int InstanceCount = static_cast<const int>(DrawCall.GetInstances());
-//
-//		Batch->BindUniqueBuffers();
-//
-//
-//		ShaderObject->UseShader();
-//		SendStandardUniforms(ShaderObject, DrawCall.GetPositionVector());
-//
-//		ShaderObject->ApplyUniforms(DrawCall.GetAppliedUniforms());
-//		
-//		Batch->ActivateTextures("u_Textures");
-//		Batch->BindUBOs();
-//
-//
-//#ifdef DEBUG__CODE
-//		CheckGLErrors();
-//#endif
-//
-//		glDrawElementsInstanced(GL_TRIANGLES, 6ui64, GL_UNSIGNED_SHORT, nullptr, InstanceCount);
-//
-//#ifdef DEBUG__CODE
-//		CheckGLErrors();
-//#endif
-//	}
-//	
-//	UIBatch::UnbindCommonVAO();
-//}
-
 
 void Renderer2D::RenderText() {
 	std::vector<TextDrawCall>& Arr = m_TextArray;
@@ -170,7 +117,6 @@ void Renderer2D::RenderText() {
 	Text::UnbindCommonVAO();
 }
 
-
 void Renderer2D::RenderBatches() {
 	std::vector<BatchDrawCall>& Arr = m_BatchArray;
 
@@ -212,7 +158,6 @@ void Renderer2D::RenderBatches() {
 	Arr.clear();
 }
 
-
 void Renderer2D::SendStandardUniforms(
 	const Shader* _targetShader,
 	const glm::vec3& _positionVector
@@ -221,7 +166,6 @@ void Renderer2D::SendStandardUniforms(
 	_targetShader->SetStandardView(GetCamera().GetViewMatrix());
 	_targetShader->SetStandardProjection(GetCamera().GetProjectionMatrix());
 }
-
 
 bool Renderer2D::Init() {
 	glEnable(GL_DEPTH_TEST);
@@ -243,8 +187,6 @@ bool Renderer2D::Init() {
 
 void Renderer2D::PerClassVAOinitialisationFunction() {
 	SpriteInformation::InitialiseMasks();
-
-	g_StandardQuad.Init();
 
 	Batch::InitialiseCommonVAO();
 

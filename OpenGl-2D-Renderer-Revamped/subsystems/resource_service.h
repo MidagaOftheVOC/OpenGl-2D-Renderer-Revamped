@@ -59,9 +59,9 @@ private:
 private:
 
 	Shader m_TextRenderingShader;
+
 	Font m_DefaultFont;
 	TextOptions m_DefaultTextOptions;
-
 	Batch m_UIBatch;
 
 public:
@@ -132,6 +132,8 @@ public:
 
 	const Shader& GetTextShader() const { return m_TextRenderingShader; }
 	const Font& GetDefaultFont() const { return m_DefaultFont; }
+	
+	Batch* GetUIBatch() { return &m_UIBatch; }
 
 public:
 

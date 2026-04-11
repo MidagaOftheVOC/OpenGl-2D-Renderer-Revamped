@@ -66,11 +66,16 @@ public:
 		const SpriteSheet* _spriteSheet
 	);
 
-	void DrawSpriteInstance(
+	void DrawSprite(
 		const SpriteInstance& spriteInstance,
 		float x, 
 		float y,
-		float rotation = 0.f
+		float rotation = 0.f,
+		float z = 0.f
+	);
+
+	void DrawSprite(
+		const FullSprite& sprite
 	);
 
 	//	Note: figure out a way to remove this

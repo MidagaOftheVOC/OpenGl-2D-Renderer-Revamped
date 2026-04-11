@@ -50,7 +50,8 @@ struct SpriteInstance {
 };
 
 struct FullSprite {
-	SpriteInstance instance;		//	SpriteInstance
-	xyPair position;				//	float *2;
-	float rotation = 0.f;			//	float
+	SpriteInstance instance;//	SpriteInstance
+	xyPair position;		//	float *2;
+	float rotation = 0.f;	//	float
+	float z = 0.f;			//	float
 };

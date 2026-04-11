@@ -8,56 +8,35 @@ int main(int argc, char** argv) {
 	auto& resService = eng.GetResourceService();
 
 	resService.UploadShaderParameters("test\\res\\text.shader",					resService.c_SpecialTextShaderName);
-	resService.UploadShaderParameters("test\\res\\fb_std.shader",				"fd_std");		//	WITH UBO
-	resService.UploadShaderParameters("test\\res\\uib_std.shader",				"uib_std");
+	resService.UploadShaderParameters("test\\res\\batch.shader",				"batch");		//	WITH UBO
+	resService.UploadShaderParameters("test\\res\\batch_ui.shader",				"batch_ui");
 
 
 	resService.UploadSpriteSheetParameters("test\\res\\cyrillic.png",			"test_font",						resService.c_SpecialTextShaderName, 9, 9);
 	
-	resService.UploadSpriteSheetParameters("test\\res\\test.cfg",				"fd_std1",							"fd_std",							0, 0);
-	resService.UploadSpriteSheetParameters("test\\res\\panda.cfg",				"fd_std2",							"fd_std",							0, 0);
+	resService.UploadSpriteSheetParameters("test\\res\\test.cfg",				"testSheet",						"batch",							0, 0);
+	resService.UploadSpriteSheetParameters("test\\res\\panda.cfg",				"pandaSheet",						"batch",							0, 0);
 	
-	resService.UploadSpriteSheetParameters("test\\res\\gui.cfg",				"uib_std",							"uib_std",							0, 0);
-	resService.UploadSpriteSheetParameters("test\\res\\gui.cfg",				resService.c_SpecialUISheetName,	"uib_std",							0, 0);
-
-	//	This is terrible, but it's supposed to represent just a skin from the first sprite sheet loaded in the special UI batch for the UI manager
-	//	and the first 9 sprites defined inside it.
-	PaneSkin skin;
-	skin.m_Name = "default";
-	SpriteInformation SIarray[] = {
-		{0, 0},
-		{0, 1},
-		{0, 2},
-		{0, 3},
-		{0, 6},
-		{0, 7},
-
-		{0, 4},
-		{0, 5},
-
-		{0, 8}
-	};
+	resService.UploadSpriteSheetParameters("test\\res\\gui.cfg",				resService.c_SpecialUISheetName,	"batch_ui",							0, 0);
 
 	eng.Init();
-
-	memcpy(skin.m_SIArray, SIarray, 9 * sizeof(SpriteInformation));
 	
-	eng.GetResourceService().AddSkin(skin);
-
-	Batch freebatch = Batch(true);
-	freebatch.AddSheetToBatch(eng.GetResourceService().GetSpriteSheetByName("fd_std1"));
-	freebatch.AddSheetToBatch(eng.GetResourceService().GetSpriteSheetByName("fd_std2"));
+	const bool INIT_OPENGL_OBJECTS = true;
+	Batch freebatch = Batch(INIT_OPENGL_OBJECTS);
+	freebatch.AddSheetToBatch(eng.GetResourceService().GetSpriteSheetByName("testSheet"));
+	freebatch.AddSheetToBatch(eng.GetResourceService().GetSpriteSheetByName("pandaSheet"));
 	freebatch.BufferUBOs();
 
 	float x = 150;
 	float y = 101;
 	float Rotation = 0.f;
 	
-	SpriteInstance instance = freebatch.GetSprite("fd_std2", "nose");
-	SpriteInstance eye = freebatch.GetSprite("fd_std2", "eye");
-	SpriteInstance testedInstance = freebatch.GetSprite("fd_std1", "nose");
+	SpriteInstance instance = freebatch.GetSprite("pandaSheet", "nose");
+	SpriteInstance eye = freebatch.GetSprite("pandaSheet", "eye");
+	SpriteInstance testedInstance = freebatch.GetSprite("testSheet", "nose");
 
 	constexpr float oneDef = 1.f / 3.1418f;
+
 
 	while (eng.IsRunning()) {
 		eng.ExecuteFrame([&](float elapsedTimeSeconds, GameInput input, GameLoopReturnType& renderComms) {
@@ -82,10 +61,10 @@ int main(int argc, char** argv) {
 				instance.dimensions.x += 5;
 			}
 
-			freebatch.DrawSpriteInstance(instance, x, y, Rotation);
-			freebatch.DrawSpriteInstance(instance, x + 50, y + 50, 0);
-			freebatch.DrawSpriteInstance(testedInstance, x + 100, y + 200, 0);
-			freebatch.DrawSpriteInstance(eye, x, y + 200, Rotation);
+			freebatch.DrawSprite(instance, x, y, Rotation);
+			freebatch.DrawSprite(instance, x + 50, y + 50, 0);
+			freebatch.DrawSprite(testedInstance, x + 100, y + 200, 0);
+			freebatch.DrawSprite(eye, x, y + 200, Rotation);
 		});
 	}
 

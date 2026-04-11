@@ -24,8 +24,6 @@ uniform mat4 u_Projection;
 out vec2 v_TextureVertex;
 flat out uint v_SheetIndex;
 
-//  NOTE: THIS SHADER IS THE MAIN SHADER THAT WILL BE USED FOR THE FREEBATCH TYPE
-
 void main(){
 
     // Texture region mapping
@@ -40,17 +38,17 @@ void main(){
 
     v_TextureVertex = mix(MinUV, MaxUV, b_TexBuffer);
 
-    //  Coord calculation
+    //  Rotation calculation
     vec2 NormalisedVertexBuffer = b_VertexBuffer / 100.f;
     vec2 LocalVertex = b_QuadDimensions * NormalisedVertexBuffer;
     vec2 PointOfRotation = LocalVertex - b_QuadDimensions / 2;
-
+    
     float sine = sin(b_Rotations);
     float cosine = cos(b_Rotations);
 
     vec2 RotatedPosition = vec2(
-		PointOfRotation.x * cosine - PointOfRotation.y * sine,
-		PointOfRotation.x * sine + PointOfRotation.y * cosine
+	   PointOfRotation.x * cosine - PointOfRotation.y * sine,
+	   PointOfRotation.x * sine + PointOfRotation.y * cosine
 	);
 
     vec2 WorldPosition = RotatedPosition + b_PositionsRelativeToModel + b_QuadDimensions / 2.0;
@@ -59,13 +57,11 @@ void main(){
 }
 
 
-
 #shader fragment
 #version 430 core
 
 in vec2 v_TextureVertex;
 flat in uint v_SheetIndex;
-
 
 uniform sampler2D u_Textures[32];
 
@@ -73,8 +69,5 @@ uniform sampler2D u_Textures[32];
 out vec4 FragColour;
 
 void main(){
-	//FragColour = mix(texture(u_Textures[v_SheetIndex], v_TextureVertex), vec4(1.0, 0, 0, 1.0), 0.5);
     FragColour = texture(u_Textures[v_SheetIndex], v_TextureVertex);
 }
-
-

@@ -150,6 +150,33 @@ void ResourceService::LoadDefaultVariables() {
 	);
 
 	m_DefaultTextOptions.m_Font = &m_DefaultFont;
+
+
+	//	This is terrible, but it's supposed to represent just a skin from the first sprite sheet loaded in the special UI batch for the UI manager
+	//	and the first 9 sprites defined inside it.
+	PaneSkin skin;
+	skin.m_Name = "default";
+	SpriteInformation SIarray[] = {
+		{0, 0},
+		{0, 1},
+		{0, 2},
+		{0, 3},
+		{0, 6},
+		{0, 7},
+
+		{0, 4},
+		{0, 5},
+
+		{0, 8}
+	};
+
+	memcpy(skin.m_SIArray, SIarray, 9 * sizeof(SpriteInformation));
+
+	AddSkin(skin);
+
+	m_UIBatch.InitialiseBuffers();
+	m_UIBatch.AddSheetToBatch(GetSpriteSheetByName(c_SpecialUISheetName));
+	m_UIBatch.BufferUBOs();
 }
 
 const PaneSkin* ResourceService::GetSkinByName(

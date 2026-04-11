@@ -49,6 +49,9 @@ Batch::Batch(
 	if (initialiseGLObjects) {
 		InitialiseBuffers();
 	}
+#ifdef DEBUG__CODE
+	CheckGLErrors();
+#endif
 }
 
 void Batch::ActivateTextures(
@@ -155,38 +158,46 @@ void Batch::BufferUBOs() {
 	CheckGLErrors();
 }
 
-
 void Batch::BindUBOs() const {
 	glBindBufferBase(GL_UNIFORM_BUFFER, 0, m_SheetUVRegionsUBO);
 	glBindBufferBase(GL_UNIFORM_BUFFER, 1, m_SheetIndexOffsetsUBO);
+#ifdef DEBUG__CODE
+	CheckGLErrors();
+#endif
 }
 
-
-void Batch::DrawSpriteInstance(
-	const SpriteInstance& spriteInstance,
-	float x,
-	float y,
-	float rotation
+void Batch::DrawSprite(
+	const FullSprite& sprite
 ) {
-	auto a = m_QueuedSpritesForRender.capacity();
 	if (m_CurrentlyQueuedSprites == m_QueuedSpritesForRender.capacity()) {
 		IncreaseBufferMemoryTo(m_CurrentlyQueuedSprites * 2);
 	}
 
+	if (m_CurrentlyQueuedSprites < m_QueuedSpritesForRender.size()) {
+		m_QueuedSpritesForRender[m_CurrentlyQueuedSprites] = sprite;
+	}
+	else {
+		m_QueuedSpritesForRender.emplace_back(sprite);
+	}
+
+	m_CurrentlyQueuedSprites++;
+}
+
+void Batch::DrawSprite(
+	const SpriteInstance& spriteInstance,
+	float x,
+	float y,
+	float rotation,
+	float z
+) {
 	FullSprite constructedRenderData;
 	constructedRenderData.instance = spriteInstance;
 	constructedRenderData.position.x = x;
 	constructedRenderData.position.y = y;
 	constructedRenderData.rotation = rotation;
+	constructedRenderData.z = z;
 
-	if (m_CurrentlyQueuedSprites < m_QueuedSpritesForRender.size()) {
-		m_QueuedSpritesForRender[m_CurrentlyQueuedSprites] = constructedRenderData;
-	}
-	else {
-		m_QueuedSpritesForRender.emplace_back(constructedRenderData);
-	}
-
-	m_CurrentlyQueuedSprites++;
+	DrawSprite(constructedRenderData);
 }
 
 //	should return instance count and update the buffer
@@ -200,6 +211,9 @@ int Batch::SendSpriteDataToGPU() {
 
 	size_t retVal = m_CurrentlyQueuedSprites;
 	m_CurrentlyQueuedSprites = 0;
+#ifdef DEBUG__CODE
+	CheckGLErrors();
+#endif
 	return retVal;
 }
 
@@ -209,6 +223,9 @@ void Batch::IncreaseBufferMemoryTo(
 	glNamedBufferData(GetBufferID(), spriteCount * sizeof(FullSprite), 0, GL_STREAM_DRAW);
 	CheckGLErrors();
 	m_QueuedSpritesForRender.reserve(spriteCount);
+#ifdef DEBUG__CODE
+	CheckGLErrors();
+#endif
 }
 
 void Batch::InitialiseBuffers() {
@@ -220,13 +237,24 @@ void Batch::InitialiseBuffers() {
 
 	m_SheetIndexOffsetsUBO = vbo[1];
 	m_SheetUVRegionsUBO = vbo[2];
+#ifdef DEBUG__CODE
+	CheckGLErrors();
+#endif
 }
 
 void Batch::DeleteBuffers() {
 	if (m_BatchBuffer != 0) {
 		glDeleteBuffers(1, &m_BatchBuffer);
+		glDeleteBuffers(1, &m_SheetUVRegionsUBO);
+		glDeleteBuffers(1, &m_SheetIndexOffsetsUBO);
+
 		m_BatchBuffer = 0;
+		m_SheetUVRegionsUBO = 0;
+		m_SheetIndexOffsetsUBO = 0;
 	}
+#ifdef DEBUG__CODE
+	CheckGLErrors();
+#endif
 }
 
 Batch::~Batch() {
@@ -317,42 +345,57 @@ void Batch::InitialiseCommonVAO() {
 				float *2;
 			}
 			float
+			float
 		}
 	*/
 
 	glBindVertexBuffer(2, 0, 0, sizeof(FullSprite)); // buffer bound later per-batch
 
-	// SpriteInfo
+	//	SpriteInfo
 	glVertexAttribIFormat(2, 1, GL_UNSIGNED_SHORT, offsetof(FullSprite, instance) + offsetof(SpriteInstance, SpriteInfo));
 	glVertexAttribBinding(2, 2);
 	glEnableVertexAttribArray(2);
 
-	// Rotation
+	//	Rotation
 	glVertexAttribFormat(3, 1, GL_FLOAT, GL_FALSE, offsetof(FullSprite, rotation));
 	glVertexAttribBinding(3, 2);
 	glEnableVertexAttribArray(3);
 
-	// Position
+	//	Position
 	glVertexAttribFormat(4, 2, GL_FLOAT, GL_FALSE, offsetof(FullSprite, position));
 	glVertexAttribBinding(4, 2);
 	glEnableVertexAttribArray(4);
 
-	// Dimensions
+	//	Dimensions
 	glVertexAttribFormat(5, 2, GL_FLOAT, GL_FALSE, offsetof(FullSprite, instance) + offsetof(SpriteInstance, dimensions));
 	glVertexAttribBinding(5, 2);
 	glEnableVertexAttribArray(5);
 
+	//	Z coord	(ignored in regular render)
+	glVertexAttribFormat(6, 1, GL_FLOAT, GL_FALSE, offsetof(FullSprite, z));
+	glVertexAttribBinding(6, 2);
+	glEnableVertexAttribArray(6);
+
 	// All share the same divisor (since per-instance)
 	glVertexBindingDivisor(2, 1);
 	glBindVertexArray(0);
+#ifdef DEBUG__CODE
+	CheckGLErrors();
+#endif
 }
 
 void Batch::BindUniqueBuffer() const {
 	glBindVertexBuffer(2, m_BatchBuffer, 0, sizeof(FullSprite));
+#ifdef DEBUG__CODE
+	CheckGLErrors();
+#endif
 }
 
 void Batch::BindCommonVAO(){
 	glBindVertexArray(s_VAO);
+#ifdef DEBUG__CODE
+	CheckGLErrors();
+#endif
 }
 
 void Batch::UnbindCommonVAO(){

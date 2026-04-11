@@ -26,10 +26,6 @@ void Engine2D::Init() {
 	m_UIManager.SetPaneFactory(&m_PaneFactory);
 	m_UIManager.SetDistributionBounds(1, 2);
 
-	//	BATCH
-	/*m_UIBatch.AddSheetToBatch(GetSpriteSheetByName(c_SpecialUISheetName));
-	m_UIBatch.BufferUBOs();*/
-
 	m_InputController.SetTrackedKeystatesBitmask(
 		InputController::c_ArrowTrackBit |
 		InputController::c_LetterTrackBit |
@@ -114,49 +110,57 @@ void Engine2D::ExecuteFrame(
 	/*
 	plan:
 
-	Create a global Sprite type to consolidate sprite information		//	<<< DONE
-		-	Maybe think about the idea where each batch generate an array of all sprites inside it and maybe expose 
-			refs to them, so the user is able to work with const refs to those, and pass those to the Batch.Draw() function.
-	Improve base batch to maintain a state and function for 'drawing' a sprite through it.	//	Needs to be slightly reworked to not have x/y in the sprite instance
-		-	Freebatch.Draw(Sprite, x, y). Where sprite's data is copied/appended depends on current drawn sprite count for that batch instance
-		-	On render cycle reset this count. Note to this: it could probably be based on the instance count in the BaseBatch
-		-	Note: we should probably remove the ability to copy entire arrays into the batch, this is precisely what we want to eliminate
-	m_Renderer must be able to consume Freebatches	//	<<< DONE, a bit halfassed but whatever, works for now
-	
-	!!! Work on program until Free batches confirmed working with .cfg files	//	Technically fulfilled, but better to take care of problems for earlier
+	Idea 1: Spam a bunch of sprites to avoid repeating and bleeding. One more variable has been added to the global sprite.
+	+	Easy to implement.
+	+	Make the rotation a union which includes the raw Z coord and don't use it elsewhere. 
+	-	Heavier on memory and performance.
 
-	UIBatch inside UIManager and how to queues the render commands	//<<< Render comms complete
-	Rework the widgets
-		-	Windows should hold an array of widgets
-		-	Widgets need to maintain a list of widgets themselves to allow nesting
-		-	Widget interface must be strict enough so the widget-click-detection function works recursively 
-			-	This idea is very complicated, may not be that good
+	Req for UI:
+	Rendering of UI elements must happen somewhere inside the UI manager.
+	The UI manager must own 
+		-all Window objects
+			-where the order will be read as the windows' ordering, with the first in the array being the closest to the screen
+		-a special array of widgets, which will act independantly. 
+			-This will allow for windowless buttons, so like general menus or special UI which is always rendered at the lowest level, furthest from us
+	UI manager must interpret the most recent GameInput object from InputController and signal if UI has taken over keyboard or mouse input.
+	UI manager must interpret input and trigger the appropriate actions.
+
+	New Window and Widgets.
+	Window will represent a logical group of Widgets.
+	Windows will have unique 32-bit IDs.
+	Windows will maintain a position, relative to the screen, but won't have dimensions.
+	A window is clicked, when one of its widgets is clicked.
+	When a window is clicked, it moves closest to us.
+	A window's position is moved when the mouse is HELD and moved, while on a Rect widget.
+	A window must have one Rect widget in it's widget array.
+	A window must be able to hold an OnClose() function
+
+	Widgets will represent the graphical components of a window.
+	Widgets may themselves be composed of other widgets, an example would be a Button being comprised of a Rect and Label.
+
+
+	
+	Plan for UI rework:
+	UI manager will have the following dependancies: [ InpuController, Renderer, ResourceService ]
+	
+
 
 
 	Low prio:
 	We should probably check if the Camera type var works as it should inside the renderer and how moving it affects the screen.
-
+	Should probably make the input for the lambda be just a non-const Engine* and pass this. The user can set their own names for ptrs to subsystems
 	*/
 
 	/*
-	IMPROVE BATCHES
-	They should know when to update their buffers. They should have a fn DrawSprite(...) or something which takes SpriteInfo or something.
-	Before rendering, update arrays if needed.
-
-	Also make a struct to unify those 1-4 OUT_ arrays to make them easier to use.
-
 	MAKE SEPARATE FACTORIES FOR EACH TYPE THAT NEEDS FACTORIES
 	(and make them depend on res service)
 	*/
-
-	//	NOTE
-	//	everything seems to be as expected up to this point
-	//	untested are the batches and what happens after in this loop
 
 	glfwPollEvents();
 
 	m_InputController.CaptureKeystates();
 
+	//	This shuold probably be moved to InputController and add it as dependancy for UI manager
 	//CapturedStates uiCapturedStates = m_UIManager.InterpretInput(m_InputController.ExposeGameInput());
 	//
 	//if (uiCapturedStates.capturedKeyboard)	m_InputController.ExposeGameInput().SetKeyboardCapturedFlag();
@@ -164,14 +168,11 @@ void Engine2D::ExecuteFrame(
 
 	gameLoop(m_ElapsedTimeSeconds, m_InputController.ExposeGameInput(), StoredRenderCommands);
 
-	//	Figure out layer
-	//	Idea for the layer, we can make it so the renderer autmatically calculate sthe Z layer based on the amount of batches
-	//	This idea can be further improved if we removed the Z layer entirely, since if this is done, we've no need for it
-	//	as the order of putting the batches in the GameLoopReturnType var will determine the order to draw.
-
-	//	Also, we must allow for other things to be queued for drawing.
+	//	Also, we must allow for other things to be queued for drawing.	//<<< no idea what this means
 	QueueFreebatchesToRenderer(StoredRenderCommands);
-	//m_Renderer.Draw(...);		//<<< FOR UI BATR
+
+	//	TODO:	decode the Z value
+	m_Renderer.Draw(GetResourceService().GetUIBatch(), 0, 0, 1, nullptr);
 
 	m_Renderer.ExecuteDraws();
 
