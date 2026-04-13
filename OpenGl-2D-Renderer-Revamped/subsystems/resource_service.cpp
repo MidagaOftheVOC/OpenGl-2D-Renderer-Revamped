@@ -154,25 +154,25 @@ void ResourceService::LoadDefaultVariables() {
 
 	//	This is terrible, but it's supposed to represent just a skin from the first sprite sheet loaded in the special UI batch for the UI manager
 	//	and the first 9 sprites defined inside it.
-	PaneSkin skin;
-	skin.m_Name = "default";
-	SpriteInformation SIarray[] = {
-		{0, 0},
-		{0, 1},
-		{0, 2},
-		{0, 3},
-		{0, 6},
-		{0, 7},
+	//PaneSkin skin;
+	//skin.name = "default";
+	//SpriteInformation SIarray[] = {
+	//	{0, 0},
+	//	{0, 1},
+	//	{0, 2},
+	//	{0, 3},
+	//	{0, 6},
+	//	{0, 7},
 
-		{0, 4},
-		{0, 5},
+	//	{0, 4},
+	//	{0, 5},
 
-		{0, 8}
-	};
+	//	{0, 8}
+	//};
 
-	memcpy(skin.m_SIArray, SIarray, 9 * sizeof(SpriteInformation));
-
-	AddSkin(skin);
+	//memcpy(skin.instanceArray, SIarray, 9 * sizeof(SpriteInformation));
+	DEBUG_LOG("Default pane skin is missing.");
+	//AddSkin(skin);
 
 	m_UIBatch.InitialiseBuffers();
 	m_UIBatch.AddSheetToBatch(GetSpriteSheetByName(c_SpecialUISheetName));
@@ -186,7 +186,7 @@ const PaneSkin* ResourceService::GetSkinByName(
 	size_t len = m_PaneSkins.size();
 	for (size_t i = 0; i < len; i++) {
 		if (
-			strcmp(_name, m_PaneSkins[i].m_Name.c_str()) == 0
+			strcmp(_name, m_PaneSkins[i].name.c_str()) == 0
 			) {
 			return &m_PaneSkins[i];
 		}

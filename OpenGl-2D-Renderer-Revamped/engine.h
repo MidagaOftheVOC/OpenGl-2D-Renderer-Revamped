@@ -58,6 +58,9 @@ public:
 		PreInit();
 	}
 
+	Engine2D(Engine2D& other) = delete;
+	Engine2D& operator=(const Engine2D&) = delete;
+
 	void Init();
 
 	void ExecuteFrame(

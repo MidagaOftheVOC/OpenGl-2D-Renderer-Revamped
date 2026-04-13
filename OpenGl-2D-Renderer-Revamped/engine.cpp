@@ -1,5 +1,4 @@
 ﻿#include "engine.h"
-#include <ranges>
 
 void Engine2D::PreInit() {
 	if (!GLFWInitialisation()) {
@@ -17,14 +16,14 @@ void Engine2D::PreInit() {
 	m_InputController = InputController(m_MainWindowContext);
 
 	m_ResourceService = ResourceService(m_MainWindowContext);
+
 }
 
 void Engine2D::Init() {
 	m_Renderer.SetInputController(&m_InputController);
 
-	m_UIManager.SetRenderer(&m_Renderer);
-	m_UIManager.SetPaneFactory(&m_PaneFactory);
-	m_UIManager.SetDistributionBounds(1, 2);
+	m_UIManager.Init(&m_ResourceService, &m_InputController);
+	m_UIManager.SetZSpaceDistribution(1, 2);
 
 	m_InputController.SetTrackedKeystatesBitmask(
 		InputController::c_ArrowTrackBit |
@@ -74,7 +73,7 @@ void Engine2D::QueueFreebatchesToRenderer(
 ) {
 	size_t CommCount = gameLoopRetVal.RenderCommands.size();
 
-	float nearZ = GetUIManager().GetFurthestReservedZ();
+	float nearZ = GetUIManager().GetFurtherZBound();
 	float farZ = GetRenderer().GetFarZCoord();
 
 	float range = farZ - nearZ;
@@ -107,55 +106,6 @@ void Engine2D::ExecuteFrame(
 	using Clock = std::chrono::steady_clock;
 	auto start = Clock::now();
 
-	/*
-	plan:
-
-	Idea 1: Spam a bunch of sprites to avoid repeating and bleeding. One more variable has been added to the global sprite.
-	+	Easy to implement.
-	+	Make the rotation a union which includes the raw Z coord and don't use it elsewhere. 
-	-	Heavier on memory and performance.
-
-	Req for UI:
-	Rendering of UI elements must happen somewhere inside the UI manager.
-	The UI manager must own 
-		-all Window objects
-			-where the order will be read as the windows' ordering, with the first in the array being the closest to the screen
-		-a special array of widgets, which will act independantly. 
-			-This will allow for windowless buttons, so like general menus or special UI which is always rendered at the lowest level, furthest from us
-	UI manager must interpret the most recent GameInput object from InputController and signal if UI has taken over keyboard or mouse input.
-	UI manager must interpret input and trigger the appropriate actions.
-
-	New Window and Widgets.
-	Window will represent a logical group of Widgets.
-	Windows will have unique 32-bit IDs.
-	Windows will maintain a position, relative to the screen, but won't have dimensions.
-	A window is clicked, when one of its widgets is clicked.
-	When a window is clicked, it moves closest to us.
-	A window's position is moved when the mouse is HELD and moved, while on a Rect widget.
-	A window must have one Rect widget in it's widget array.
-	A window must be able to hold an OnClose() function
-
-	Widgets will represent the graphical components of a window.
-	Widgets may themselves be composed of other widgets, an example would be a Button being comprised of a Rect and Label.
-
-
-	
-	Plan for UI rework:
-	UI manager will have the following dependancies: [ InpuController, Renderer, ResourceService ]
-	
-
-
-
-	Low prio:
-	We should probably check if the Camera type var works as it should inside the renderer and how moving it affects the screen.
-	Should probably make the input for the lambda be just a non-const Engine* and pass this. The user can set their own names for ptrs to subsystems
-	*/
-
-	/*
-	MAKE SEPARATE FACTORIES FOR EACH TYPE THAT NEEDS FACTORIES
-	(and make them depend on res service)
-	*/
-
 	glfwPollEvents();
 
 	m_InputController.CaptureKeystates();
@@ -168,11 +118,12 @@ void Engine2D::ExecuteFrame(
 
 	gameLoop(m_ElapsedTimeSeconds, m_InputController.ExposeGameInput(), StoredRenderCommands);
 
-	//	Also, we must allow for other things to be queued for drawing.	//<<< no idea what this means
+	//	Also, we must allow for other types to be queued for drawing.
 	QueueFreebatchesToRenderer(StoredRenderCommands);
 
 	//	TODO:	decode the Z value
-	m_Renderer.Draw(GetResourceService().GetUIBatch(), 0, 0, 1, nullptr);
+	DEBUG_LOG("UIBatch rendering is commented out.");
+	//m_Renderer.Draw(GetResourceService().GetUIBatch(), 0, 0, 1, nullptr);
 
 	m_Renderer.ExecuteDraws();
 
@@ -180,3 +131,52 @@ void Engine2D::ExecuteFrame(
 
 	m_ElapsedTimeSeconds = std::chrono::duration<float>(end - start).count();
 }
+
+/*
+plan:
+
+Idea 1: Spam a bunch of sprites to avoid repeating and bleeding. One more variable has been added to the global sprite.
++	Easy to implement.
++	Make the rotation a union which includes the raw Z coord and don't use it elsewhere.
+-	Heavier on memory and performance.
+
+Req for UI:
+Rendering of UI elements must happen somewhere inside the UI manager.
+The UI manager must own
+	-all Window objects
+		-where the order will be read as the windows' ordering, with the first in the array being the closest to the screen
+	-a special array of widgets, which will act independantly.
+		-This will allow for windowless buttons, so like general menus or special UI which is always rendered at the lowest level, furthest from us
+UI manager must interpret the most recent GameInput object from InputController and signal if UI has taken over keyboard or mouse input.
+UI manager must interpret input and trigger the appropriate actions.
+
+New Window and Widgets.
+Window will represent a logical group of Widgets.
+Windows will have unique 32-bit IDs.
+Windows will maintain a position, relative to the screen, but won't have dimensions.
+A window is clicked, when one of its widgets is clicked.
+When a window is clicked, it moves closest to us.
+A window's position is moved when the mouse is HELD and moved, while on a Rect widget.
+A window must have one Rect widget in it's widget array.
+A window must be able to hold an OnClose() function
+
+Widgets will represent the graphical components of a window.
+Widgets may themselves be composed of other widgets, an example would be a Button being comprised of a Rect and Label.
+
+
+
+Plan for UI rework:
+UI manager will have the following dependancies: [ InpuController, Renderer, ResourceService ]
+
+
+
+
+Low prio:
+We should probably check if the Camera type var works as it should inside the renderer and how moving it affects the screen.
+Should probably make the input for the lambda be just a non-const Engine* and pass this. The user can set their own names for ptrs to subsystems
+*/
+
+/*
+MAKE SEPARATE FACTORIES FOR EACH TYPE THAT NEEDS FACTORIES
+(and make them depend on res service)
+*/

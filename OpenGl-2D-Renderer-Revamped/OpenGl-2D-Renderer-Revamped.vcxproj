@@ -154,6 +154,7 @@
     <ClCompile Include="components\ui\primitives\types\label.h" />
     <ClCompile Include="components\ui\primitives\types\primitives.cpp" />
     <ClCompile Include="components\ui\text.cpp" />
+    <ClCompile Include="components\ui\widget\widgets.cpp" />
     <ClCompile Include="subsystems\ui_manager.cpp" />
     <ClCompile Include="components\ui\window.cpp" />
     <ClCompile Include="components\uniform\uniform_data.cpp" />
@@ -178,6 +179,7 @@
     <ClInclude Include="components\shader.h" />
     <ClInclude Include="components\sprite_sheet.h" />
     <ClInclude Include="components\ui\font.h" />
+    <ClInclude Include="components\ui\widget\widget_interface.h" />
     <ClInclude Include="subsystems\factories\pane_factory.h" />
     <ClInclude Include="components\ui\primitives\types\button.h" />
     <ClInclude Include="components\ui\primitives\types\pane.h" />

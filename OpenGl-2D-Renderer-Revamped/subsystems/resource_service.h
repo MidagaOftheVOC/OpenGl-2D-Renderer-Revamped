@@ -5,7 +5,7 @@
 #include "../components/shader.h"
 #include "../components/sprite_sheet.h"
 #include "../components/ui/font.h"
-#include "../components/ui/primitives/types/pane.h"
+#include "../components/ui/widget/widget_interface.h"
 
 struct ShaderLoadingParameters {
 	const std::string m_ShaderName;

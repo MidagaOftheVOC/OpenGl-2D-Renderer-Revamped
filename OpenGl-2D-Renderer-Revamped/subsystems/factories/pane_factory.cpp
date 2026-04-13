@@ -15,7 +15,7 @@ Pane PaneFactory::CreatePane(
 	Pane self({ _width, _height }, _cornerLength);
 	const PaneSkin* Skin = GetResService()->GetSkinByName(_skinName);
 
-	self.SetSpriteInformation(Skin->m_SIArray);
+	//self.SetSpriteInformation(Skin->m_SIArray);
 
 	return self;
 }

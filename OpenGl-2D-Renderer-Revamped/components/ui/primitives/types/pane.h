@@ -4,33 +4,9 @@
 #include "../ui_primitive.h"
 
 
-/*
 
-Pane:
-Graphical primitive which must represetn a rectangle split in 9 segments.
 
-+-+----------+-+
-|0|    4     |1|
-+-+----------+-+
-| |          | |
-|6|    8     |7|
-| |          | |
-+-+----------+-+
-|2|    5     |3|
-+-+----------+-+
 
-Corners of the pane are squares.
-Middle and centrail borders are rectangles.
-In total:
--4 unique shapes
--3 unique lengths
-
-*/
-
-struct PaneSkin {
-	std::string m_Name;
-	SpriteInformation m_SIArray[9];
-};
 
 struct Pane : public UI_Primitive {
 private:
