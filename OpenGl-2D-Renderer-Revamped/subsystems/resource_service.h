@@ -110,7 +110,7 @@ public:
 
 public:
 
-	void AddSkin(
+	void AddBgSkin(
 		const PaneSkin& _skin
 	);
 

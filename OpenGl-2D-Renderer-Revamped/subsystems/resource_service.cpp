@@ -152,27 +152,29 @@ void ResourceService::LoadDefaultVariables() {
 	m_DefaultTextOptions.m_Font = &m_DefaultFont;
 
 
-	//	This is terrible, but it's supposed to represent just a skin from the first sprite sheet loaded in the special UI batch for the UI manager
-	//	and the first 9 sprites defined inside it.
-	//PaneSkin skin;
-	//skin.name = "default";
-	//SpriteInformation SIarray[] = {
-	//	{0, 0},
-	//	{0, 1},
-	//	{0, 2},
-	//	{0, 3},
-	//	{0, 6},
-	//	{0, 7},
+	/*
+	struct PaneSkin {
+		int cornerLengthPx = 0;
+		std::string name;
+		SpriteInstance instanceArray[9];
+	};
+	*/
 
-	//	{0, 4},
-	//	{0, 5},
+	PaneSkin defSkin;
+	defSkin.cornerLengthPx = 20;
+	defSkin.name = "default";
+	for (int i = 0; i < 9; i++) {
+		SpriteInstance si;
+		si.dimensions.x = 20;
+		si.dimensions.y = 20;
 
-	//	{0, 8}
-	//};
+		si.SpriteInfo = SpriteInformation(0, i);
 
-	//memcpy(skin.instanceArray, SIarray, 9 * sizeof(SpriteInformation));
+		defSkin.instanceArray[i] = si;
+	}
+
 	DEBUG_LOG("Default pane skin is missing.");
-	//AddSkin(skin);
+	AddBgSkin(defSkin);
 
 	m_UIBatch.InitialiseBuffers();
 	m_UIBatch.AddSheetToBatch(GetSpriteSheetByName(c_SpecialUISheetName));
@@ -195,7 +197,7 @@ const PaneSkin* ResourceService::GetSkinByName(
 	return nullptr;
 }
 
-void ResourceService::AddSkin(
+void ResourceService::AddBgSkin(
 	const PaneSkin& _skin
 ) {
 	m_PaneSkins.emplace_back(_skin);

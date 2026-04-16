@@ -1,4 +1,6 @@
 ﻿#include "engine.h"
+#include "components/ui/widget/widgets/label.h"
+#include "components/ui/widget/widgets/window.h"
 
 #include <print>
 
@@ -7,17 +9,17 @@ int main(int argc, char** argv) {
 	Engine2D eng(1600, 900, "nog", false);
 	auto& resService = eng.GetResourceService();
 
-	resService.UploadShaderParameters("test\\res\\text.shader",					resService.c_SpecialTextShaderName);
-	resService.UploadShaderParameters("test\\res\\batch.shader",				"batch");		//	WITH UBO
-	resService.UploadShaderParameters("test\\res\\batch_ui.shader",				"batch_ui");
+	resService.UploadShaderParameters("test\\res\\text.shader",			resService.c_SpecialTextShaderName);
+	resService.UploadShaderParameters("test\\res\\batch.shader",		"batch");		//	WITH UBO
+	resService.UploadShaderParameters("test\\res\\batch_ui.shader",		"batch_ui");
 
 
-	resService.UploadSpriteSheetParameters("test\\res\\cyrillic.png",			"test_font",						resService.c_SpecialTextShaderName, 9, 9);
+	resService.UploadSpriteSheetParameters("test\\res\\cyrillic.png",	"test_font",						resService.c_SpecialTextShaderName, 9, 9);
 	
-	resService.UploadSpriteSheetParameters("test\\res\\test.cfg",				"testSheet",						"batch",							0, 0);
-	resService.UploadSpriteSheetParameters("test\\res\\panda.cfg",				"pandaSheet",						"batch",							0, 0);
+	resService.UploadSpriteSheetParameters("test\\res\\test.cfg",		"testSheet",						"batch",							0, 0);
+	resService.UploadSpriteSheetParameters("test\\res\\panda.cfg",		"pandaSheet",						"batch",							0, 0);
 	
-	resService.UploadSpriteSheetParameters("test\\res\\gui.cfg",				resService.c_SpecialUISheetName,	"batch_ui",							0, 0);
+	resService.UploadSpriteSheetParameters("test\\res\\gui.cfg",		resService.c_SpecialUISheetName,	"batch_ui",							0, 0);
 
 	eng.Init();
 	
@@ -70,31 +72,3 @@ int main(int argc, char** argv) {
 
 	return 0;
 }
-
-
-/*
-	InputController& input = eng.GetInputController();
-
-	UIManager& ui = eng.GetUIManager();
-
-	Window win  = ui.CreateWindow({	600, 300 },	20);
-	Window win2 = ui.CreateWindow({ 400, 200 }, 20);
-
-
-	Label label = Label(eng.GetTextFactory().GenerateText(U"здрасти"), {50, 80});
-	Label label2 = Label(eng.GetTextFactory().GenerateText(U"бепче"), { 50, 100 });
-
-	Button btn = Button({ 30, 30 }, eng.GetTextFactory().GenerateText(U"бутон"), eng.GetPaneFactory().CreatePane(100, 50, 2, "default"), []() {
-		std::cout << "Natisnat buton\n";
-	});
-
-	win.AttachWidget(&label);
-	win.AttachWidget(&label2);
-	win2.AttachWidget(&btn);
-
-	ID winID1 = ui.AddWindow(win);
-	ID winID2 = ui.AddWindow(win2);
-
-	ui.OpenWindow(winID1, 200, 200);
-	ui.OpenWindow(winID2, 560, 250);
-*/

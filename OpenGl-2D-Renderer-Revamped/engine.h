@@ -41,8 +41,6 @@ private:
 
 public:
 
-	Engine2D() {}
-
 	Engine2D(
 		int screenWidth,
 		int screenHeight,
@@ -53,7 +51,8 @@ public:
 		m_ScreenWidth(screenWidth),
 		m_ScreenHeight(screenHeight),
 		m_WindowTitle(windowTitle),
-		m_Fullscreen(fullscreen)
+		m_Fullscreen(fullscreen),
+		m_UIManager(glm::vec2(screenWidth, screenHeight))
 	{
 		PreInit();
 	}

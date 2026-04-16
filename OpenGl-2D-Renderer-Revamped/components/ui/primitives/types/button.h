@@ -1,7 +1,6 @@
 #pragma once
 #include "../ui_primitive.h"
 #include "pane.h"
-#include "label.h"
 
 #include <functional>
 

@@ -2,13 +2,42 @@
 
 #include "../../common/common.h"
 
-#include "widget/widget_interface.h"
+#include "../widget_interface.h"
 
-class Window {
-	
-	ID m_ID = 0;
+class Window : public WidgetCompositionInterface{
+
+	ID m_ID;
 
 public:
+
+	Window(
+		ID id,
+		glm::vec2 offsetRelToParent,
+		glm::vec2 dimensions,
+		const PaneSkin* bgSkin
+	) :
+		m_ID(id),
+		WidgetCompositionInterface(
+			offsetRelToParent,
+			dimensions,
+			bgSkin,
+			true
+		)
+	{}
+
+private:
+
+	//	Should be empty, since Window has no graphical data beyond a background
+	virtual void SendOwnRenderData(
+		Batch* uiBatch,
+		std::vector<TextWithZLayer>& texts,
+		glm::vec2 absoluteParentOrigin,
+		float z
+	) const override {}
+
+public:
+
+	virtual ~Window() {}
 
 };
 

@@ -21,6 +21,8 @@ void Engine2D::PreInit() {
 
 void Engine2D::Init() {
 	m_Renderer.SetInputController(&m_InputController);
+	m_Renderer.SetResService(&m_ResourceService);
+	m_Renderer.Init();
 
 	m_UIManager.Init(&m_ResourceService, &m_InputController);
 	m_UIManager.SetZSpaceDistribution(1, 2);
@@ -31,7 +33,6 @@ void Engine2D::Init() {
 		InputController::c_SpecialTrackBit
 	);
 
-	m_Renderer.Init();
 	m_ResourceService.StartLoadingProcess();
 
 	m_TextFactory = TextFactory(&GetResourceService());
@@ -92,7 +93,7 @@ void Engine2D::QueueFreebatchesToRenderer(
 				break;
 			}
 			case RenderCommand::Type::TextDC: {
-				GetRenderer().Draw(rCommand.Text, 0, 0, calculatedZcoord, nullptr);
+				GetRenderer().Draw(rCommand.Text, 90, 90, calculatedZcoord, nullptr);
 				break;
 			}
 		}
@@ -135,38 +136,15 @@ void Engine2D::ExecuteFrame(
 /*
 plan:
 
-Idea 1: Spam a bunch of sprites to avoid repeating and bleeding. One more variable has been added to the global sprite.
-+	Easy to implement.
-+	Make the rotation a union which includes the raw Z coord and don't use it elsewhere.
--	Heavier on memory and performance.
+UI needs further testing once Texts are done.
 
-Req for UI:
-Rendering of UI elements must happen somewhere inside the UI manager.
-The UI manager must own
-	-all Window objects
-		-where the order will be read as the windows' ordering, with the first in the array being the closest to the screen
-	-a special array of widgets, which will act independantly.
-		-This will allow for windowless buttons, so like general menus or special UI which is always rendered at the lowest level, furthest from us
-UI manager must interpret the most recent GameInput object from InputController and signal if UI has taken over keyboard or mouse input.
-UI manager must interpret input and trigger the appropriate actions.
+Text rework:
+Texts will stop being their own specialised batches. They'll continue to own the UTF string inside them, as well as a
+TextOptions member variable, but won't hold their own OpenGL objects. 
 
-New Window and Widgets.
-Window will represent a logical group of Widgets.
-Windows will have unique 32-bit IDs.
-Windows will maintain a position, relative to the screen, but won't have dimensions.
-A window is clicked, when one of its widgets is clicked.
-When a window is clicked, it moves closest to us.
-A window's position is moved when the mouse is HELD and moved, while on a Rect widget.
-A window must have one Rect widget in it's widget array.
-A window must be able to hold an OnClose() function
-
-Widgets will represent the graphical components of a window.
-Widgets may themselves be composed of other widgets, an example would be a Button being comprised of a Rect and Label.
-
-
-
-Plan for UI rework:
-UI manager will have the following dependancies: [ InpuController, Renderer, ResourceService ]
+Fonts must have:
+pointer/ref to the spritesheet which coresponds to them
+a bunch of data regarding the glyphs like Advance array
 
 
 

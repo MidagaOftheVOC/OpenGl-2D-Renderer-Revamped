@@ -7,6 +7,8 @@
 #include "../text.h"
 #include "../../batch_types/base_batch.h"
 
+//	TODO: this can be expanded to maintain an array of instances for the normal and pressed version of buttons or something
+//	We operate under the assumption all UI-related data is in one sheet
 struct PaneSkin {
 	int cornerLengthPx = 0;
 	std::string name;
@@ -50,6 +52,8 @@ private:
 
 	const PaneSkin* m_BackgroundSkin = nullptr;
 
+	std::vector<FullSprite> m_BackgroundGeometry;
+
 private:
 
 	std::function<void()> m_OnClickFn;
@@ -67,12 +71,38 @@ public:
 	WidgetCompositionInterface() {}
 
 	WidgetCompositionInterface(
+		glm::vec2 offsetRelToParent,
+		glm::vec2 dimensions,
 		const PaneSkin* background,
-		bool isInteractable = true
+		bool isInteractable
 	) :
-		m_IsInteractable(isInteractable),
-		m_BackgroundSkin(background)
-	{}
+		m_PositionRelToParent(offsetRelToParent),
+		m_Dimensions(dimensions),
+		m_BackgroundSkin(background),
+		m_IsInteractable(isInteractable)
+	{
+		if (background) {
+			CalculateBackgroundGeometry();
+		}
+	}
+
+	WidgetCompositionInterface(
+		float xOffsetRelToParent,
+		float yOffsetRelToParent,
+		float xDimension,
+		float yDimension,
+		const PaneSkin* background,
+		bool isInteractable
+	) :
+		m_PositionRelToParent(xOffsetRelToParent, yOffsetRelToParent),
+		m_Dimensions(xDimension, yDimension),
+		m_BackgroundSkin(background),
+		m_IsInteractable(isInteractable)
+	{
+		if (background) {
+			CalculateBackgroundGeometry();
+		}
+	}
 
 	WidgetCompositionInterface(WidgetCompositionInterface& other) = delete;
 	WidgetCompositionInterface& operator=(const WidgetCompositionInterface& other) = delete;
@@ -103,13 +133,21 @@ private:
 	virtual void SendOwnRenderData(
 		Batch* uiBatch,
 		std::vector<TextWithZLayer>& texts,
-		glm::vec2 absolutePosition,
+		glm::vec2 absoluteCurrentWidgetOrigin,
 		float z
-	) = 0;
+	) const = 0;
 
-	void SendStandardisedRenderData(
-		Batch* uiBatch
+	//	As it stands, backgrounds will probably be shared by widgets who are groups of others only.
+	//	Widgets like "Label" probably won't work properly if BG data is sent.
+	void SendBackgroundRenderData(
+		Batch* uiBatch,
+		glm::vec2 absoluteCurrentWidgetOrigin,
+		float z
 	);
+
+	void CalculateBackgroundGeometry();
+
+protected:
 
 	glm::vec2 GetAbsolutePosition(
 		glm::vec2 parentOrigin
@@ -124,5 +162,7 @@ public:
 public:
 
 	const std::vector<std::unique_ptr<WidgetCompositionInterface>>& GetWidgets() { return m_WidgetComposition; }
+
+	virtual ~WidgetCompositionInterface() {}
 
 };

@@ -1,6 +1,5 @@
 #include "../ui_primitive.h"
 #include "pane.h"
-#include "label.h"
 #include "button.h"
 
 //	TODO:	MUST ADD COMMON DESTROY() FUNCTION TO INTERFACE
@@ -198,30 +197,6 @@ void Pane::OnDimensionChange() {
 }
 
 
-
-//		--			LABEL			--		//
-
-Label::Label(
-	const Text& _textObject,
-	glm::vec2 _offsetFromWindowCorner
-) {
-	m_PositionRelativeToWindow = _offsetFromWindowCorner;
-	m_TextObject = _textObject;
-}
-
-
-void Label::PostAttachment(WidgetWindowData _data) {
-	m_TextObject.SetWordWrapBound(_data.WindowDimensions.y - m_PositionRelativeToWindow.y);
-}
-
-
-void Label::AppendWidgetTextDataToArray(
-	std::vector<Text>& OUT_textArraysToRender
-) {
-	OUT_textArraysToRender.push_back(m_TextObject);
-}
-
-
 //		--			BUTTON			--		//
 
 Button::Button(
@@ -241,8 +216,6 @@ Button::Button(
 	float textCenterX = abs( label.GetLineLengthsArray()[0] - dimensions.x ) / 2;
 	float textCenterY = abs( 20 - dimensions.y ) / 2;
 
-	Label* labelWidget = new Label(label, glm::vec2(textCenterX, textCenterY));
-	m_WidgetComposition.emplace_back(labelWidget);
 }
 
 void Button::OnClick() {

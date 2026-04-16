@@ -7,7 +7,7 @@
 #include "batch_instance_primitives.h"
 
 
-constexpr size_t MIN_SPRITES_WITH_RESERVED_MEM = 50;
+static constexpr size_t MIN_SPRITES_WITH_RESERVED_MEM = 50;
 
 class Batch {
 	

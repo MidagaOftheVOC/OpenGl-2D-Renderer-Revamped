@@ -66,8 +66,8 @@ void Renderer2D::RenderText() {
 		const TextDrawCall& DrawCall = Arr[i];
 
 		const Text* TextObject = DrawCall.GetTextPointer();
-		const SpriteSheet* SheetObject = TextObject->GetFont()->GetFontSheet();
 		const TextOptions& OptionsObject = TextObject->GetTextOptions();
+		const SpriteSheet* SheetObject = OptionsObject.m_Font->GetFontSheet();
 
 		const size_t CharInstances = TextObject->GetCharCount();
 		const int LineBreakCount = static_cast<int>(TextObject->GetLineBreakCount());
@@ -81,6 +81,7 @@ void Renderer2D::RenderText() {
 			glBindTexture(GL_TEXTURE_2D, SheetObject->GetTextureBufferID());
 			GetQuad().BufferTexCoords(SheetObject);
 			Shader.SetInt("u_Texture", 0);
+			CheckGLErrors();
 
 			LastUsedSpriteSheet = SheetObject;
 		}
@@ -90,14 +91,22 @@ void Renderer2D::RenderText() {
 		//	Sprite indices are passed already, so we need sprite dimensions sent
 		DEBUG_ASSERT(SheetObject != nullptr, "Sprite sheet from font [%s] is null.", TextObject->GetFont()->GetName().c_str());
 		Shader.SetVec2("u_SpriteDimensions", SheetObject->GetSpriteDimensions());
+		CheckGLErrors();
 		Shader.SetInt("u_RowSpriteCount", SheetObject->GetSheetRowSpriteCount());
+		CheckGLErrors();
 
 		Shader.SetInt("u_LineBreakCount", LineBreakCount);
+		CheckGLErrors();
 		Shader.SetIntArray("u_LineBreakArray", TextObject->GetLineBreakArray().data(), LineBreakCount);
+		CheckGLErrors();
 		Shader.SetFloatArray("u_LineLengths", TextObject->GetLineLengthsArray().data(), LineBreakCount);
+		CheckGLErrors();
 
 		Shader.SetFloat("u_CharacterHeight", OptionsObject.m_CharacterHeight);
+		CheckGLErrors();
+
 		Shader.SetFloat("u_SpacingBetweenLines", OptionsObject.m_SpacingBetweenLines);
+		CheckGLErrors();
 
 
 		Shader.ApplyUniforms(DrawCall.GetAppliedUniforms());
@@ -146,8 +155,7 @@ void Renderer2D::RenderBatches() {
 #ifdef DEBUG__CODE
 		CheckGLErrors();
 #endif
-
-		glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr, InstanceCount);
+		glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr, static_cast<int>(InstanceCount));
 
 #ifdef DEBUG__CODE
 		CheckGLErrors();

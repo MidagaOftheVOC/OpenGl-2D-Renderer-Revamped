@@ -54,4 +54,17 @@ struct FullSprite {
 	xyPair position;		//	float *2;
 	float rotation = 0.f;	//	float
 	float z = 0.f;			//	float
+
+	FullSprite() {}
+
+	FullSprite(
+		const SpriteInstance& newInstance,
+		float x, float y
+	) :
+		instance(newInstance)
+	{
+		position.x = x;
+		position.y = y;
+	}
+
 };
