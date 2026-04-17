@@ -5,7 +5,6 @@
 #include "subsystems/ui_manager.h"
 
 #include "subsystems/factories/text_factory.h"
-#include "subsystems/factories/pane_factory.h"
 
 class Engine2D {
 
@@ -20,8 +19,6 @@ class Engine2D {
 private:
 
 	TextFactory m_TextFactory;
-
-	PaneFactory m_PaneFactory;
 
 private:
 
@@ -81,7 +78,6 @@ public:
 	bool IsRunning() const { return !glfwWindowShouldClose(m_MainWindowContext); }
 
 	const TextFactory& GetTextFactory() { return m_TextFactory; }
-	const PaneFactory& GetPaneFactory() { return m_PaneFactory; }
 
 	ResourceService& GetResourceService() { return m_ResourceService; }
 	InputController& GetInputController() { return m_InputController; }

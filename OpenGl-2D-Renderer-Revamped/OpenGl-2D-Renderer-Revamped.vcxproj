@@ -151,7 +151,6 @@
     <ClCompile Include="components\shader.cpp" />
     <ClCompile Include="components\sprite_sheet.cpp" />
     <ClCompile Include="components\ui\font.cpp" />
-    <ClCompile Include="components\ui\primitives\types\primitives.cpp" />
     <ClCompile Include="components\ui\text.cpp" />
     <ClCompile Include="components\ui\widget\widgets\label.cpp" />
     <ClCompile Include="components\ui\widget\widget_interface.cpp" />
@@ -161,7 +160,6 @@
     <ClCompile Include="engine.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="subsystems\factories\factory_interface.h" />
-    <ClCompile Include="subsystems\factories\pane_factory.cpp" />
     <ClCompile Include="subsystems\factories\text_factory.cpp" />
     <ClCompile Include="subsystems\main_renderer.cpp" />
     <ClCompile Include="subsystems\resource_service.cpp" />
@@ -182,12 +180,8 @@
     <ClInclude Include="components\ui\font.h" />
     <ClInclude Include="components\ui\widget\widgets\label.h" />
     <ClInclude Include="components\ui\widget\widget_interface.h" />
-    <ClInclude Include="subsystems\factories\pane_factory.h" />
-    <ClInclude Include="components\ui\primitives\types\button.h" />
-    <ClInclude Include="components\ui\primitives\types\pane.h" />
     <ClInclude Include="components\ui\text.h" />
     <ClInclude Include="subsystems\ui_manager.h" />
-    <ClInclude Include="components\ui\primitives\ui_primitive.h" />
     <ClInclude Include="components\ui\widget\widgets\window.h" />
     <ClInclude Include="components\uniform\uniform_data.h" />
     <ClInclude Include="engine.h" />

@@ -12,8 +12,8 @@ Text TextFactory::GenerateText(
 		localOptions = *_textOptions;
 	}
 	
-	if (!localOptions.m_Font) {
-		localOptions.m_Font = &GetResService()->GetDefaultFont();
+	if (!localOptions.font) {
+		localOptions.font = &GetResService()->GetDefaultFont();
 	}
 
 	return Text(_string, localOptions);

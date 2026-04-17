@@ -135,7 +135,6 @@ int SpriteSheet::DetermineLoadingMethodFromGivenPath(
 	const std::string& _pathFromConstructor
 ) {
 	std::string FileExtention;
-
 	
 	int FirstDotFromEndToBeginning = static_cast<int>(_pathFromConstructor.rfind('.'));
 	int FirstSlash = static_cast<int>(_pathFromConstructor.rfind('/'));
@@ -202,8 +201,6 @@ void SpriteSheet::ConfigurationPairLoadingMethod(
 
 	LoadImageInTexture(TextureImagePath.c_str());
 
-
-
 	std::string AssetName;
 	AssetName.resize(40, '\0');
 	while (std::getline(File, Line)) {
@@ -240,7 +237,7 @@ void SpriteSheet::ConfigurationPairLoadingMethod(
 			.y = static_cast<float>(AssetHeight)
 		};
 
-		m_SpriteDimensionsPx.emplace_back(std::move(dims));
+		m_SpriteDimensionsPx.emplace_back(dims);
 	}
 }
 
@@ -259,10 +256,31 @@ void SpriteSheet::StandardImageLoadingMethod(
 
 	LoadImageInTexture(_pathFromConstructor);
 
-	//	Keep it within [0, 1]
-	m_SpriteUniformUVs.u0 = 0;	m_SpriteUniformUVs.v0 = 0;
-	m_SpriteUniformUVs.u1 = static_cast<float>(1.f / m_SpriteCountPerRow);
-	m_SpriteUniformUVs.v1 = static_cast<float>(1.f / m_SpriteCountPerCol);
+	float assetWidth = float(m_SheetWidth) / float(m_SpriteCountPerRow);
+	float assetHeight = float(m_SheetHeight) / float(m_SpriteCountPerCol);
+
+	auto WriteData = [this, assetWidth, assetHeight](int x, int y) {
+		float xTotalOffsetPx = x * assetWidth;
+		float yTotalOffsetPx = y * assetHeight;
+
+		m_UVregionsFromConfigFile.emplace_back(
+			xTotalOffsetPx / float(m_SheetWidth),
+			yTotalOffsetPx / float(m_SheetHeight),
+			(xTotalOffsetPx + assetWidth) / float(m_SheetWidth),
+			(yTotalOffsetPx + assetHeight) / float(m_SheetHeight)
+		);
+
+		xyDimensions dims = {
+			.x = assetWidth,
+			.y = assetHeight
+		};
+
+		m_SpriteDimensionsPx.emplace_back(dims);
+	};
+
+	for (int y = 0; y < m_SpriteCountPerCol; y++)
+		for (int x = 0; x < m_SpriteCountPerRow; x++)
+			WriteData(x, y);
 }
 
 
@@ -470,6 +488,52 @@ void SpriteSheet::GetSpriteInstances(
 		"Sprite sheet [%s] has data corruption. Sprite names and sprite pxDimension arrays have differing sizes.", m_SheetName.c_str());
 	
 	OUT_spriteArray.clear();
+
+	for (size_t i = 0; i < m_SpriteDimensionsPx.size(); i++) {
+		SpriteInstance si;
+		si.SpriteInfo = SpriteInformation(sheetIndex, i);
+		si.dimensions.x = m_SpriteDimensionsPx[i].x;
+		si.dimensions.y = m_SpriteDimensionsPx[i].y;
+
+		OUT_spriteArray.emplace_back(std::move(si));
+	}
+}
+
+SpriteInstance SpriteSheet::GetSpriteInstanceByIndex(
+	size_t index,
+	size_t sheetIndex
+) const {
+	DEBUG_ASSERT(index < m_SpriteDimensionsPx.size(),
+		"SpriteSheet [%s]: index out of bounds (%zu / %zu)",
+		m_SheetName.c_str(), index, m_SpriteDimensionsPx.size());
+
+	SpriteInstance si;
+	si.SpriteInfo = SpriteInformation(sheetIndex, index);
+	si.dimensions.x = m_SpriteDimensionsPx[index].x;
+	si.dimensions.y = m_SpriteDimensionsPx[index].y;
+
+	return si;
+}
+
+SpriteInstance SpriteSheet::GetSpriteInstanceByGrid(
+	size_t x,
+	size_t y,
+	size_t sheetIndex
+) const {
+	DEBUG_ASSERT(x < m_SpriteCountPerRow && y < m_SpriteCountPerCol,
+		"SpriteSheet [%s]: grid coords out of bounds (%zu, %zu)",
+		m_SheetName.c_str(), x, y);
+
+	size_t index = y * m_SpriteCountPerRow + x;
+	return GetSpriteInstanceByIndex(index, sheetIndex);
+}
+
+void SpriteSheet::GetAllSpriteInstances(
+	std::vector<SpriteInstance>& OUT_spriteArray,
+	size_t sheetIndex
+) const {
+	OUT_spriteArray.clear();
+	OUT_spriteArray.reserve(m_SpriteDimensionsPx.size());
 
 	for (size_t i = 0; i < m_SpriteDimensionsPx.size(); i++) {
 		SpriteInstance si;

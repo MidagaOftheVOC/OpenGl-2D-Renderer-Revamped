@@ -34,10 +34,7 @@ struct RenderCommand {
 		TextDC
 	} StoredValueType;
 
-	union {
-		Batch* Batch;
-		Text* Text;
-	};
+	Batch* Batch;
 
 	unsigned int IssuedZLayer;
 };
@@ -46,7 +43,6 @@ struct GameLoopReturnType {
 	std::vector<RenderCommand> RenderCommands;
 
 	void QueueRenderObject(Batch* ptr, unsigned int zLayer);
-	void QueueRenderObject(Text* ptr, unsigned int zLayer);
 };
 
 struct DrawCall {
@@ -71,7 +67,7 @@ public:
 
 //		BATCHES
 
-struct BatchDrawCall : DrawCall {
+struct BatchDrawCall : public DrawCall {
 private:
 	const Batch* m_Base = nullptr;
 public:
@@ -130,8 +126,6 @@ private:	//	Structures for draw queue optimisation
 	std::vector<TextDrawCall> m_TextArray;
 
 private:	//	Methods to render queued Drawcalls
-
-	void RenderText();
 
 	void RenderBatches();
 

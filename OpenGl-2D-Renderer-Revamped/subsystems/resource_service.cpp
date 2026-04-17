@@ -140,25 +140,20 @@ void ResourceService::StartLoadingProcess() {
 }
 
 void ResourceService::LoadDefaultVariables() {
-	m_DefaultFont = Font(GetSpriteSheetByName("test_font"), "cyrillic");
+	m_DefaultFont = Font(GetSpriteSheetByName("cyrillic"), "cyrillic");
 
-	unsigned short off[] = { 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, };
+	std::vector<unsigned short> offsets;
+	offsets.resize(80, 20);
 	m_DefaultFont.Init(
-		U"абвгдежзийклмнопрстуфхцчшщъьюяѝ .,+-!?;:&><#/",
-		off,
-		50
+		U"АБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЬЮЯЍ",
+		U"абвгдежзийклмнопрстуфхцчшщъьюяѝ",
+		U".,+-!?;:&><#/",
+		offsets.data(),
+		80
 	);
 
-	m_DefaultTextOptions.m_Font = &m_DefaultFont;
+	m_DefaultTextOptions.font = &m_DefaultFont;
 
-
-	/*
-	struct PaneSkin {
-		int cornerLengthPx = 0;
-		std::string name;
-		SpriteInstance instanceArray[9];
-	};
-	*/
 
 	PaneSkin defSkin;
 	defSkin.cornerLengthPx = 20;

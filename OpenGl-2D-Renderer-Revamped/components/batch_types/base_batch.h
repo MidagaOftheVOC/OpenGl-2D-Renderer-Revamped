@@ -5,7 +5,7 @@
 
 
 #include "batch_instance_primitives.h"
-
+#include "../ui/text.h"
 
 static constexpr size_t MIN_SPRITES_WITH_RESERVED_MEM = 50;
 
@@ -72,6 +72,12 @@ public:
 		float y,
 		float rotation = 0.f,
 		float z = 0.f
+	);
+
+	void DrawText(
+		const Text* textObject,
+		float x,
+		float y
 	);
 
 	void DrawSprite(

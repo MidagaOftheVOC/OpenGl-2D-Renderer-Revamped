@@ -102,7 +102,6 @@ const SpriteSheet* Batch::GetSpecialSheetPointer() const {
 	return m_SpriteSheets[0];
 }
 
-//	TODO: optimise this to store total offset for each batch to save on vertex shader loops and calculations
 void Batch::BufferUBOs() {
 	if (m_SpriteSheets.empty()) return;
 
@@ -122,7 +121,6 @@ void Batch::BufferUBOs() {
 	}
 
 	glBufferData(GL_UNIFORM_BUFFER, UVs.size() * sizeof(UVRegion), UVs.data(), GL_STATIC_DRAW);
-
 
 	//	for the (std140) buffer alignment requiring 16 byte blocks within the shader code
 	//	Note: UVRegion doesn't need it since it's already 4 * float = 16 bytes
@@ -215,6 +213,22 @@ int Batch::SendSpriteDataToGPU() {
 	CheckGLErrors();
 #endif
 	return retVal;
+}
+
+void Batch::DrawText(
+	const Text* textObject,
+	float x,
+	float y
+) {
+	auto textGeometry = textObject->GetTextGeometry();
+
+	for (auto&& sprite : textGeometry) {
+		DrawSprite(
+			sprite.instance,
+			sprite.position.x + x,
+			sprite.position.y + y
+		);
+	}
 }
 
 void Batch::IncreaseBufferMemoryTo(

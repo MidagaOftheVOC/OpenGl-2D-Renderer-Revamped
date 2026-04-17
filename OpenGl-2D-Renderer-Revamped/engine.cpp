@@ -36,7 +36,6 @@ void Engine2D::Init() {
 	m_ResourceService.StartLoadingProcess();
 
 	m_TextFactory = TextFactory(&GetResourceService());
-	m_PaneFactory = PaneFactory(&GetResourceService());
 }
 
 bool Engine2D::GLFWInitialisation() {
@@ -92,10 +91,6 @@ void Engine2D::QueueFreebatchesToRenderer(
 				GetRenderer().Draw(rCommand.Batch, 0, 0, calculatedZcoord, nullptr);
 				break;
 			}
-			case RenderCommand::Type::TextDC: {
-				GetRenderer().Draw(rCommand.Text, 90, 90, calculatedZcoord, nullptr);
-				break;
-			}
 		}
 	}
 }
@@ -123,8 +118,8 @@ void Engine2D::ExecuteFrame(
 	QueueFreebatchesToRenderer(StoredRenderCommands);
 
 	//	TODO:	decode the Z value
-	DEBUG_LOG("UIBatch rendering is commented out.");
-	//m_Renderer.Draw(GetResourceService().GetUIBatch(), 0, 0, 1, nullptr);
+	//DEBUG_LOG("UIBatch rendering is commented out.");
+	m_Renderer.Draw(GetResourceService().GetUIBatch(), 0, 0, 1, nullptr);
 
 	m_Renderer.ExecuteDraws();
 

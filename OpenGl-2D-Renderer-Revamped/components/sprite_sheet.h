@@ -1,6 +1,5 @@
 #pragma once
 
-
 /*
 * Regular Sprite sheet where each sprite is next to each other
 * and all have uniform dimensions
@@ -12,7 +11,6 @@
 * 
 */
 
-
 #define _CRT_SECURE_NO_WARNINGS
 
 #include <string>
@@ -20,7 +18,6 @@
 
 #include "../common/common.h"
 #include "batch_types/batch_instance_primitives.h"
-
 #include "shader.h"
 
 
@@ -41,7 +38,6 @@ struct alignas(float) UVRegion {
 
 };
 
-
 enum class SpriteSheetType {
 	NotInitialised = 0,
 	IndexBased,
@@ -50,17 +46,14 @@ enum class SpriteSheetType {
 	ErrorLoading
 };
 
-
 struct TextureParamsDataStruct {
 	int S_WrapMode = -1;
 	int T_WrapMode = -1;
 };
 
-
 struct xyDimensions {
 	float x = 0, y = 0;
 };
-
 
 class SpriteSheet {
 
@@ -177,6 +170,22 @@ public:
 
 
 	void GetSpriteInstances(
+		std::vector<SpriteInstance>& OUT_spriteArray,
+		size_t sheetIndex
+	) const;
+
+	SpriteInstance GetSpriteInstanceByIndex(
+		size_t index,
+		size_t sheetIndex
+	) const;
+
+	SpriteInstance GetSpriteInstanceByGrid(
+		size_t x,
+		size_t y,
+		size_t sheetIndex
+	) const;
+
+	void GetAllSpriteInstances(
 		std::vector<SpriteInstance>& OUT_spriteArray,
 		size_t sheetIndex
 	) const;

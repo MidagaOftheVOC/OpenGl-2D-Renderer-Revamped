@@ -1,88 +1,69 @@
 #shader vertex
-#version 330 core
-layout(location = 0) in vec2	b_Positions;
-layout(location = 1) in vec2	b_TextureUVs;
-layout(location = 2) in uint	b_Offsets;
-layout(location = 3) in int		b_SpriteIndices;
+#version 430 core
 
-//	standard uniforms
+layout(location = 0) in vec2 b_VertexBuffer;
+layout(location = 1) in vec2 b_TexBuffer;
+layout(location = 2) in uint b_SpriteInformationBuffer;
+
+layout(location = 4) in vec2 b_PositionsRelativeToModel;
+layout(location = 5) in vec2 b_QuadDimensions;
+
+layout(std140, binding = 0) uniform ubo_UVRegions {
+    vec4 u_UVRegions[512];
+};
+
+layout(std140, binding = 1) uniform ubo_SheetOffsets {
+    int u_SheetOffsets[32];
+};
+
 uniform mat4 u_Model;
 uniform mat4 u_View;
 uniform mat4 u_Projection;
 
-//	indexing for instances
-uniform vec2 u_SpriteDimensions;
-uniform int u_RowSpriteCount;
-
-
-//	for line breaks
-uniform int u_LineBreakCount;
-uniform int u_LineBreakArray[64];
-
-//uniform float u_LineMaximumLength;
-uniform float u_LineLengths[64];
-
-
-//	other text variables
-uniform float u_CharacterHeight;
-uniform float u_SpacingBetweenLines;
-
-out vec2 v_TexCoord;
+out vec2 v_TextureVertex;
+flat out uint v_SheetIndex;
 
 void main(){
-	
-	vec2 SpriteCoords = vec2(
-		b_SpriteIndices % u_RowSpriteCount,
-		b_SpriteIndices / u_RowSpriteCount
-	);
-	v_TexCoord = b_TextureUVs + SpriteCoords * u_SpriteDimensions;
 
+    // Texture region mapping
+    uint SheetIndex  = uint( b_SpriteInformationBuffer >> 11 );
+    uint SpriteIndex = uint( b_SpriteInformationBuffer & 0x07FFu );
+    v_SheetIndex = SheetIndex;
 
-	vec2 OffsetPosition = b_Positions;
+    vec4 UVRegion = u_UVRegions[u_SheetOffsets[SheetIndex] + SpriteIndex];
 
-	if( u_LineBreakCount > 0)
-	{
-		int PassedLineCount = 0;
-		float TotalOffsetForCharacter = 0.f;
-		for(int i = 0; i < u_LineBreakCount; i ++){
-			if( gl_InstanceID >= u_LineBreakArray[i]){
-				PassedLineCount ++;
-				TotalOffsetForCharacter += u_LineLengths[i];
-			}
-		}
+    vec2 MinUV = UVRegion.xy;
+    vec2 MaxUV = UVRegion.zw;
 
-		OffsetPosition.x += float(b_Offsets) - TotalOffsetForCharacter;
-		OffsetPosition.y += ( u_CharacterHeight + u_SpacingBetweenLines) * PassedLineCount;
+    v_TextureVertex = mix(MinUV, MaxUV, b_TexBuffer);
 
-	}
-	else
-		OffsetPosition += vec2(float(b_Offsets), 0.f);
+    //  Rotation calculation
+    vec2 NormalisedVertexBuffer = b_VertexBuffer / 100.f;
+    vec2 LocalVertex = b_QuadDimensions * NormalisedVertexBuffer;
 
-	gl_Position = u_Projection * u_View * u_Model * vec4(OffsetPosition, 0.f, 1.f);
+    vec2 WorldPosition = LocalVertex + b_PositionsRelativeToModel + b_QuadDimensions / 2.0;
+
+	gl_Position = u_Projection * u_View * u_Model * vec4(WorldPosition, 0.f, 1.f);
 }
 
 #shader fragment
-#version 330 core
+#version 430 core
 
+in vec2 v_TextureVertex;
+flat in uint v_SheetIndex;
 
-in vec2 v_TexCoord;
-
-uniform sampler2D u_Texture;
-
+uniform sampler2D u_Textures[32];
 
 out vec4 FragColour;
 
 void main(){
+	vec4 frag = texture(u_Textures[v_SheetIndex], v_TextureVertex);
+    if(
+        frag.x > 0.9f &&
+        frag.y > 0.9f &&
+        frag.z > 0.9f
+    ) 
+        discard;
 
-	vec4 texel = texture(u_Texture, v_TexCoord);
-
-	if(
-		texel.x > 0.9 &&
-		texel.y > 0.9 &&
-		texel.z > 0.9
-	){
-		discard;
-	}
-
-	FragColour = vec4(1.f, 1.f, 1.f, 1.f);
+    FragColour = vec4(1.f, 1.f, 1.f, 1.f);
 }

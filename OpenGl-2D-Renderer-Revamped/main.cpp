@@ -4,9 +4,24 @@
 
 #include <print>
 
+static Text nice = Text();
+static Engine2D* epicEngine = nullptr;
+
+void hui(GLFWwindow* win, unsigned int ch) {
+	std::println("Read letter with CHAR CODE: {}", ch);
+	std::println("Was this a backspace: {}", epicEngine->GetInputController().ExposeGameInput().IsPressed(GLFW_KEY_BACKSPACE));
+
+	if (epicEngine->GetInputController().ExposeGameInput().IsPressed(GLFW_KEY_BACKSPACE)) {
+		nice.RemoveLastCharacter();
+	}
+
+	nice.AppendCharacter(ch);
+}
+
 int main(int argc, char** argv) {
 
 	Engine2D eng(1600, 900, "nog", false);
+	epicEngine = &eng;
 	auto& resService = eng.GetResourceService();
 
 	resService.UploadShaderParameters("test\\res\\text.shader",			resService.c_SpecialTextShaderName);
@@ -14,7 +29,7 @@ int main(int argc, char** argv) {
 	resService.UploadShaderParameters("test\\res\\batch_ui.shader",		"batch_ui");
 
 
-	resService.UploadSpriteSheetParameters("test\\res\\cyrillic.png",	"test_font",						resService.c_SpecialTextShaderName, 9, 9);
+	resService.UploadSpriteSheetParameters("test\\res\\cyrillic.png",	"cyrillic",							resService.c_SpecialTextShaderName, 9, 9);
 	
 	resService.UploadSpriteSheetParameters("test\\res\\test.cfg",		"testSheet",						"batch",							0, 0);
 	resService.UploadSpriteSheetParameters("test\\res\\panda.cfg",		"pandaSheet",						"batch",							0, 0);
@@ -39,11 +54,30 @@ int main(int argc, char** argv) {
 
 	constexpr float oneDef = 1.f / 3.1418f;
 
+	const char32_t* string = U"абв";	//	1072, 0x430 | 1073, 0x431 ...
+
+	TextOptions options;
+	options.font = &resService.GetDefaultFont();
+
+	nice = Text(
+		U"здрасти бепце",
+		options
+	);
+
+	Batch txtBatch = Batch(INIT_OPENGL_OBJECTS);
+	txtBatch.AddSheetToBatch(resService.GetSpriteSheetByName("cyrillic"));
+	txtBatch.BufferUBOs();
+
+	glfwSetCharCallback(eng.GetRenderer().GetWinHandle(), hui);
 
 	while (eng.IsRunning()) {
 		eng.ExecuteFrame([&](float elapsedTimeSeconds, GameInput input, GameLoopReturnType& renderComms) {
 			renderComms.QueueRenderObject(&freebatch, 2);
-			std::println("FPS: {:.0f}", 1 / elapsedTimeSeconds);
+			renderComms.QueueRenderObject(&txtBatch, 1);
+
+			txtBatch.DrawText(&nice, 100, 100);
+
+			//std::println("FPS: {:.0f}", 1 / elapsedTimeSeconds);
 
 			if (input.IsHeld(GLFW_KEY_LEFT)) {
 				x -= 1;

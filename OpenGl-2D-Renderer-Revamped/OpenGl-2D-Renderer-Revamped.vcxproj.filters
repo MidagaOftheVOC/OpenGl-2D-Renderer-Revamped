@@ -57,9 +57,6 @@
     <ClCompile Include="components\batch_types\batches.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="components\ui\primitives\types\primitives.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="components\file_handler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -76,9 +73,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="subsystems\factories\factory_interface.h">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="subsystems\factories\pane_factory.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="components\ui\widget\widget_interface.cpp">
@@ -125,9 +119,6 @@
     <ClInclude Include="subsystems\ui_manager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="components\ui\primitives\ui_primitive.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="components\ui\widget\widgets\window.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -137,12 +128,6 @@
     <ClInclude Include="components\batch_types\batch_instance_primitives.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="components\ui\primitives\types\pane.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="subsystems\factories\pane_factory.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="components\file_handler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -150,9 +135,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="common\io_util.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="components\ui\primitives\types\button.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="engine.h">

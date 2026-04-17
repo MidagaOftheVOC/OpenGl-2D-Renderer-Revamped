@@ -36,94 +36,10 @@ void Renderer2D::ExecuteDraws() {
 	//	-- RENDERING STARTS --	//
 
 	RenderBatches();
-	RenderText();
-
 
 	//	-- RENDERING ENDS	--	//
 
 	glfwSwapBuffers(GetWinHandle());
-}
-
-void Renderer2D::RenderText() {
-	std::vector<TextDrawCall>& Arr = m_TextArray;
-
-	if (Arr.empty()) return;
-
-	size_t ArraySize = Arr.size();
-
-	Text::BindCommonVAO();
-
-	const Shader& Shader = GetResources()->GetTextShader();
-	Shader.UseShader();
-	Shader.SetStandardView(GetCamera().GetViewMatrix());
-	Shader.SetStandardProjection(GetCamera().GetProjectionMatrix());
-
-	//	Keep this for now, remove later when we reorganise the structures better
-	const SpriteSheet* LastUsedSpriteSheet = nullptr;
-
-	for (size_t i = 0; i < ArraySize; i++) {
-
-		const TextDrawCall& DrawCall = Arr[i];
-
-		const Text* TextObject = DrawCall.GetTextPointer();
-		const TextOptions& OptionsObject = TextObject->GetTextOptions();
-		const SpriteSheet* SheetObject = OptionsObject.m_Font->GetFontSheet();
-
-		const size_t CharInstances = TextObject->GetCharCount();
-		const int LineBreakCount = static_cast<int>(TextObject->GetLineBreakCount());
-
-		TextObject->BindUniqueBuffers();
-		
-		if( SheetObject != LastUsedSpriteSheet)
-		{
-			//	TODO: start finding alternatives to this
-			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, SheetObject->GetTextureBufferID());
-			GetQuad().BufferTexCoords(SheetObject);
-			Shader.SetInt("u_Texture", 0);
-			CheckGLErrors();
-
-			LastUsedSpriteSheet = SheetObject;
-		}
-				
-		Shader.SetStandardModel(glm::translate(glm::mat4(1.f), DrawCall.GetPositionVector()));
-
-		//	Sprite indices are passed already, so we need sprite dimensions sent
-		DEBUG_ASSERT(SheetObject != nullptr, "Sprite sheet from font [%s] is null.", TextObject->GetFont()->GetName().c_str());
-		Shader.SetVec2("u_SpriteDimensions", SheetObject->GetSpriteDimensions());
-		CheckGLErrors();
-		Shader.SetInt("u_RowSpriteCount", SheetObject->GetSheetRowSpriteCount());
-		CheckGLErrors();
-
-		Shader.SetInt("u_LineBreakCount", LineBreakCount);
-		CheckGLErrors();
-		Shader.SetIntArray("u_LineBreakArray", TextObject->GetLineBreakArray().data(), LineBreakCount);
-		CheckGLErrors();
-		Shader.SetFloatArray("u_LineLengths", TextObject->GetLineLengthsArray().data(), LineBreakCount);
-		CheckGLErrors();
-
-		Shader.SetFloat("u_CharacterHeight", OptionsObject.m_CharacterHeight);
-		CheckGLErrors();
-
-		Shader.SetFloat("u_SpacingBetweenLines", OptionsObject.m_SpacingBetweenLines);
-		CheckGLErrors();
-
-
-		Shader.ApplyUniforms(DrawCall.GetAppliedUniforms());
-
-#ifdef DEBUG__CODE
-		CheckGLErrors();
-#endif
-
-		glDrawElementsInstanced(GL_TRIANGLES, 6Ui64, GL_UNSIGNED_SHORT, nullptr, static_cast<int>(CharInstances));
-
-#ifdef DEBUG__CODE
-		CheckGLErrors();
-#endif
-	}
-
-	m_TextArray.clear();
-	Text::UnbindCommonVAO();
 }
 
 void Renderer2D::RenderBatches() {
@@ -197,9 +113,6 @@ void Renderer2D::PerClassVAOinitialisationFunction() {
 	SpriteInformation::InitialiseMasks();
 
 	Batch::InitialiseCommonVAO();
-
-	Font::InitialiseCommonFontSizeVBO(20);
-	Text::InitialiseCommonVAO();
 }
 
 Renderer2D::Renderer2D(
@@ -216,22 +129,6 @@ Renderer2D::Renderer2D(
 	m_Fullscreen(_fullscreen)
 {}
 
-void Renderer2D::Draw(
-	const Text* _text,
-	float _xPosition,
-	float _yPosition,
-	float _zLayer,
-	UniformDataVector* _uniformArray
-) {
-	m_TextArray.emplace_back(
-		_text,
-		_xPosition,
-		_yPosition,
-		_zLayer,
-		_uniformArray
-	);
-}
-
 const bool Renderer2D::HasClicked() {
 	return m_HasClickedThisFrame;
 }
@@ -241,15 +138,6 @@ void GameLoopReturnType::QueueRenderObject(Batch* ptr, unsigned int zLayer){
 	RenderCommand self;
 	self.Batch = ptr;
 	self.StoredValueType = RenderCommand::Type::FBatchDC;
-	self.IssuedZLayer = zLayer;
-
-	RenderCommands.emplace_back(self);
-}
-
-void GameLoopReturnType::QueueRenderObject(Text* ptr, unsigned int zLayer){
-	RenderCommand self;
-	self.Text = ptr;
-	self.StoredValueType = RenderCommand::Type::TextDC;
 	self.IssuedZLayer = zLayer;
 
 	RenderCommands.emplace_back(self);
