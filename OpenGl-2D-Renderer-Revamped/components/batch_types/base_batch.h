@@ -77,7 +77,8 @@ public:
 	void DrawText(
 		const Text* textObject,
 		float x,
-		float y
+		float y,
+		float z
 	);
 
 	void DrawSprite(

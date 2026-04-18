@@ -42,7 +42,7 @@ void main(){
     vec2 NormalisedVertexBuffer = b_VertexBuffer / 100.f;
     vec2 LocalVertex = b_QuadDimensions * NormalisedVertexBuffer;
 
-    vec2 WorldPosition = LocalVertex + b_PositionsRelativeToModel + b_QuadDimensions / 2.0;
+    vec2 WorldPosition = LocalVertex + b_PositionsRelativeToModel;
 
 	gl_Position = u_Projection * u_View * u_Model * vec4(WorldPosition, b_Zcoord, 1.f);
 }

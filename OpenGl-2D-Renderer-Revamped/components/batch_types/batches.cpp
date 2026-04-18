@@ -218,7 +218,8 @@ int Batch::SendSpriteDataToGPU() {
 void Batch::DrawText(
 	const Text* textObject,
 	float x,
-	float y
+	float y,
+	float z
 ) {
 	auto textGeometry = textObject->GetTextGeometry();
 
@@ -226,7 +227,8 @@ void Batch::DrawText(
 		DrawSprite(
 			sprite.instance,
 			sprite.position.x + x,
-			sprite.position.y + y
+			sprite.position.y + y,
+			z
 		);
 	}
 }

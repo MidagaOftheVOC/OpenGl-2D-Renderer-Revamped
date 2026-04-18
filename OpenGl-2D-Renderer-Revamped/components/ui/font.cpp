@@ -35,13 +35,12 @@ void Font::Init(
         m_GlyphIdentifier.push_back(c);
 
     memcpy(m_GlyphAdvances, glyphOffsets, glyphCount * sizeof(unsigned short));
-    m_GlyphCount = glyphCount;
 }
 
 unsigned short Font::GetCharacterAdvance(
     char32_t ch
 ) const {
-    for (int i = 0; i < m_GlyphCount; i++)
+    for (int i = 0; i < m_GlyphIdentifier.size(); i++)
     {
         if (m_GlyphIdentifier[i] == ch)
             return m_GlyphAdvances[i];
@@ -53,13 +52,14 @@ unsigned short Font::GetCharacterAdvance(
 size_t Font::GetGlyphIndex(
     char32_t ch
 ) const {
-    for (int i = 0; i < m_GlyphCount; i++)
+    for (int i = 0; i < m_GlyphIdentifier.size(); i++)
     {
         if (m_GlyphIdentifier[i] == ch)
             return i;
     }
 
-    return MAXIMUM_LETTERS * 2;
+    //  TODO: HACKFIX until cyrillic font fixes this
+    return MAXIMUM_LETTERS * 2 - 2;
 }
 
 GlyphSprite Font::GetGlyph(

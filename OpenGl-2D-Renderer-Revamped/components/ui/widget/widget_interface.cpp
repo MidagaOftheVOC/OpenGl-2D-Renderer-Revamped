@@ -2,7 +2,7 @@
 
 void WidgetCompositionInterface::RenderWidgetTree(
 	Batch* uiBatch,
-	std::vector<TextWithZLayer>& texts,
+	Batch* texts,
 	glm::vec2 absoluteParentOrigin,
 	float baseZLayer,
 	float zSubstep,
@@ -89,17 +89,17 @@ void WidgetCompositionInterface::CalculateBackgroundGeometry() {
 
 	//	Vertical sides
 	glm::vec2 leftVerticalSideOrigin = glm::vec2(0, cornerLength);
-	SpriteInstance leftVerticalSideInstance = m_BackgroundSkin->instanceArray[6];
+	SpriteInstance leftVerticalSideInstance = m_BackgroundSkin->instanceArray[4];
 
 	glm::vec2 rightVerticalSideOrigin = glm::vec2(cornerLength + horizontalSpaceToFill, cornerLength);
-	SpriteInstance rightVerticalSideInstance = m_BackgroundSkin->instanceArray[7];
+	SpriteInstance rightVerticalSideInstance = m_BackgroundSkin->instanceArray[5];
 
 	//	Horizontal sides
 	glm::vec2 upperHorizontalSideOrigin = glm::vec2(cornerLength, 0);
-	SpriteInstance upperHorizontalSideInstance = m_BackgroundSkin->instanceArray[4];
+	SpriteInstance upperHorizontalSideInstance = m_BackgroundSkin->instanceArray[6];
 
 	glm::vec2 lowerHorizontalSideOrigin = glm::vec2(cornerLength, cornerLength + verticalSpaceToFill);
-	SpriteInstance lowerHorizontalSideInstance = m_BackgroundSkin->instanceArray[5];
+	SpriteInstance lowerHorizontalSideInstance = m_BackgroundSkin->instanceArray[7];
 
 	auto FillSpace = [this](const SpriteInstance& instance, glm::vec2 origin, float totalDistance, bool repeatAboutXaxis) {
 		if (totalDistance < 0.f) return;

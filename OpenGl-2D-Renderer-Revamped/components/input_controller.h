@@ -23,11 +23,17 @@ struct GameInput {
 	bool m_KeyboardCaptured = false;
 	bool m_MouseCaptured = false;
 
+	std::u32string m_BufferedUtfInput;
+
 public:
 
 	void SetKeyboardCapturedFlag();
 	void SetMouseCapturedFlag();
 	void ClearCapturedFlags();
+	
+	void SetBufferedInput(
+		std::u32string&& MOV_string
+	);
 
 public:
 
@@ -58,6 +64,8 @@ public:
 
 	glm::vec2 GetMousePosition() const;
 
+	std::u32string& GetUtfInput() { return m_BufferedUtfInput; }
+
 public:
 
 	bool AccessBitmask(
@@ -80,6 +88,8 @@ public:
 class InputController {
 
 	GLFWwindow* m_MainWinHandle = nullptr;
+
+	static std::u32string m_BufferedUtfInput;
 
 	GameInput m_Input;
 	
@@ -152,9 +162,16 @@ public:
 		TrackingBit _trackingBitmask
 	);
 
+	static void AddCharacterToUtfInput(
+		char32_t ch
+	);
+
+	static void ClearBufferedUtfInput();
+
 public:
 
 	GameInput& ExposeGameInput() { return m_Input; }
+
 
 #if DEBUG__CODE
 

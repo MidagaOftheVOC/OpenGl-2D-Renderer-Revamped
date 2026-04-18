@@ -30,12 +30,14 @@ private:
 	//	Should be empty, since Window has no graphical data beyond a background
 	virtual void SendOwnRenderData(
 		Batch* uiBatch,
-		std::vector<TextWithZLayer>& texts,
+		Batch* texts,
 		glm::vec2 absoluteParentOrigin,
 		float z
 	) const override {}
 
 public:
+
+	ID GetID() const { return m_ID; }
 
 	virtual ~Window() {}
 

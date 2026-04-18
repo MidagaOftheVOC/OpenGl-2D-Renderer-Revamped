@@ -19,7 +19,6 @@ class Font {
 	//	images we'll be rendering
 	const SpriteSheet* m_SpriteSheet = nullptr;
 
-	int m_GlyphCount = 0;
 	unsigned short m_GlyphAdvances[MAXIMUM_GLYPHS_PER_FONT] = { 0 };
 
 	std::u32string m_GlyphIdentifier;
@@ -60,7 +59,6 @@ private:
 public:
 
 	const std::string& GetName() const { return m_FontName; }
-	int GetGlyphCount() const { return m_GlyphCount; }
 	const SpriteSheet* GetFontSheet() const { return m_SpriteSheet; }
 
 };

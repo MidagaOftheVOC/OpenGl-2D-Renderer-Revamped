@@ -63,6 +63,7 @@ private:
 	Font m_DefaultFont;
 	TextOptions m_DefaultTextOptions;
 	Batch m_UIBatch;
+	Batch m_UITextBatch;
 
 public:
 
@@ -134,6 +135,7 @@ public:
 	const Font& GetDefaultFont() const { return m_DefaultFont; }
 	
 	Batch* GetUIBatch() { return &m_UIBatch; }
+	Batch* GetUITextBatch() { return &m_UITextBatch; }
 
 public:
 

@@ -2,9 +2,9 @@
 
 void Label::SendOwnRenderData(
 	Batch* uiBatch,
-	std::vector<TextWithZLayer>& texts,
+	Batch* texts,
 	glm::vec2 absoluteCurrentWidgetOrigin,
 	float z
 ) const {
-	texts.emplace_back(&m_StoredText, absoluteCurrentWidgetOrigin.x, absoluteCurrentWidgetOrigin.y, z);
+	texts->DrawText(&m_StoredText, absoluteCurrentWidgetOrigin.x, absoluteCurrentWidgetOrigin.y, z);
 }

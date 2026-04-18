@@ -116,7 +116,7 @@ public:
 	//	Note: design is smooth except here
 	void RenderWidgetTree(
 		Batch* uiBatch,
-		std::vector<TextWithZLayer>& texts,
+		Batch* texts,
 		glm::vec2 absoluteParentOrigin,
 		float baseZLayer,
 		float zSubstep,
@@ -132,7 +132,7 @@ private:
 
 	virtual void SendOwnRenderData(
 		Batch* uiBatch,
-		std::vector<TextWithZLayer>& texts,
+		Batch* texts,
 		glm::vec2 absoluteCurrentWidgetOrigin,
 		float z
 	) const = 0;

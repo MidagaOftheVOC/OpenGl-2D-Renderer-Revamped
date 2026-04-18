@@ -174,6 +174,10 @@ void ResourceService::LoadDefaultVariables() {
 	m_UIBatch.InitialiseBuffers();
 	m_UIBatch.AddSheetToBatch(GetSpriteSheetByName(c_SpecialUISheetName));
 	m_UIBatch.BufferUBOs();
+
+	m_UITextBatch.InitialiseBuffers();
+	m_UITextBatch.AddSheetToBatch(GetSpriteSheetByName("cyrillic"));
+	m_UITextBatch.BufferUBOs();
 }
 
 const PaneSkin* ResourceService::GetSkinByName(

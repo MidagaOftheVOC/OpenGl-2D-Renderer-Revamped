@@ -70,7 +70,7 @@ public:
 
 	virtual void SendOwnRenderData(
 		Batch* uiBatch,
-		std::vector<TextWithZLayer>& texts,
+		Batch* texts,
 		glm::vec2 absoluteCurrentWidgetOrigin,
 		float z
 	) const {}

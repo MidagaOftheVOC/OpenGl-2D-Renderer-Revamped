@@ -1,5 +1,9 @@
 ﻿#include "engine.h"
 
+#include "components/ui/widget/widgets/window.h"
+
+#include <print>
+
 void Engine2D::PreInit() {
 	if (!GLFWInitialisation()) {
 		throw new std::exception("idk bro");
@@ -16,7 +20,6 @@ void Engine2D::PreInit() {
 	m_InputController = InputController(m_MainWindowContext);
 
 	m_ResourceService = ResourceService(m_MainWindowContext);
-
 }
 
 void Engine2D::Init() {
@@ -105,6 +108,14 @@ void Engine2D::ExecuteFrame(
 	glfwPollEvents();
 
 	m_InputController.CaptureKeystates();
+	float x, y;
+	m_InputController.ExposeGameInput().GetMousePosition(x, y);
+
+	auto targetClicked = GetUIManager().DetectClick(glm::vec2(0, 0), glm::vec2(x, y));
+
+	if (auto a = dynamic_cast<Window*>(targetClicked)) {
+		std::println("Window clicked: {}", a->GetID());
+	}
 
 	//	This shuold probably be moved to InputController and add it as dependancy for UI manager
 	//CapturedStates uiCapturedStates = m_UIManager.InterpretInput(m_InputController.ExposeGameInput());
@@ -116,10 +127,21 @@ void Engine2D::ExecuteFrame(
 
 	//	Also, we must allow for other types to be queued for drawing.
 	QueueFreebatchesToRenderer(StoredRenderCommands);
+	auto uiBatch = GetResourceService().GetUIBatch();
+	auto textBatch = GetResourceService().GetUITextBatch();
+	auto &ui = GetUIManager();
+	float TotalDistributionSpace = 2.f - 1.f;
+	float winCount = ui.GetWidgets().size();	//	UI Manager will maintain a hack-window, invisible window which will hold all 'permanent' UI
+	float substep = TotalDistributionSpace / (winCount * 4 + 1);	//	4 is maximum widget composition debt where UI manager is 0, and windows are 1
+	int subPositionCurrent = 1;
 
-	//	TODO:	decode the Z value
-	//DEBUG_LOG("UIBatch rendering is commented out.");
-	m_Renderer.Draw(GetResourceService().GetUIBatch(), 0, 0, 1, nullptr);
+	for (auto&& win : ui.GetWidgets()) {
+		win->RenderWidgetTree(uiBatch, textBatch, glm::vec2(0, 0), 2.f, -substep, subPositionCurrent);
+		subPositionCurrent += 4;
+	}
+
+	m_Renderer.Draw(GetResourceService().GetUIBatch(), 0, 0, 2, nullptr);
+	m_Renderer.Draw(GetResourceService().GetUITextBatch(), 0, 0, 2, nullptr);
 
 	m_Renderer.ExecuteDraws();
 

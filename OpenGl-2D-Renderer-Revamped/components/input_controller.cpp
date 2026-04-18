@@ -1,5 +1,14 @@
 #include "input_controller.h"
 
+std::u32string InputController::m_BufferedUtfInput;
+
+void UtfCharacterInputCallback(GLFWwindow* win, unsigned int input) {
+	InputController::AddCharacterToUtfInput(input);
+}
+
+
+
+
 bool GameInput::AccessBitmask(
 	int _index,
 	const std::bitset<MAXIMUM_BITSET_SIZE> &_bitmask
@@ -120,14 +129,33 @@ glm::vec2 GameInput::GetMousePosition() const {
 	return glm::vec2(m_xMouseCoord, m_yMouseCoord);
 }
 
+void GameInput::SetBufferedInput(
+	std::u32string&& MOV_string
+) {
+	m_BufferedUtfInput = std::move(MOV_string);
+}
 
 
+
+
+
+void InputController::AddCharacterToUtfInput(
+	char32_t ch
+) {
+	m_BufferedUtfInput += ch;
+}
+
+void InputController::ClearBufferedUtfInput() {
+	m_BufferedUtfInput.clear();
+}
 
 InputController::InputController(
 	GLFWwindow* _mainWindowHandle
 ) :
 	m_MainWinHandle(_mainWindowHandle)
-{}
+{
+	glfwSetCharCallback(m_MainWinHandle, UtfCharacterInputCallback);
+}
 
 void InputController::CaptureKeystates() {
 
@@ -155,6 +183,13 @@ void InputController::CaptureKeystates() {
 
 	m_Input.m_xMouseCoord = static_cast<float>(xMousePosition);
 	m_Input.m_yMouseCoord = static_cast<float>(yMousePosition);
+
+	if (m_BufferedUtfInput.size() != 0) {
+		int a = 1;
+		a++;
+	}
+
+	m_Input.SetBufferedInput(std::move(m_BufferedUtfInput));
 }
 
 void InputController::SetTrackedKeystatesBitmask(

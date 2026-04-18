@@ -26,7 +26,7 @@ private:
 
 	virtual void SendOwnRenderData(
 		Batch* uiBatch,
-		std::vector<TextWithZLayer>& texts,
+		Batch* texts,
 		glm::vec2 absoluteParentOrigin,
 		float z
 	) const override;
