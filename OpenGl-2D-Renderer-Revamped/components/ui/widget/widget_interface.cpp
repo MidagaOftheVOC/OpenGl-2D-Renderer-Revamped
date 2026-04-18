@@ -5,10 +5,9 @@ void WidgetCompositionInterface::RenderWidgetTree(
 	Batch* texts,
 	glm::vec2 absoluteParentOrigin,
 	float baseZLayer,
-	float zSubstep,
-	float zSubposition
+	float zSubstep
 ) {
-	float currentZLayer = baseZLayer + zSubposition * zSubstep;
+	float currentZLayer = baseZLayer;
 	glm::vec2 absoluteCurrentWidgetOrigin = GetAbsolutePosition(absoluteParentOrigin);
 	
 	SendBackgroundRenderData(uiBatch, absoluteCurrentWidgetOrigin, currentZLayer);
@@ -19,9 +18,8 @@ void WidgetCompositionInterface::RenderWidgetTree(
 			uiBatch, 
 			texts, 
 			absoluteCurrentWidgetOrigin, 
-			baseZLayer, 
-			zSubstep, 
-			zSubposition + 1
+			baseZLayer + zSubstep,
+			zSubstep
 		);
 	}
 }

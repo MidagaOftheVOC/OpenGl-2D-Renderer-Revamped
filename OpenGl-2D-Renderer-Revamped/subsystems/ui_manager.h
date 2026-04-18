@@ -7,7 +7,7 @@
 
 #include "../components/batch_types/base_batch.h"
 
-#include "../components/ui/widget/widget_interface.h"
+#include "../components/ui/widget/widgets/window.h"
 
 struct CapturedStates {
 	bool capturedMouse = false;
@@ -28,6 +28,8 @@ private:
 	float m_FurtherBoundOfZLayerDistribution = 0.f;
 
 	ID m_UniqueWindowIDCounter = 0;
+
+	std::vector<std::unique_ptr<Window>> m_OpenedWindows;
 
 public:
 
@@ -53,6 +55,14 @@ public:
 
 	UIManager(const UIManager&) = delete;
 	UIManager& operator=(const UIManager&) = delete;
+
+	void InterpretInput();
+
+	void OpenWindow(std::unique_ptr<Window> window);
+
+	void MoveWindowToFront(ID windowID);
+
+	void CloseWindow(ID windowID);
 
 private:
 

@@ -7,6 +7,7 @@ layout(location = 2) in uint b_SpriteInformationBuffer;
 
 layout(location = 4) in vec2 b_PositionsRelativeToModel;
 layout(location = 5) in vec2 b_QuadDimensions;
+layout(location = 6) in float b_Zcoord;
 
 layout(std140, binding = 0) uniform ubo_UVRegions {
     vec4 u_UVRegions[512];
@@ -43,7 +44,7 @@ void main(){
 
     vec2 WorldPosition = LocalVertex + b_PositionsRelativeToModel + b_QuadDimensions / 2.0;
 
-	gl_Position = u_Projection * u_View * u_Model * vec4(WorldPosition, 0.f, 1.f);
+	gl_Position = u_Projection * u_View * u_Model * vec4(WorldPosition, b_Zcoord, 1.f);
 }
 
 #shader fragment

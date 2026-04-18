@@ -43,12 +43,12 @@ int main(int argc, char** argv) {
 	options.font = &resService.GetDefaultFont();
 
 	Text txt = Text(
-		U"тест 1",
+		U"едно",
 		options
 	);
 
 	Text txt2 = Text(
-		U"тест 2",
+		U"две",
 		options
 	);
 
@@ -58,14 +58,14 @@ int main(int argc, char** argv) {
 	window.get()->AddChild(std::move(label));
 
 
-	auto label2 = std::make_unique<Label>(txt, glm::vec2(10.f, 10.f), glm::vec2(200, 50));
+	auto label2 = std::make_unique<Label>(txt2, glm::vec2(10.f, 10.f), glm::vec2(200, 50));
 	auto window2 = std::make_unique<Window>(2, glm::vec2(450, 380), glm::vec2(300, 200), resService.GetSkinByName("default"));
 
 	window2.get()->AddChild(std::move(label2));
 
 
-	eng.GetUIManager().AddChild(std::move(window));
-	eng.GetUIManager().AddChild(std::move(window2));
+	eng.GetUIManager().OpenWindow(std::move(window));
+	eng.GetUIManager().OpenWindow(std::move(window2));
 
 	while (eng.IsRunning()) {
 		eng.ExecuteFrame([&](float elapsedTimeSeconds, GameInput input, GameLoopReturnType& renderComms) {

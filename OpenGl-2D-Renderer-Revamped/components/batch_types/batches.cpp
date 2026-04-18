@@ -228,6 +228,7 @@ void Batch::DrawText(
 			sprite.instance,
 			sprite.position.x + x,
 			sprite.position.y + y,
+			0.f,
 			z
 		);
 	}

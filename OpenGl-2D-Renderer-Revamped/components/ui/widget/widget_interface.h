@@ -119,8 +119,7 @@ public:
 		Batch* texts,
 		glm::vec2 absoluteParentOrigin,
 		float baseZLayer,
-		float zSubstep,
-		float zSubposition
+		float zSubstep
 	);
 
 	WidgetCompositionInterface* DetectClick(
