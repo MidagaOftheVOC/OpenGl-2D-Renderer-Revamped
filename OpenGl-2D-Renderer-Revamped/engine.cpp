@@ -109,13 +109,9 @@ void Engine2D::ExecuteFrame(
 
 	m_InputController.CaptureKeystates();
 
+	//	TODO:	input widget missing, focus field missing, keyboard is not captured and utf input not processed,
+	//			need event/comm system to connect widgets with the manager so they can issue self-closing commands for example
 	m_UIManager.InterpretInput();
-
-	//	This shuold probably be moved to InputController and add it as dependancy for UI manager
-	//CapturedStates uiCapturedStates = m_UIManager.InterpretInput(m_InputController.ExposeGameInput());
-	//
-	//if (uiCapturedStates.capturedKeyboard)	m_InputController.ExposeGameInput().SetKeyboardCapturedFlag();
-	//if (uiCapturedStates.capturedMouse)		m_InputController.ExposeGameInput().SetMouseCapturedFlag();
 
 	gameLoop(m_ElapsedTimeSeconds, m_InputController.ExposeGameInput(), StoredRenderCommands);
 
@@ -134,17 +130,6 @@ void Engine2D::ExecuteFrame(
 
 /*
 plan:
-
-UI needs further testing once Texts are done.
-
-Text rework:
-Texts will stop being their own specialised batches. They'll continue to own the UTF string inside them, as well as a
-TextOptions member variable, but won't hold their own OpenGL objects. 
-
-Fonts must have:
-pointer/ref to the spritesheet which coresponds to them
-a bunch of data regarding the glyphs like Advance array
-
 
 
 

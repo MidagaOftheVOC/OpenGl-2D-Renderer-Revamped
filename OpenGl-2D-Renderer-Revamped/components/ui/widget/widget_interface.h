@@ -113,6 +113,10 @@ public:
 		m_WidgetComposition.push_back(std::move(widget));
 	}
 
+	void ApplyChangeToPosition(
+		glm::vec2 change
+	);
+
 	//	Note: design is smooth except here
 	void RenderWidgetTree(
 		Batch* uiBatch,

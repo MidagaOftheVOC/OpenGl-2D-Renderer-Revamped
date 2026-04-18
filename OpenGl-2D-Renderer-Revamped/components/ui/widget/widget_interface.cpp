@@ -201,3 +201,9 @@ void WidgetCompositionInterface::SetOnClick(
 ) {
 	m_OnClickFn = fn;
 }
+
+void WidgetCompositionInterface::ApplyChangeToPosition(
+	glm::vec2 change
+) {
+	m_PositionRelToParent += change;
+}

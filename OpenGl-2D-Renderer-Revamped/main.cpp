@@ -56,13 +56,18 @@ int main(int argc, char** argv) {
 	auto window = std::make_unique<Window>(1, glm::vec2(400, 400), glm::vec2(300, 200), resService.GetSkinByName("default"));
 
 	window.get()->AddChild(std::move(label));
+	window.get()->SetOnClick([]() {
+		std::println("nogg 1");
+	});
 
 
 	auto label2 = std::make_unique<Label>(txt2, glm::vec2(10.f, 10.f), glm::vec2(200, 50));
 	auto window2 = std::make_unique<Window>(2, glm::vec2(450, 380), glm::vec2(300, 200), resService.GetSkinByName("default"));
 
 	window2.get()->AddChild(std::move(label2));
-
+	window2.get()->SetOnClick([]() {
+		std::println("nogg 2");
+	});
 
 	eng.GetUIManager().OpenWindow(std::move(window));
 	eng.GetUIManager().OpenWindow(std::move(window2));

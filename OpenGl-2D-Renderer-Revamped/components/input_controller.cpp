@@ -121,12 +121,16 @@ void GameInput::GetMousePosition(
 	float& OUT_xMouseCoord,
 	float& OUT_yMouseCoord
 ) const {
-	OUT_xMouseCoord = m_xMouseCoord;
-	OUT_yMouseCoord = m_yMouseCoord;
+	OUT_xMouseCoord = m_RecentMouseCoords.x;
+	OUT_yMouseCoord = m_RecentMouseCoords.y;
 }
 
 glm::vec2 GameInput::GetMousePosition() const {
-	return glm::vec2(m_xMouseCoord, m_yMouseCoord);
+	return m_RecentMouseCoords;
+}
+
+glm::vec2 GameInput::GetMouseChange() const {
+	return m_RecentMouseCoords - m_PreviousMouseCoords;
 }
 
 void GameInput::SetBufferedInput(
@@ -181,8 +185,8 @@ void InputController::CaptureKeystates() {
 	double xMousePosition, yMousePosition;
 	glfwGetCursorPos(m_MainWinHandle, &xMousePosition, &yMousePosition);
 
-	m_Input.m_xMouseCoord = static_cast<float>(xMousePosition);
-	m_Input.m_yMouseCoord = static_cast<float>(yMousePosition);
+	m_Input.m_PreviousMouseCoords = m_Input.m_RecentMouseCoords;
+	m_Input.m_RecentMouseCoords = glm::vec2(static_cast<float>(xMousePosition), static_cast<float>(yMousePosition));
 
 	if (m_BufferedUtfInput.size() != 0) {
 		int a = 1;

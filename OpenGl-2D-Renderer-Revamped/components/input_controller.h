@@ -17,8 +17,8 @@ struct GameInput {
 	std::bitset<MAXIMUM_BITSET_SIZE> m_RecentKeystateBitmask;
 	std::bitset<MAXIMUM_BITSET_SIZE> m_PreviousKeystateBitmask;
 
-	float m_xMouseCoord = 0.f;
-	float m_yMouseCoord = 0.f;
+	glm::vec2 m_RecentMouseCoords;
+	glm::vec2 m_PreviousMouseCoords;
 
 	bool m_KeyboardCaptured = false;
 	bool m_MouseCaptured = false;
@@ -61,6 +61,8 @@ public:
 		float& OUT_xMouseCoord,
 		float& OUT_yMouseCoord
 	) const;
+
+	glm::vec2 GetMouseChange() const;
 
 	glm::vec2 GetMousePosition() const;
 
