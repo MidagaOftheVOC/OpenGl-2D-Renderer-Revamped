@@ -2,66 +2,20 @@
 
 #include "font.h"
 
-/*
-* Text is similar StrictBatch, but its texture data
-* is in a special wrapper called Font and there are 
-* a little more rules to rendering it.
-*/
-
 struct TextOptions {
-	const Font* m_Font = nullptr;
-
-	float m_LineLength = 0.f;
-	//	TODO:
-	//	Allow for upper and lower cut-off bounds, if the text is within a textbox
-	//	and is scrolled too far down or up or something
-	float m_UpperBound = 0.f;
-	float m_LowerBound = 0.f;
-
-	float m_ScaleFactor = 1.f;
-
-	float m_CharacterHeight;
-	float m_SpacingBetweenLines;
-
-	TextOptions() {}
-
-	TextOptions(
-		const Font* _font
-	) :
-		m_Font(_font)
-	{}
-
-	TextOptions(
-		const Font* _font,
-		float _charHeight,
-		float _spacingBetweenLines
-	):
-		m_CharacterHeight(_charHeight),
-		m_SpacingBetweenLines(_spacingBetweenLines),
-		m_Font(_font)
-	{}
+	const Font* font = nullptr;
+	float lineLength = 0.f;
+	float lineHeight = 20.f;
 };
 
 class Text {
 
 	std::u32string m_TextContent;
-	std::vector<unsigned short> m_OffsetsFromFirstGlyph;
-	std::vector<int> m_LineBreaks; // needs to be cast to int for uniform anyway
-	std::vector<float> m_LineLengths;
-	
-	const Font* m_Font = nullptr;
-
 	TextOptions m_TextOptions;
 
-	//	Since appending and removing from the string will take place
-	//	we need to track this for know if we can just buffer data
-	//	or allocated memori is insufficient and we need more.
-	size_t m_VBOlastReportedSize = 0;
-	//	This buffer holds pairs of unsigned shorts for each instance
-	unsigned int m_GlyphDataVBO = 0;
+	std::vector<FullSprite> m_TextGeometry;
 
-	float m_fRightWordWrapBound = 0.f;
-	int m_MaximumCharsPerLine = 0;
+	bool m_HasChanged = false;
 	
 public:
 
@@ -71,12 +25,6 @@ public:
 		const std::u32string& _string,
 		TextOptions _textOptions
 	);
-
-	//	This could be called from any random Text instance but it has to 
-	//	be called only once in total. The idea is to have the common VAO
-	//	bind `some` unique buffer, but at rendering it can be replaced
-	//	with per-instance buffers
-	static void InitialiseCommonVAO();
 
 	void UpdateTextValue(
 		std::u32string&& _stringToMove
@@ -90,58 +38,24 @@ public:
 		char32_t _char
 	);
 
-	void RemoveCharacter(
-		char32_t _char
+	void RemoveLastCharacter();
+
+	void SetLineLength(
+		float length
 	);
 
-	//	This should only be called after this class' VAO is bound
-	void BindUniqueBuffers() const;
-
-	void SetWordWrapBound(
-		float _rightBound
-	);
-
-	void SetMaximumCharactersPerLine(
-		int _charsPerLine
-	);
-
-	void CalculateWordWraps();
-
-private:	
-
-	static unsigned int s_VAO;
-
-public:		// globally available for rendering
-
-	static void BindCommonVAO();
-	static void UnbindCommonVAO();
+	void CalculateGeometry();
 
 public:
 
-	const TextOptions& GetTextOptions() const { return m_TextOptions; }
-	const std::vector<float>& GetLineLengthsArray() const { return m_LineLengths; }
-	const std::vector<int>& GetLineBreakArray() const { return m_LineBreaks; }
-	size_t GetLineBreakCount() const { return m_LineBreaks.size(); }
-	int GetMaxCharsPerLine() const { return m_MaximumCharsPerLine; }
-	float GetRightWordWrapBound() const { return m_TextOptions.m_LineLength; }
-	//float GetScaleFactor() const { return m_ScaleFactor; }
-	unsigned int GetGlyphDataVBO() const { return m_GlyphDataVBO; }
 	const std::u32string& GetTextString() const { return m_TextContent; }
-	const Font* GetFont() const { return m_TextOptions.m_Font; }
 	size_t GetCharCount() const { return m_TextContent.size(); }
 
-private:
+	const TextOptions& GetTextOptions() const { return m_TextOptions; }
+	const Font* GetFont() const { return m_TextOptions.font; }
+	const float GetLineHeight() const { return m_TextOptions.lineHeight; }
+	float GetLineLength() const { return m_TextOptions.lineLength; }
 
-	unsigned short GetTotalOffsetForCharAt(
-		int _charIndex
-	);
-
-	void UpdateGlyphOffsets();
-
-	void UpdateVBO();
-
-	void GenerateBuffers();
-
-	size_t GetLastVBOsize() const { return m_VBOlastReportedSize; }
+	const std::vector<FullSprite>& GetTextGeometry() const;
 
 };

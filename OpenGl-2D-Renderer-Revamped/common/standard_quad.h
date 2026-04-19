@@ -19,7 +19,7 @@ struct StandardQuad {
 	unsigned int m_InterpolationBuffer = 0;
 
 	UVRegion m_UVregionCurrentlyUsed;
-	const UVRegion& GetCurrentUVregion() const { return m_UVregionCurrentlyUsed; }
+	UVRegion& GetCurrentUVregion() { return m_UVregionCurrentlyUsed; }
 
 	StandardQuad();
 
@@ -55,8 +55,6 @@ public:
 	unsigned int m_OriginalStandardQuadBuffer = 0;
 	unsigned int GetUnmodifiedStandardQuadBuffer() const { return m_OriginalStandardQuadBuffer; }
 	void BindUnmodifiedStandardQuadBufferAt(int _index) const;
-
-
 	
 public:
 
@@ -82,4 +80,3 @@ public:
 };
 
 extern StandardQuad g_StandardQuad;
-

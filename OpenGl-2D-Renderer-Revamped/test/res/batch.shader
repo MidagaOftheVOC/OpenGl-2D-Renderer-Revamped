@@ -4,8 +4,8 @@
 layout(location = 0) in vec2 b_VertexBuffer;
 layout(location = 1) in vec2 b_TexBuffer;
 layout(location = 2) in uint b_SpriteInformationBuffer;
-
-layout(location = 4) in vec2 b_PositionsRelativeToModel;
+layout(location = 3) in float b_Rotations;
+layout(location = 4) in vec2 b_PositionsRelativeToModel;    //  relative to batch origin
 layout(location = 5) in vec2 b_QuadDimensions;
 layout(location = 6) in float b_Zcoord;
 
@@ -41,11 +41,21 @@ void main(){
     //  Rotation calculation
     vec2 NormalisedVertexBuffer = b_VertexBuffer / 100.f;
     vec2 LocalVertex = b_QuadDimensions * NormalisedVertexBuffer;
+    vec2 PointOfRotation = LocalVertex - b_QuadDimensions / 2;
+    
+    float sine = sin(b_Rotations);
+    float cosine = cos(b_Rotations);
 
-    vec2 WorldPosition = LocalVertex + b_PositionsRelativeToModel;
+    vec2 RotatedPosition = vec2(
+	   PointOfRotation.x * cosine - PointOfRotation.y * sine,
+	   PointOfRotation.x * sine + PointOfRotation.y * cosine
+	);
 
-	gl_Position = u_Projection * u_View * u_Model * vec4(WorldPosition, b_Zcoord, 1.f);
+    vec2 WorldPosition = RotatedPosition + b_PositionsRelativeToModel + b_QuadDimensions / 2.0;
+
+	gl_Position = u_Projection * u_View * u_Model * vec4(WorldPosition, 0.f, 1.f);
 }
+
 
 #shader fragment
 #version 430 core
@@ -55,16 +65,9 @@ flat in uint v_SheetIndex;
 
 uniform sampler2D u_Textures[32];
 
+
 out vec4 FragColour;
 
 void main(){
-	vec4 frag = texture(u_Textures[v_SheetIndex], v_TextureVertex);
-    if(
-        frag.x > 0.9f &&
-        frag.y > 0.9f &&
-        frag.z > 0.9f
-    ) 
-        discard;
-
-    FragColour = vec4(1.f, 1.f, 1.f, 1.f);
+    FragColour = texture(u_Textures[v_SheetIndex], v_TextureVertex);
 }

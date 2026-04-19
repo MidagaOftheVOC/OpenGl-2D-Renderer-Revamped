@@ -1,88 +1,129 @@
-﻿#include "main_renderer.h"
+﻿#include "engine.h"
+#include "components/ui/widget/widgets/label.h"
+#include "components/ui/widget/widgets/window.h"
+#include "components/ui/widget/widgets/button.h"
 
-#include "components/batch_types/batch_instance_primitives.h"
-
+#include <print>
 
 int main(int argc, char** argv) {
 
-	Renderer2D r(1600, 900, "Absolyuten hui");
-	r.Init();
-	//r.SetBaseDirectory(__FILE__);
+	Engine2D eng(1600, 900, "nog", false);
+	auto& resService = eng.GetResourceService();
+
+	resService.UploadShaderParameters("test\\res\\batch.shader",		"batch");		//	WITH UBO
+	resService.UploadShaderParameters("test\\res\\batch_ui.shader",		"batch_ui");
 
 
-	r.UploadShaderParameters("test\\res\\text.shader",				r.c_SpecialTextShaderName);
-	r.UploadShaderParameters("test\\res\\batch_test.shader",		"strict_batch");
-	r.UploadShaderParameters("test\\res\\sb_std.shader",			"soft_batch");
-	r.UploadShaderParameters("test\\res\\free_batch.shader",		"fb_shader");	//	W/O UBO
-	r.UploadShaderParameters("test\\res\\sb_floating_quads.shader",	"sb_floating_quads");
-	r.UploadShaderParameters("test\\res\\fb_std.shader",			"fd_std");		//	WITH UBO
-	r.UploadShaderParameters("test\\res\\uib_std.shader",			"uib_std");	
-
-
-	r.UploadSpriteSheetParameters("test\\res\\cyrillic.png",		"test_font",				r.c_SpecialTextShaderName,	9, 9);
-	r.UploadSpriteSheetParameters("test\\res\\test.cfg",			"fox",						"strict_batch",				0, 0);
-	r.UploadSpriteSheetParameters("test\\res\\test.cfg",			"soft_sheet",				"soft_batch",				0, 0);
-	r.UploadSpriteSheetParameters("test\\res\\test.cfg",			"fb_sheet",					"fb_shader",				0, 0);
-	r.UploadSpriteSheetParameters("test\\res\\test.cfg",			"sb_fq",					"sb_floating_quads",		0, 0);
-	r.UploadSpriteSheetParameters("test\\res\\panda.cfg",			"sb_panda",					"sb_floating_quads",		0, 0);
-	r.UploadSpriteSheetParameters("test\\res\\test.cfg",			"fd_std1",					"fd_std",					0, 0);
-	r.UploadSpriteSheetParameters("test\\res\\panda.cfg",			"fd_std2",					"fd_std",					0, 0);
-	r.UploadSpriteSheetParameters("test\\res\\gui.cfg",				"uib_std",					"uib_std",					0, 0);
-	r.UploadSpriteSheetParameters("test\\res\\gui.cfg",				r.c_SpecialUISheetName,		"uib_std",					0, 0);
-
+	resService.UploadSpriteSheetParameters("test\\res\\cyrillic.png",	"cyrillic",							"batch_ui",		 9, 9);
 	
-	r.StartLoadingProcess();
-
-
-	InputController& input = r.GetInputController();
+	resService.UploadSpriteSheetParameters("test\\res\\test.cfg",		"testSheet",						"batch",		0, 0);
+	resService.UploadSpriteSheetParameters("test\\res\\panda.cfg",		"pandaSheet",						"batch",		0, 0);
 	
-	UIManager& ui = r.GetUIManager();
+	resService.UploadSpriteSheetParameters("test\\res\\gui.cfg",		resService.c_SpecialUISheetName,	"batch_ui",		0, 0);
+
+	eng.Init();
 	
-	Window win  = ui.CreateWindow({	600, 300 },	20);
-	Window win2 = ui.CreateWindow({ 400, 200 }, 20);
+	const bool INIT_OPENGL_OBJECTS = true;
+	Batch freebatch = Batch(INIT_OPENGL_OBJECTS);
+	freebatch.AddSheetToBatch(eng.GetResourceService().GetSpriteSheetByName("testSheet"));
+	freebatch.AddSheetToBatch(eng.GetResourceService().GetSpriteSheetByName("pandaSheet"));
+	freebatch.BufferUBOs();
 
+	float x = 150;
+	float y = 101;
+	float Rotation = 0.f;
+	
+	SpriteInstance instance = freebatch.GetSprite("pandaSheet", "nose");
+	SpriteInstance eye = freebatch.GetSprite("pandaSheet", "eye");
+	SpriteInstance testedInstance = freebatch.GetSprite("testSheet", "nose");
 
-	Label label = Label(r.GenText(U"здрасти"), {50, 80});
-	Label label2 = Label(r.GenText(U"бепче"), { 50, 100 });
+	constexpr float oneDef = 1.f / 3.1418f;
 
-	Button btn = Button({ 30, 30 }, r.GenText(U"бутон"), r.GetUIManager().GetPaneFactory().CreatePane(100, 50, 2, "default"), []() {
-		std::cout << "Natisnat buton\n";
+	TextOptions options;
+	options.font = &resService.GetDefaultFont();
+
+	Text txt = Text(
+		U"едно",
+		options
+	);
+
+	Text txt2 = Text(
+		U"две",
+		options
+	);
+
+	Text btntxt = Text(
+		U"ЗАТВОРИ",
+		options
+	);
+
+	Text emptyText = Text(U"", options);
+
+	auto label = std::make_unique<Label>(txt, glm::vec2(10.f, 10.f), glm::vec2(200, 50));
+	auto window = std::make_unique<Window>(1, glm::vec2(400, 400), glm::vec2(300, 200), resService.GetSkinByName("default"));
+
+	window.get()->AddChild(std::move(label));
+
+	auto label2 = std::make_unique<Label>(txt2, glm::vec2(10.f, 10.f), glm::vec2(200, 50));
+	auto window2 = std::make_unique<Window>(2, glm::vec2(450, 380), glm::vec2(300, 200), resService.GetSkinByName("default"));
+	
+	auto input2 = std::make_unique<Input>(glm::vec2(10.f, 90.f), glm::vec2(200.f, 30.f), emptyText, resService.GetSkinByName("default"));
+	Input* input2ptr = input2.get();
+
+	auto btn2 = std::make_unique<Button>(glm::vec2(10.f, 40.f), glm::vec2(150.f, 30.f), btntxt, resService.GetSkinByName("default"));
+	btn2.get()->SetOnClick([input2ptr](EventEmitter* ctx, Window* win) {
+		/*Event self;
+		self.type = EventType::CLOSE_WINDOW;
+		self.closeWindowEvent.targetWindowID = win->GetID();
+
+		ctx->PushEvent(self);*/
+
+		std::print("Input:");
+		auto* str = input2ptr->GetValue();
+		for (size_t i = 0; i < str->size(); i++) {
+			std::print(" {}", int(str->at(i)));
+		}
+		std::println();
 	});
 
-	win.AttachWidget(&label);
-	win.AttachWidget(&label2);
-	win2.AttachWidget(&btn);
+	window2.get()->AddChild(std::move(label2));
+	window2.get()->AddChild(std::move(btn2));
+	window2.get()->AddChild(std::move(input2));
 
-	ID winID1 = ui.AddWindow(win);
-	ID winID2 = ui.AddWindow(win2);
+	eng.GetUIManager().OpenWindow(std::move(window));
+	eng.GetUIManager().OpenWindow(std::move(window2));
 
-	ui.OpenWindow(winID1, 200, 200);
-	ui.OpenWindow(winID2, 560, 250);
+	eng.SetGameLoop([&](float elapsedTimeSeconds, GameInput input, GameLoopReturnType& renderComms) {
+		renderComms.QueueRenderObject(&freebatch, 2);
 
-	while (!r.IsRunning()) {
-		input.CaptureKeystates();
-		//input.CaptureMouseButtons();
+		//std::println("FPS: {:.0f}", 1 / elapsedTimeSeconds);
 
-		//r.Draw(&rando,	300, 700, 1, nullptr);
+		if (input.IsHeld(GLFW_KEY_LEFT)) {
+			x -= 1;
+			std::println("NEW X: {}", x);
+		}
 
 		if (input.IsHeld(GLFW_KEY_RIGHT)) {
-			std::cout << "right pressed\n";
+			x += 1;
+			std::println("NEW X: {}", x);
 		}
 
-		if (input.IsPressed(GLFW_KEY_ESCAPE)) {
-
-			return 0;
+		if (input.IsHeld(GLFW_KEY_R)) {
+			Rotation += oneDef;
 		}
 
-		//if(r.GetInputController().IsHeld(GLFW_MOUSE_BUTTON_1)) {		std::cout << "Mouse is   HELD	\n"; }
-		//if (r.GetInputController().IsPressed(GLFW_MOUSE_BUTTON_1)) {	std::cout << "Mouse is   PRESSED\n"; }
-		//if (r.GetInputController().IsReleased(GLFW_MOUSE_BUTTON_1)) {	std::cout << "Mouse is   RELEASED\n"; }
-
-		if (r.HasClicked()) {
-			std::cout << "Clicked outside a window.\n";
+		if (input.IsHeld(GLFW_KEY_DOWN)) {
+			instance.dimensions.x += 5;
 		}
 
-		r.ExecuteDraws();
+		freebatch.DrawSprite(instance, x, y, Rotation);
+		freebatch.DrawSprite(instance, x + 50, y + 50, 0);
+		freebatch.DrawSprite(testedInstance, x + 100, y + 200, 0);
+		freebatch.DrawSprite(eye, x, y + 200, Rotation);
+	});
+
+	while (eng.IsRunning()) {
+		eng.ExecuteFrame();
 	}
 
 	return 0;

@@ -25,6 +25,7 @@ void Camera::UpdateViewMatrix() {	//	reminder:	from +Z to -Z
 
 
 void Camera::UpdateProjectionMatrix() {
+	DEBUG_LOG("Reminder Camera doesn't have configurable NearZ and FarZ");
 	m_ProjectionMatrix = glm::ortho(
 		0.f,
 		m_ViewPortSize.x / m_Zoom,
