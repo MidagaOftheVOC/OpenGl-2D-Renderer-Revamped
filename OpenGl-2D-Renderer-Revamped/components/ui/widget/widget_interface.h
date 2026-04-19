@@ -4,8 +4,10 @@
 #include <memory>
 #include <functional>
 
-#include "../text.h"
+#include "event_emitter.h"
 #include "../../batch_types/base_batch.h"
+
+class Window;
 
 //	TODO: this can be expanded to maintain an array of instances for the normal and pressed version of buttons or something
 //	We operate under the assumption all UI-related data is in one sheet
@@ -14,29 +16,6 @@ struct PaneSkin {
 	std::string name;
 	SpriteInstance instanceArray[9];
 };
-
-struct TextWithZLayer {
-	TextWithZLayer(
-		const Text* _text,
-		float _x,
-		float _y,
-		float _zLayer
-	) :
-		text(_text),
-		xLayer(_x),
-		yLayer(_y),
-		zLayer(_zLayer)
-	{
-	}
-	const float xLayer = 0.f;
-	const float yLayer = 0.f;
-	const float zLayer = 0.f;
-	const Text* text = nullptr;
-};
-
-//	The 'Pane'/'Rect' concept will exist not as a widget, but the interface will
-//	hold data about the rectanlge AND which skin to use.
-//	
 
 class WidgetCompositionInterface {
 
@@ -56,13 +35,13 @@ private:
 
 private:
 
-	std::function<void()> m_OnClickFn;
+	std::function<void(EventEmitter* ctx, Window* owningWindow)> m_OnClickFn;
 
 public:
 
-	void OnClick() {
+	virtual void OnClick(EventEmitter* ctx, Window* owningWindow) {
 		if (m_OnClickFn) {
-			m_OnClickFn();
+			m_OnClickFn(ctx, owningWindow);
 		}
 	}
 
@@ -120,7 +99,6 @@ public:
 	//	Note: design is smooth except here
 	void RenderWidgetTree(
 		Batch* uiBatch,
-		Batch* texts,
 		glm::vec2 absoluteParentOrigin,
 		float baseZLayer,
 		float zSubstep
@@ -135,7 +113,6 @@ private:
 
 	virtual void SendOwnRenderData(
 		Batch* uiBatch,
-		Batch* texts,
 		glm::vec2 absoluteCurrentWidgetOrigin,
 		float z
 	) const = 0;
@@ -159,7 +136,7 @@ protected:
 public:
 
 	void SetOnClick(
-		std::function<void()> fn
+		std::function<void(EventEmitter* ctx, Window* owningWindow)> fn
 	);
 
 public:

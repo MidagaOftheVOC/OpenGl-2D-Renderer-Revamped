@@ -4,15 +4,6 @@ void ResourceService::LoadShader(
 	const std::string& _locationShaderFile,
 	const std::string& _shaderName
 ) {
-	//	Special common shader used only by Text objects
-	if (!_shaderName.compare(c_SpecialTextShaderName)) {
-		m_TextRenderingShader = Shader(
-			_locationShaderFile,
-			_shaderName
-		);
-		return;
-	}
-
 	m_Shaders.emplace_back(
 		_locationShaderFile,
 		_shaderName
@@ -115,17 +106,6 @@ void ResourceService::StartLoadingProcess() {
 	for (size_t i = 0; i < m_SpriteSheetLoadQueue.size(); i++) {
 		SpriteSheetLoadingParameters& params = m_SpriteSheetLoadQueue[i];
 
-		if (!params.m_PreferredShaderName.compare(c_SpecialTextShaderName)) {
-			LoadSpriteSheet(
-				std::string(params.m_LocationOfImage),
-				std::string(params.m_SheetName),
-				&GetTextShader(),
-				params.m_SpritesPerRow,
-				params.m_SpritesPerCol
-			);
-			continue;
-		}
-
 		LoadSpriteSheet(
 			std::string(params.m_LocationOfImage),
 			std::string(params.m_SheetName),
@@ -173,11 +153,8 @@ void ResourceService::LoadDefaultVariables() {
 
 	m_UIBatch.InitialiseBuffers();
 	m_UIBatch.AddSheetToBatch(GetSpriteSheetByName(c_SpecialUISheetName));
+	m_UIBatch.AddSheetToBatch(GetSpriteSheetByName("cyrillic"));
 	m_UIBatch.BufferUBOs();
-
-	m_UITextBatch.InitialiseBuffers();
-	m_UITextBatch.AddSheetToBatch(GetSpriteSheetByName("cyrillic"));
-	m_UITextBatch.BufferUBOs();
 }
 
 const PaneSkin* ResourceService::GetSkinByName(

@@ -36,6 +36,8 @@ private:
 
 	float m_ElapsedTimeSeconds = 0.00f;
 
+	std::function<void(float, GameInput, GameLoopReturnType&)> m_GameLoop;
+
 public:
 
 	Engine2D(
@@ -59,9 +61,7 @@ public:
 
 	void Init();
 
-	void ExecuteFrame(
-		std::function<void(float, GameInput, GameLoopReturnType&)> gameLoop
-	);
+	void ExecuteFrame();
 
 private:
 
@@ -69,7 +69,7 @@ private:
 
 	bool GLFWInitialisation();
 
-	void QueueFreebatchesToRenderer(
+	void QueueBatchesToRenderer(
 		GameLoopReturnType& gameLoopRetVal
 	);
 
@@ -78,6 +78,12 @@ public:
 	bool IsRunning() const { return !glfwWindowShouldClose(m_MainWindowContext); }
 
 	const TextFactory& GetTextFactory() { return m_TextFactory; }
+
+	void SetGameLoop(
+		std::function<void(float, GameInput, GameLoopReturnType&)> gameLoop
+	) {
+		m_GameLoop = gameLoop;
+	}
 
 	ResourceService& GetResourceService() { return m_ResourceService; }
 	InputController& GetInputController() { return m_InputController; }

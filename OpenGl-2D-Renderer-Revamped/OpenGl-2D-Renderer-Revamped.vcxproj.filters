@@ -84,6 +84,15 @@
     <ClCompile Include="test\widgets\stored_test_scenarios.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="components\ui\widget\widgets\button.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="components\ui\widget\event_emitter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="components\ui\widget\widgets\input.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="subsystems\main_renderer.h">
@@ -150,6 +159,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="components\ui\widget\widgets\label.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="components\ui\widget\widgets\button.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="components\ui\widget\event_emitter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="components\ui\widget\widgets\input.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

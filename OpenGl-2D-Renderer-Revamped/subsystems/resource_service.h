@@ -58,12 +58,9 @@ private:
 
 private:
 
-	Shader m_TextRenderingShader;
-
 	Font m_DefaultFont;
 	TextOptions m_DefaultTextOptions;
 	Batch m_UIBatch;
-	Batch m_UITextBatch;
 
 public:
 
@@ -131,15 +128,12 @@ public:
 
 public:
 
-	const Shader& GetTextShader() const { return m_TextRenderingShader; }
 	const Font& GetDefaultFont() const { return m_DefaultFont; }
 	
 	Batch* GetUIBatch() { return &m_UIBatch; }
-	Batch* GetUITextBatch() { return &m_UITextBatch; }
 
 public:
 
-	const char* c_SpecialTextShaderName = "SPECIAL_COMMON_TEXT_SHADER";
 	const char* c_SpecialUISheetName	= "SPECIAL_UI_SPRITESHEET_NAME";
 
 };

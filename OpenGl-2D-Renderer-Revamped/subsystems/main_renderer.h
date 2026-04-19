@@ -78,19 +78,6 @@ public:
 	const Batch* GetBaseBatchPointer() const { return m_Base; }
 };
 
-//		TEXT
-
-struct TextDrawCall : DrawCall {
-private:
-	const Text* m_Text = nullptr;
-public:
-	TextDrawCall(const Text* _text, float x, float y, float z, const UniformDataVector* _uniformDataArray)
-		:m_Text(_text), DrawCall(x, y, z, _uniformDataArray, 0)
-	{
-	}
-	const Text* GetTextPointer() const { return m_Text; }
-};
-
 class Renderer2D {
 private:	//	Window-related information
 
@@ -123,7 +110,6 @@ public:
 private:	//	Structures for draw queue optimisation
 
 	std::vector<BatchDrawCall> m_BatchArray;
-	std::vector<TextDrawCall> m_TextArray;
 
 private:	//	Methods to render queued Drawcalls
 
@@ -152,14 +138,6 @@ public:		//	Exposed functions
 
 	void Draw(
 		Batch* _batch,
-		float _xPosition,
-		float _yPosition,
-		float _zLayer,
-		UniformDataVector* _uniformArray
-	);
-
-	void Draw(
-		const Text* _text,
 		float _xPosition,
 		float _yPosition,
 		float _zLayer,

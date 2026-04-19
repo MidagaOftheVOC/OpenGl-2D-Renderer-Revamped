@@ -22,11 +22,12 @@ public:
 		)
 	{}
 
+	Text* GetText() { return &m_StoredText; }
+
 private:
 
 	virtual void SendOwnRenderData(
 		Batch* uiBatch,
-		Batch* texts,
 		glm::vec2 absoluteParentOrigin,
 		float z
 	) const override;

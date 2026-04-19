@@ -152,6 +152,9 @@
     <ClCompile Include="components\sprite_sheet.cpp" />
     <ClCompile Include="components\ui\font.cpp" />
     <ClCompile Include="components\ui\text.cpp" />
+    <ClCompile Include="components\ui\widget\event_emitter.cpp" />
+    <ClCompile Include="components\ui\widget\widgets\button.cpp" />
+    <ClCompile Include="components\ui\widget\widgets\input.cpp" />
     <ClCompile Include="components\ui\widget\widgets\label.cpp" />
     <ClCompile Include="components\ui\widget\widget_interface.cpp" />
     <ClCompile Include="subsystems\ui_manager.cpp" />
@@ -178,6 +181,9 @@
     <ClInclude Include="components\shader.h" />
     <ClInclude Include="components\sprite_sheet.h" />
     <ClInclude Include="components\ui\font.h" />
+    <ClInclude Include="components\ui\widget\event_emitter.h" />
+    <ClInclude Include="components\ui\widget\widgets\button.h" />
+    <ClInclude Include="components\ui\widget\widgets\input.h" />
     <ClInclude Include="components\ui\widget\widgets\label.h" />
     <ClInclude Include="components\ui\widget\widget_interface.h" />
     <ClInclude Include="components\ui\text.h" />

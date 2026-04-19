@@ -4,7 +4,7 @@
 layout(location = 0) in vec2 b_VertexBuffer;
 layout(location = 1) in vec2 b_TexBuffer;
 layout(location = 2) in uint b_SpriteInformationBuffer;
-
+layout(location = 3) in float b_Rotations;
 layout(location = 4) in vec2 b_PositionsRelativeToModel;
 layout(location = 5) in vec2 b_QuadDimensions;
 layout(location = 6) in float b_Zcoord;

@@ -15,7 +15,6 @@ void UIManager::InterpretInput() {
 	/* process keyboard here */
 
 	Batch* uiBatch = GetResService()->GetUIBatch();
-	Batch* textBatch = GetResService()->GetUITextBatch();
 
 	const int MAXIMUM_NESTED_WIDGETS = 4;
 	const int totalLayers = 1 + m_OpenedWindows.size();	//	dont forget UI-manager ui
@@ -33,20 +32,28 @@ void UIManager::InterpretInput() {
 
 	//	---		RENDER		---	 //
 
-	//	UI manager
-	//	TODO: replace this with a special background-less window
-	RenderWidgetTree(uiBatch, textBatch, glm::vec2(0.f, 0.f), baseZLayer, substep);
+	RenderWidgetTree(uiBatch, glm::vec2(0.f, 0.f), baseZLayer, substep);
 
 	//	render windows
 	for (size_t i = 0; i < m_OpenedWindows.size(); i++) {
 		float correctBaseZlayer = baseZLayer + ((i + 1) * MAXIMUM_NESTED_WIDGETS * substep);
 		m_OpenedWindows[i].get()->RenderWidgetTree(
 			uiBatch,
-			textBatch,
 			glm::vec2(0.f, 0.f),
 			correctBaseZlayer,
 			substep
 		);
+	}
+
+	if (m_FocusedInputField) {
+		std::u32string bufferedInput = input.GetUtfInput();
+		m_FocusedInputField->AppendString(bufferedInput);
+
+		if (input.IsPressed(GLFW_KEY_BACKSPACE)) {
+			m_FocusedInputField->RemoveLastCharacter();
+		}
+
+		input.SetKeyboardCapturedFlag();
 	}
 
 	if (input.AccessRecentKeystateBitmask(GLFW_MOUSE_BUTTON_LEFT)) {
@@ -65,17 +72,21 @@ void UIManager::InterpretInput() {
 				if (targetWindow == Target && input.IsHeld(GLFW_MOUSE_BUTTON_LEFT))
 					targetWindow->ApplyChangeToPosition(input.GetMouseChange());
 
+				if (Target && input.IsPressed(GLFW_MOUSE_BUTTON_LEFT)) {
+					Target->OnClick(&m_EventEmitter, targetWindow);
+					input.SetMouseCapturedFlag();
+				}
 				break;
 			}
 		}
-
-		if (Target && input.IsPressed(GLFW_MOUSE_BUTTON_LEFT)) {
-			Target->OnClick();
-			input.SetMouseCapturedFlag();
-		}
-
-		//	TODO: IF ITS AN INPUT FIELD, SET IT AS FOCUS
 	}
+
+	if (input.IsPressed(GLFW_MOUSE_BUTTON_LEFT) || input.IsPressed(GLFW_KEY_ESCAPE)) {
+		std::println("Focus released");
+		m_FocusedInputField = nullptr;
+	}
+
+	EnforceUIEvents();
 }
 
 void UIManager::OpenWindow(std::unique_ptr<Window> window) {
@@ -94,5 +105,30 @@ void UIManager::MoveWindowToFront(ID windowID) {
 }
 
 void UIManager::CloseWindow(ID windowID) {
+	for (size_t i = 0; i < m_OpenedWindows.size(); i++) {
+		if (m_OpenedWindows[i]->GetID() == windowID) {
+			m_OpenedWindows.erase(m_OpenedWindows.begin() + i);
+			return;
+		}
+	}
+}
 
+void UIManager::EnforceUIEvents() {
+	auto& events = m_EventEmitter.GetEvents();
+
+	for (auto& event : events) {
+		switch (event.type) {
+		case EventType::CLOSE_WINDOW: {
+			CloseWindow(event.closeWindowEvent.targetWindowID);
+			break;
+		}
+		case EventType::SET_FOCUS_ON_INPUT: {
+			m_FocusedInputField = event.setInputFocusEvent.targetInputPointer;
+			std::println("Focus set");
+		}
+		}
+	}
+
+
+	events.clear();
 }

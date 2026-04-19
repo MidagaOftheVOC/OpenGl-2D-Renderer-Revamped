@@ -7,6 +7,7 @@ layout(location = 2) in uint b_SpriteInformationBuffer;
 layout(location = 3) in float b_Rotations;
 layout(location = 4) in vec2 b_PositionsRelativeToModel;    //  relative to batch origin
 layout(location = 5) in vec2 b_QuadDimensions;
+layout(location = 6) in float b_Zcoord;
 
 layout(std140, binding = 0) uniform ubo_UVRegions {
     vec4 u_UVRegions[512];
@@ -19,7 +20,6 @@ layout(std140, binding = 1) uniform ubo_SheetOffsets {
 uniform mat4 u_Model;
 uniform mat4 u_View;
 uniform mat4 u_Projection;
-
 
 out vec2 v_TextureVertex;
 flat out uint v_SheetIndex;

@@ -2,7 +2,6 @@
 
 void WidgetCompositionInterface::RenderWidgetTree(
 	Batch* uiBatch,
-	Batch* texts,
 	glm::vec2 absoluteParentOrigin,
 	float baseZLayer,
 	float zSubstep
@@ -11,12 +10,11 @@ void WidgetCompositionInterface::RenderWidgetTree(
 	glm::vec2 absoluteCurrentWidgetOrigin = GetAbsolutePosition(absoluteParentOrigin);
 	
 	SendBackgroundRenderData(uiBatch, absoluteCurrentWidgetOrigin, currentZLayer);
-	SendOwnRenderData(uiBatch, texts, absoluteCurrentWidgetOrigin, currentZLayer);
+	SendOwnRenderData(uiBatch, absoluteCurrentWidgetOrigin, currentZLayer);
 
 	for (size_t i = 0; i < m_WidgetComposition.size(); i++) {
 		m_WidgetComposition[i].get()->RenderWidgetTree(
 			uiBatch, 
-			texts, 
 			absoluteCurrentWidgetOrigin, 
 			baseZLayer + zSubstep,
 			zSubstep
@@ -197,7 +195,7 @@ glm::vec2 WidgetCompositionInterface::GetAbsolutePosition(
 }
 
 void WidgetCompositionInterface::SetOnClick(
-	std::function<void()> fn
+	std::function<void(EventEmitter* ctx, Window* owningWindow)> fn
 ) {
 	m_OnClickFn = fn;
 }

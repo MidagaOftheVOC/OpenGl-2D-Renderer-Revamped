@@ -40,9 +40,11 @@ void Text::AppendCharacter(
 }
 
 void Text::RemoveLastCharacter() {
-	m_TextContent.pop_back();
-	CalculateGeometry();
-	m_HasChanged = true;
+	if (m_TextContent.size() > 0) {
+		m_TextContent.pop_back();
+		CalculateGeometry();
+		m_HasChanged = true;
+	}
 }
 
 void Text::SetLineLength(

@@ -188,11 +188,6 @@ void InputController::CaptureKeystates() {
 	m_Input.m_PreviousMouseCoords = m_Input.m_RecentMouseCoords;
 	m_Input.m_RecentMouseCoords = glm::vec2(static_cast<float>(xMousePosition), static_cast<float>(yMousePosition));
 
-	if (m_BufferedUtfInput.size() != 0) {
-		int a = 1;
-		a++;
-	}
-
 	m_Input.SetBufferedInput(std::move(m_BufferedUtfInput));
 }
 

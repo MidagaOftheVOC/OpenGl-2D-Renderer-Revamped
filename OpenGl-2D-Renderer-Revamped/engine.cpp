@@ -71,7 +71,7 @@ bool Engine2D::GLFWInitialisation() {
 	return true;
 }
 
-void Engine2D::QueueFreebatchesToRenderer(
+void Engine2D::QueueBatchesToRenderer(
 	GameLoopReturnType& gameLoopRetVal
 ) {
 	size_t CommCount = gameLoopRetVal.RenderCommands.size();
@@ -81,6 +81,8 @@ void Engine2D::QueueFreebatchesToRenderer(
 
 	float range = farZ - nearZ;
 	float layerStep = range / static_cast<float>(CommCount);
+
+	GetRenderer().Draw(GetResourceService().GetUIBatch(), 0, 0, 0, nullptr);
 	
 	std::ranges::stable_sort(gameLoopRetVal.RenderCommands, [](const RenderCommand& a, const RenderCommand& b) {
 		return a.IssuedZLayer < b.IssuedZLayer;
@@ -88,7 +90,7 @@ void Engine2D::QueueFreebatchesToRenderer(
 
 	for (size_t i = 0; i < gameLoopRetVal.RenderCommands.size(); i++) {
 		const auto& rCommand = gameLoopRetVal.RenderCommands.at(i);
-		float calculatedZcoord = nearZ + i * layerStep;
+		float calculatedZcoord = nearZ + i * layerStep + 2.f;
 		switch (rCommand.StoredValueType) {
 			case RenderCommand::Type::FBatchDC: {
 				GetRenderer().Draw(rCommand.Batch, 0, 0, calculatedZcoord, nullptr);
@@ -98,9 +100,7 @@ void Engine2D::QueueFreebatchesToRenderer(
 	}
 }
 
-void Engine2D::ExecuteFrame(
-	std::function<void(float, GameInput, GameLoopReturnType&)> gameLoop
-) {
+void Engine2D::ExecuteFrame() {
 	GameLoopReturnType StoredRenderCommands;
 	using Clock = std::chrono::steady_clock;
 	auto start = Clock::now();
@@ -109,17 +109,12 @@ void Engine2D::ExecuteFrame(
 
 	m_InputController.CaptureKeystates();
 
-	//	TODO:	input widget missing, focus field missing, keyboard is not captured and utf input not processed,
-	//			need event/comm system to connect widgets with the manager so they can issue self-closing commands for example
 	m_UIManager.InterpretInput();
 
-	gameLoop(m_ElapsedTimeSeconds, m_InputController.ExposeGameInput(), StoredRenderCommands);
+	m_GameLoop(m_ElapsedTimeSeconds, m_InputController.ExposeGameInput(), StoredRenderCommands);
 
 	//	Also, we must allow for other types to be queued for drawing.
-	QueueFreebatchesToRenderer(StoredRenderCommands);
-
-	m_Renderer.Draw(GetResourceService().GetUIBatch(), 0, 0, 2, nullptr);
-	m_Renderer.Draw(GetResourceService().GetUITextBatch(), 0, 0, 2, nullptr);
+	QueueBatchesToRenderer(StoredRenderCommands);
 
 	m_Renderer.ExecuteDraws();
 
