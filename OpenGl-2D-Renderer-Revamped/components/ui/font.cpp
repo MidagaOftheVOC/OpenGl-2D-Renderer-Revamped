@@ -68,7 +68,8 @@ GlyphSprite Font::GetGlyph(
 
     size_t chIndex = GetGlyphIndex(ch);
     GlyphSprite result;
-    result.instance = m_SpriteSheet->GetSpriteInstanceByIndex(chIndex, 1);  //  TODO: brutal hack, assumes 2nd UI-sprite is the font
+    //  Sheet index is queried in the DrawText function, once per Text draw call
+    result.instance = m_SpriteSheet->GetSpriteInstanceByIndex(chIndex, 0);  
     result.advance = m_GlyphAdvances[chIndex];
 
     return result;

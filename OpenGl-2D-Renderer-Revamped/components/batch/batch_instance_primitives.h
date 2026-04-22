@@ -7,34 +7,21 @@
 struct SpriteInformation {
 
 	SpriteInformation() {}
-
 	
 	SpriteInformation(
-		unsigned int _sheetIndex,
-		unsigned int _spriteIndex
+		uint32_t _sheetIndex,
+		uint32_t _spriteIndex
 	);
 
-
-	uint16_t GetSheetIndex() const;
-	uint16_t GetSpriteIndex() const;
-
-private:
-
-	uint16_t m_SheetSpriteIndexData = 0;
-
-public:	//	Bitmasks
-
-	//	Can only be called once.
-	static void InitialiseMasks();
+	uint32_t GetSheetIndex() const;
+	uint32_t GetSpriteIndex() const;
+	
+	void SetSheetIndex(uint32_t sheetIndex);
+	void SetSpriteIndex(uint32_t spriteIndex);
 
 private:
 
-	//	0 - masks the sprite index
-	//	1 - masks the sheet index
-	static uint16_t s_SheetSpriteBitmask;
-
-	static uint16_t s_SheetIndexBits;
-	static uint16_t s_SpriteIndexBits;
+	uint32_t data = 0;
 
 };
 

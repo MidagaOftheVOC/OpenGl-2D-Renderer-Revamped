@@ -93,6 +93,7 @@ void Renderer2D::SendStandardUniforms(
 
 bool Renderer2D::Init() {
 	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LEQUAL);
 	//	Component initialisation
 
 	const glm::vec2 DefaultCameraLocation = glm::vec2(0.f, 0.f);
@@ -110,8 +111,6 @@ bool Renderer2D::Init() {
 }
 
 void Renderer2D::PerClassVAOinitialisationFunction() {
-	SpriteInformation::InitialiseMasks();
-
 	Batch::InitialiseCommonVAO();
 }
 

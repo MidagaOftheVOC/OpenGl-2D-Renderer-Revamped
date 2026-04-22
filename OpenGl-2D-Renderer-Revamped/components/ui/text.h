@@ -13,9 +13,9 @@ class Text {
 	std::u32string m_TextContent;
 	TextOptions m_TextOptions;
 
-	std::vector<FullSprite> m_TextGeometry;
+	mutable std::vector<FullSprite> m_TextGeometry;
 
-	bool m_HasChanged = false;
+	mutable bool m_HasChanged = false;
 	
 public:
 
@@ -44,7 +44,7 @@ public:
 		float length
 	);
 
-	void CalculateGeometry();
+	void CalculateGeometry() const;
 
 public:
 

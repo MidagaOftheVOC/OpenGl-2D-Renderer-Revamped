@@ -40,6 +40,19 @@ struct SpriteSheetLoadingParameters {
 	{}
 };
 
+struct FontLoadingParameters {
+	const std::string location;
+	const std::string name;
+
+	FontLoadingParameters(
+		const char* location,
+		const char* name
+	) :
+		location(location),
+		name(name)
+	{}
+};
+
 class ResourceService {
 
 	GLFWwindow* m_MainWindowContext = nullptr;
@@ -50,15 +63,14 @@ private:
 	std::vector<SpriteSheet> m_Sheets;
 
 	std::vector<Font> m_Fonts;
-	std::vector<PaneSkin> m_PaneSkins;
-
+	std::vector<BackgroundSkin> m_PaneSkins;
 
 	std::vector<ShaderLoadingParameters> m_ShaderLoadQueue;
 	std::vector<SpriteSheetLoadingParameters> m_SpriteSheetLoadQueue;
+	std::vector<FontLoadingParameters> m_FontLoadQueue;
 
 private:
 
-	Font m_DefaultFont;
 	TextOptions m_DefaultTextOptions;
 	Batch m_UIBatch;
 
@@ -108,8 +120,8 @@ public:
 
 public:
 
-	void AddBgSkin(
-		const PaneSkin& _skin
+	void AddBackgroundSkin(
+		const BackgroundSkin& _skin
 	);
 
 public:
@@ -122,13 +134,17 @@ public:
 		const char* _spriteSheetName
 	);
 
-	const PaneSkin* GetSkinByName(
-		const char* _name
+	const BackgroundSkin* GetBgSkinByName(
+		const char* _name = nullptr
+	) const;
+
+	const Font* GetFontByName(
+		const char* name = nullptr
 	) const;
 
 public:
 
-	const Font& GetDefaultFont() const { return m_DefaultFont; }
+	const TextOptions& GetDefaultTextOptions() const { return m_DefaultTextOptions; }
 	
 	Batch* GetUIBatch() { return &m_UIBatch; }
 

@@ -13,7 +13,7 @@ Text TextFactory::GenerateText(
 	}
 	
 	if (!localOptions.font) {
-		localOptions.font = &GetResService()->GetDefaultFont();
+		localOptions.font = GetResService()->GetFontByName();
 	}
 
 	return Text(_string, localOptions);

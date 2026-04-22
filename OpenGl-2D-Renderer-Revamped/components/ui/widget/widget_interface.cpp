@@ -1,5 +1,18 @@
 #include "widget_interface.h"
 
+const char* BackgroundSkin::DEFAULT_BG_SUBSPRITE_NAMES[] = {
+	"ul_corner",
+	"ur_corner",
+	"ll_corner",
+	"lr_corner",
+	"leftborder",
+	"rightborder",
+	"upperborder",
+	"lowerborder",
+	"middle"
+};
+
+
 void WidgetCompositionInterface::RenderWidgetTree(
 	Batch* uiBatch,
 	glm::vec2 absoluteParentOrigin,

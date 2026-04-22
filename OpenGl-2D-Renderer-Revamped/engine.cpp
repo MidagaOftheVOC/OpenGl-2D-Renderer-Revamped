@@ -124,9 +124,7 @@ void Engine2D::ExecuteFrame() {
 }
 
 /*
-plan:
-
-
+next:
 
 Low prio:
 We should probably check if the Camera type var works as it should inside the renderer and how moving it affects the screen.

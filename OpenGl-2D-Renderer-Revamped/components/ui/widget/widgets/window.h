@@ -14,7 +14,7 @@ public:
 		ID id,
 		glm::vec2 offsetRelToParent,
 		glm::vec2 dimensions,
-		const PaneSkin* bgSkin
+		const BackgroundSkin* bgSkin
 	) :
 		m_ID(id),
 		WidgetCompositionInterface(

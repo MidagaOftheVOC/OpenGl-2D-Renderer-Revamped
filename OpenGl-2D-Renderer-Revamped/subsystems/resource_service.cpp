@@ -1,5 +1,7 @@
 ﻿#include "resource_service.h"
 
+static const char* g_DefaultFontName = "cyrillic";
+
 void ResourceService::LoadShader(
 	const std::string& _locationShaderFile,
 	const std::string& _shaderName
@@ -120,11 +122,10 @@ void ResourceService::StartLoadingProcess() {
 }
 
 void ResourceService::LoadDefaultVariables() {
-	m_DefaultFont = Font(GetSpriteSheetByName("cyrillic"), "cyrillic");
-
+	Font self = Font(GetSpriteSheetByName(g_DefaultFontName), g_DefaultFontName);
 	std::vector<unsigned short> offsets;
 	offsets.resize(80, 20);
-	m_DefaultFont.Init(
+	self.Init(
 		U"АБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЬЮЯЍ",
 		U"абвгдежзийклмнопрстуфхцчшщъьюяѝ",
 		U".,+-!?;:&><#/",
@@ -132,49 +133,76 @@ void ResourceService::LoadDefaultVariables() {
 		80
 	);
 
-	m_DefaultTextOptions.font = &m_DefaultFont;
+	m_Fonts.emplace_back(std::move(self));
+	m_DefaultTextOptions.font = &m_Fonts[0];
 
-
-	PaneSkin defSkin;
-	defSkin.cornerLengthPx = 20;
-	defSkin.name = "default";
-	for (int i = 0; i < 9; i++) {
-		SpriteInstance si;
-		si.dimensions.x = 20;
-		si.dimensions.y = 20;
-
-		si.SpriteInfo = SpriteInformation(0, i);
-
-		defSkin.instanceArray[i] = si;
-	}
-
-	DEBUG_LOG("Default pane skin is missing.");
-	AddBgSkin(defSkin);
 
 	m_UIBatch.InitialiseBuffers();
 	m_UIBatch.AddSheetToBatch(GetSpriteSheetByName(c_SpecialUISheetName));
 	m_UIBatch.AddSheetToBatch(GetSpriteSheetByName("cyrillic"));
 	m_UIBatch.BufferUBOs();
+
+	BackgroundSkin defSkin;
+	defSkin.cornerLengthPx = 20;
+	defSkin.name = "default";
+	for (int i = 0; i < 9; i++) {
+		defSkin.instanceArray[i] = m_UIBatch.GetSprite(c_SpecialUISheetName, BackgroundSkin::DEFAULT_BG_SUBSPRITE_NAMES[i]);
+	}
+	AddBackgroundSkin(defSkin);
 }
 
-const PaneSkin* ResourceService::GetSkinByName(
+const BackgroundSkin* ResourceService::GetBgSkinByName(
 	const char* _name
 ) const {
-	if (!_name) return nullptr;
-	size_t len = m_PaneSkins.size();
-	for (size_t i = 0; i < len; i++) {
+	size_t paneCount = m_PaneSkins.size();
+	if (paneCount == 0) {
+		DEBUG_ASSERT(0, "GetBgSkingByName() called when no skins were loaded.");
+		return nullptr;
+	}
+
+	if (!_name) {
+		return &m_PaneSkins[0];
+	}
+
+	for (size_t i = 0; i < paneCount; i++) {
 		if (
 			strcmp(_name, m_PaneSkins[i].name.c_str()) == 0
 			) {
 			return &m_PaneSkins[i];
 		}
 	}
-	DEBUG_WARN(0, "GetShaderByName() for name [%s] returned nullptr.", _name);
+
+	DEBUG_WARN(0, "GetBgSkinByName() for name [%s] returned nullptr.", _name);
 	return nullptr;
 }
 
-void ResourceService::AddBgSkin(
-	const PaneSkin& _skin
+void ResourceService::AddBackgroundSkin(
+	const BackgroundSkin& _skin
 ) {
 	m_PaneSkins.emplace_back(_skin);
+}
+
+const Font* ResourceService::GetFontByName(
+	const char* name
+) const {
+	size_t fontCount = m_Fonts.size();
+	if (fontCount == 0) {
+		DEBUG_ASSERT(0, "GetFontByName() called when no skins were loaded.");
+		return nullptr;
+	}
+
+	if (!name) {
+		return &m_Fonts[0];
+	}
+
+	for (size_t i = 0; i < fontCount; i++) {
+		if (
+			strcmp(name, m_Fonts[i].GetName().c_str()) == 0
+			) {
+			return &m_Fonts[i];
+		}
+	}
+
+	DEBUG_WARN(0, "GetFontByName() for name [%s] returned nullptr.", name);
+	return nullptr;
 }
