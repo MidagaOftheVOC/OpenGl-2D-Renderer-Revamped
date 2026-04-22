@@ -1,4 +1,4 @@
-#include "base_batch.h"
+#include "batch.h"
 
 
 /*		DATA TYPES		*/
@@ -212,7 +212,7 @@ int Batch::SendSpriteDataToGPU() {
 #ifdef DEBUG__CODE
 	CheckGLErrors();
 #endif
-	return retVal;
+	return int(retVal);
 }
 
 void Batch::DrawText(

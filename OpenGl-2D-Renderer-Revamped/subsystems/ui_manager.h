@@ -4,7 +4,7 @@
 
 #include "resource_service.h"
 #include "../components/input_controller.h"
-#include "../components/batch_types/base_batch.h"
+#include "../components/batch/batch.h"
 
 #include "../components/ui/widget/event_emitter.h"
 #include "../components/ui/widget/widgets/window.h"

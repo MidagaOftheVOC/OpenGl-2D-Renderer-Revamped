@@ -17,7 +17,7 @@
 #include <vector>
 
 #include "../common/common.h"
-#include "batch_types/batch_instance_primitives.h"
+#include "batch/batch_instance_primitives.h"
 #include "shader.h"
 
 

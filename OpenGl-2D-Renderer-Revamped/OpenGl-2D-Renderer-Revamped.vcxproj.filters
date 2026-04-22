@@ -54,13 +54,10 @@
     <ClCompile Include="components\ui\widget\widgets\window.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="components\batch_types\batches.cpp">
+    <ClCompile Include="components\batch\batch.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="components\file_handler.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="components\managers\managers.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="engine.cpp">
@@ -131,16 +128,13 @@
     <ClInclude Include="components\ui\widget\widgets\window.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="components\batch_types\base_batch.h">
+    <ClInclude Include="components\batch\batch.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="components\batch_types\batch_instance_primitives.h">
+    <ClInclude Include="components\batch\batch_instance_primitives.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="components\file_handler.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="components\managers\resource_manager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="common\io_util.h">

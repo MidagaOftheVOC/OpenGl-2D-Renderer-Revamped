@@ -5,7 +5,7 @@
 #include <functional>
 
 #include "event_emitter.h"
-#include "../../batch_types/base_batch.h"
+#include "../../batch/batch.h"
 
 class Window;
 

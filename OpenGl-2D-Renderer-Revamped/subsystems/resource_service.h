@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../components/batch_types/base_batch.h"
+#include "../components/batch/batch.h"
 
 #include "../components/shader.h"
 #include "../components/sprite_sheet.h"
