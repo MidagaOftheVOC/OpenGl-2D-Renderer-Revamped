@@ -45,6 +45,11 @@ void UIManager::InterpretInput() {
 		);
 	}
 
+	if (input.IsPressed(GLFW_MOUSE_BUTTON_LEFT) || input.IsPressed(GLFW_KEY_ESCAPE)) {
+		std::println("Focus released");
+		m_FocusedInputField = nullptr;
+	}
+
 	if (m_FocusedInputField) {
 		std::u32string bufferedInput = input.GetUtfInput();
 		m_FocusedInputField->AppendString(bufferedInput);
@@ -60,36 +65,39 @@ void UIManager::InterpretInput() {
 		float mouseX, mouseY;
 		input.GetMousePosition(mouseX, mouseY);
 		glm::vec2 mousePos = glm::vec2(mouseX, mouseY);
-		WidgetCompositionInterface* Target = DetectClick(glm::vec2(0.f, 0.f), mousePos);
+		WidgetCompositionInterface* clickedWidget = DetectClick(glm::vec2(0.f, 0.f), mousePos);
+		Window* clickedWindow = nullptr;
 
 		for (size_t i = m_OpenedWindows.size(); i-- > 0; ) {
 			Window* targetWindow = m_OpenedWindows[i].get();
 			WidgetCompositionInterface* windowTarget = targetWindow->DetectClick(glm::vec2(0.f, 0.f), mousePos);
+			
 			if (windowTarget) {
-				MoveWindowToFront(targetWindow->GetID());
-				Target = windowTarget;
-
-				if (targetWindow == Target && input.IsHeld(GLFW_MOUSE_BUTTON_LEFT))
-					targetWindow->ApplyChangeToPosition(input.GetMouseChange());
-
-				if (Target && input.IsPressed(GLFW_MOUSE_BUTTON_LEFT)) {
-					Target->OnClick(&m_EventEmitter, targetWindow);
-					input.SetMouseCapturedFlag();
-				}
+				clickedWidget = windowTarget;
+				clickedWindow = targetWindow;
 				break;
 			}
 		}
-	}
 
-	if (input.IsPressed(GLFW_MOUSE_BUTTON_LEFT) || input.IsPressed(GLFW_KEY_ESCAPE)) {
-		std::println("Focus released");
-		m_FocusedInputField = nullptr;
+		if (clickedWindow) {
+			MoveWindowToFront(clickedWindow->GetID());
+		}
+
+		if (clickedWidget && clickedWidget == clickedWindow) {
+			clickedWindow->ApplyChangeToPosition(input.GetMouseChange());
+		}
+
+		if (clickedWidget && input.IsPressed(GLFW_MOUSE_BUTTON_LEFT)) {
+			clickedWidget->OnClick(&m_EventEmitter, clickedWindow);
+			input.SetMouseCapturedFlag();
+		}
 	}
 
 	EnforceUIEvents();
 }
 
-void UIManager::OpenWindow(std::unique_ptr<Window> window) {
+void UIManager::OpenWindow(std::unique_ptr<Window> window, glm::vec2 openWhere) {
+	window.get()->SetRelPosition(openWhere);
 	m_OpenedWindows.push_back(std::move(window));
 }
 
@@ -129,6 +137,36 @@ void UIManager::EnforceUIEvents() {
 		}
 	}
 
-
 	events.clear();
+}
+
+std::unique_ptr<Window> UIManager::GenWindowObject(
+	glm::vec2 dimensions,
+	const BackgroundSkinInterface* bgSkin,
+	bool haveClosingButton
+) {
+	const BackgroundSkinInterface* selectedSkin = bgSkin;
+	if (!selectedSkin) {
+		selectedSkin = GetResService()->GetBgSkinByName();
+	}
+
+	auto self = std::make_unique<Window>(GetNextWindowID(), dimensions, selectedSkin);
+	
+	if (haveClosingButton) {
+		glm::vec2 closeBtnPos = dimensions;
+		closeBtnPos.x -= 20 + 4;	//	TODO:	HARDCODED DIMENSIONS OF CLOSING BUTTON	
+		closeBtnPos.y = 4;			//	TODO:	HARDCODED PADDING FOR CLOSING BUTTON
+
+		auto closeBtn = std::make_unique<TextlessButton>(closeBtnPos, glm::vec2(20.f, 20.f), GetResService()->GetCloseBtnBgSkin());
+		closeBtn.get()->SetOnClick([](UI_EVENT_CONTEXT_PARAMS) {
+			Event self;
+			self.type = EventType::CLOSE_WINDOW;
+			self.closeWindowEvent.targetWindowID = owningWindow->GetID();
+			ctx->PushEvent(self);
+		});
+
+		self.get()->AddChild(std::move(closeBtn));
+	}
+
+	return self;
 }

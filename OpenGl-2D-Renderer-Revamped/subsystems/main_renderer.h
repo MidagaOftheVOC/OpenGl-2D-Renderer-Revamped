@@ -13,7 +13,7 @@
 #include "../components/input_controller.h"
 #include "../components/file_handler.h"
 
-#include "../components/batch_types/base_batch.h"
+#include "../components/batch/batch.h"
 #include "../components/uniform/uniform_data.h"
 
 #include "../components/ui/text.h"

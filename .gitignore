@@ -362,3 +362,5 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 /OpenGl-2D-Renderer-Revamped/main.cpp
+/OpenGl-2D-Renderer-Revamped/test/res/cyrillic_print_big.xcf
+*.xcf

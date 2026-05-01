@@ -54,13 +54,10 @@
     <ClCompile Include="components\ui\widget\widgets\window.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="components\batch_types\batches.cpp">
+    <ClCompile Include="components\batch\batch.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="components\file_handler.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="components\managers\managers.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="engine.cpp">
@@ -91,6 +88,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="components\ui\widget\widgets\input.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="components\ui\widget\background_skin.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="components\ui\widget\widgets\textless_button.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -131,16 +134,13 @@
     <ClInclude Include="components\ui\widget\widgets\window.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="components\batch_types\base_batch.h">
+    <ClInclude Include="components\batch\batch.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="components\batch_types\batch_instance_primitives.h">
+    <ClInclude Include="components\batch\batch_instance_primitives.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="components\file_handler.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="components\managers\resource_manager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="common\io_util.h">
@@ -170,5 +170,19 @@
     <ClInclude Include="components\ui\widget\widgets\input.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="components\ui\widget\background_skin.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="components\ui\widget\widgets\textless_button.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="test\res\cyrillic_print.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="test\res\cyrillic_print_big.png">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>

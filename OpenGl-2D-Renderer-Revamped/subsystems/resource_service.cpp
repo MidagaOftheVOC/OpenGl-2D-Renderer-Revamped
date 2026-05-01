@@ -1,5 +1,7 @@
 ﻿#include "resource_service.h"
 
+static const char* g_DefaultFontName = "cyrillic";
+
 void ResourceService::LoadShader(
 	const std::string& _locationShaderFile,
 	const std::string& _shaderName
@@ -15,14 +17,16 @@ void ResourceService::LoadSpriteSheet(
 	const std::string& _sheetName,
 	const Shader* _preferredShader,
 	int _spritesPerRow,
-	int _spritesPerCol
+	int _spritesPerCol,
+	int paddingPx
 ) {
 	m_Sheets.emplace_back(
 		_locationRawImage,
 		_sheetName,
 		_preferredShader,
 		_spritesPerRow,
-		_spritesPerCol
+		_spritesPerCol,
+		paddingPx
 	);
 }
 
@@ -70,14 +74,16 @@ void ResourceService::UploadSpriteSheetParameters(
 	const char* _sheetName,
 	const char* _preferredShader,
 	int _spritesPerRow,
-	int _spritesPerCol
+	int _spritesPerCol,
+	int paddingPx
 ) {
 	m_SpriteSheetLoadQueue.emplace_back(
 		_locationRawImage,
 		_sheetName,
 		_preferredShader,
 		_spritesPerRow,
-		_spritesPerCol
+		_spritesPerCol,
+		paddingPx
 	);
 }
 
@@ -105,76 +111,185 @@ void ResourceService::StartLoadingProcess() {
 
 	for (size_t i = 0; i < m_SpriteSheetLoadQueue.size(); i++) {
 		SpriteSheetLoadingParameters& params = m_SpriteSheetLoadQueue[i];
-
+		
 		LoadSpriteSheet(
 			std::string(params.m_LocationOfImage),
 			std::string(params.m_SheetName),
 			GetShaderByName(params.m_PreferredShaderName.c_str()),
 			params.m_SpritesPerRow,
-			params.m_SpritesPerCol
+			params.m_SpritesPerCol,
+			params.paddingPx
 		);
 	}
 	m_SpriteSheetLoadQueue.clear();
+
+	LoadFonts();
 
 	LoadDefaultVariables();
 }
 
 void ResourceService::LoadDefaultVariables() {
-	m_DefaultFont = Font(GetSpriteSheetByName("cyrillic"), "cyrillic");
-
-	std::vector<unsigned short> offsets;
-	offsets.resize(80, 20);
-	m_DefaultFont.Init(
-		U"АБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЬЮЯЍ",
-		U"абвгдежзийклмнопрстуфхцчшщъьюяѝ",
-		U".,+-!?;:&><#/",
-		offsets.data(),
-		80
-	);
-
-	m_DefaultTextOptions.font = &m_DefaultFont;
-
-
-	PaneSkin defSkin;
-	defSkin.cornerLengthPx = 20;
-	defSkin.name = "default";
-	for (int i = 0; i < 9; i++) {
-		SpriteInstance si;
-		si.dimensions.x = 20;
-		si.dimensions.y = 20;
-
-		si.SpriteInfo = SpriteInformation(0, i);
-
-		defSkin.instanceArray[i] = si;
+	if (m_Fonts.size()) {
+		m_DefaultTextOptions.font = &m_Fonts[0];
 	}
-
-	DEBUG_LOG("Default pane skin is missing.");
-	AddBgSkin(defSkin);
 
 	m_UIBatch.InitialiseBuffers();
 	m_UIBatch.AddSheetToBatch(GetSpriteSheetByName(c_SpecialUISheetName));
-	m_UIBatch.AddSheetToBatch(GetSpriteSheetByName("cyrillic"));
 	m_UIBatch.BufferUBOs();
+
+	auto defSkin = std::make_unique<NineSliceBgSkin>("default");
+	defSkin.get()->cornerLengthPx = 20;
+	for (int i = 0; i < 9; i++) {
+		defSkin.get()->instanceArray[i] = m_UIBatch.GetSprite(c_SpecialUISheetName, NineSliceBgSkin::DEFAULT_BG_SUBSPRITE_NAMES[i]);
+	}
+	AddBgSkin(std::move(defSkin));
+	
+	auto closeBtnSkin = std::make_unique<ImageBgSkin>("closeBtnSkin");
+	closeBtnSkin.get()->imageInstance = m_UIBatch.GetSprite(c_SpecialUISheetName, "closeBtn");
+	AddBgSkin(std::move(closeBtnSkin));
+
+	m_bgCloseBtnSkin = GetBgSkinByName("closeBtnSkin");
 }
 
-const PaneSkin* ResourceService::GetSkinByName(
+const BackgroundSkinInterface* ResourceService::GetBgSkinByName(
 	const char* _name
 ) const {
-	if (!_name) return nullptr;
-	size_t len = m_PaneSkins.size();
-	for (size_t i = 0; i < len; i++) {
+	size_t paneCount = m_BgSkins.size();
+	if (paneCount == 0) {
+		DEBUG_ASSERT(0, "GetBgSkinByName() called when no skins were loaded.");
+		return nullptr;
+	}
+
+	if (!_name) {
+		return m_BgSkins[0].get();
+	}
+
+	for (size_t i = 0; i < paneCount; i++) {
 		if (
-			strcmp(_name, m_PaneSkins[i].name.c_str()) == 0
+			strcmp(_name, m_BgSkins[i].get()->name.c_str()) == 0
 			) {
-			return &m_PaneSkins[i];
+			return m_BgSkins[i].get();
 		}
 	}
-	DEBUG_WARN(0, "GetShaderByName() for name [%s] returned nullptr.", _name);
+
+	DEBUG_WARN(0, "GetBgSkinByName() for name [%s] returned nullptr.", _name);
 	return nullptr;
 }
 
 void ResourceService::AddBgSkin(
-	const PaneSkin& _skin
+	std::unique_ptr<BackgroundSkinInterface> _skin
 ) {
-	m_PaneSkins.emplace_back(_skin);
+	m_BgSkins.emplace_back(std::move(_skin));
+}
+
+const Font* ResourceService::GetFontByName(
+	const char* name
+) const {
+	size_t fontCount = m_Fonts.size();
+	if (fontCount == 0) {
+		DEBUG_ASSERT(0, "GetFontByName() called when no skins were loaded.");
+		return nullptr;
+	}
+
+	if (!name) {
+		return &m_Fonts[0];
+	}
+
+	for (size_t i = 0; i < fontCount; i++) {
+		if (
+			strcmp(name, m_Fonts[i].GetName().c_str()) == 0
+			) {
+			return &m_Fonts[i];
+		}
+	}
+
+	DEBUG_WARN(0, "GetFontByName() for name [%s] returned nullptr.", name);
+	return nullptr;
+}
+
+void ResourceService::UploadFontParameters(
+	const char* fontName,
+	const char* fontFileLocation
+) {
+	m_FontLoadQueue.emplace_back(
+		fontName,
+		fontFileLocation
+	);
+}
+
+void ResourceService::LoadFonts() {
+	for (size_t i = 0; i < m_FontLoadQueue.size(); i++) {
+		FontLoadingParameters params = m_FontLoadQueue[i];
+		const std::string& name = params.name;
+		const std::string& location = params.location;
+		std::fstream file(location.c_str(), std::ios::in);
+		std::string currentLine;
+
+		std::u32string preparedCharset;
+		std::vector<unsigned short> preparedOffsets;
+		int preparedGlyphCount = 0;
+		int offsetCounter = 0;
+		std::string fontName;
+		std::string sheetName;
+
+		DEBUG_ASSERT(file.is_open(), "Font with name [%s] tried to open file at [%s] but couldn\'t open it.", name.c_str(), location.c_str());
+		
+		while (std::getline(file, currentLine)) {
+			if (currentLine.length() == 0 || currentLine.starts_with("//")) {
+				continue;
+			}
+			
+			DEBUG_ASSERT(currentLine.contains("="), "Font file [%s] has bad key-value pair.", location.c_str());
+
+			auto equalSign = currentLine.find("=");
+			std::string key = currentLine.substr(0, equalSign);
+			std::string val = currentLine.substr(equalSign + 1, currentLine.length() - equalSign - 1);
+
+			if (key == "font_name") {
+				fontName = std::move(val);
+				continue;
+			}
+
+			if (key == "sheet_name") {
+				sheetName = std::move(val);
+				continue;
+			}
+
+			if (key == "charset") {
+				std::stringstream ss(val);
+				uint32_t codepoint;
+				while (ss >> codepoint) {
+					preparedCharset.push_back(codepoint);
+					preparedGlyphCount++;
+				}
+				continue;
+			}
+
+			if (key == "offsets") {
+				std::stringstream ss(val);
+				unsigned short offset;
+				while (ss >> offset) {
+					preparedOffsets.push_back(offset);
+					offsetCounter++;
+				}
+				continue;
+			}
+		}
+
+		const SpriteSheet* sheetSearchResult = GetSpriteSheetByName(sheetName.c_str());
+		DEBUG_ASSERT(sheetSearchResult, "Font with name [%s] queried for non-existant sprite sheet with name [%s]", name.c_str(), sheetName.c_str());
+		DEBUG_ASSERT(offsetCounter >= preparedGlyphCount, "Font with name [%s] has less offsets than glyphs in its charset.", name.c_str());
+
+		Font self(sheetSearchResult, fontName);
+		self.Init(
+			preparedCharset,
+			preparedOffsets.data(),
+			preparedGlyphCount
+		);
+
+		m_Fonts.emplace_back(std::move(self));
+		m_UIBatch.AddSheetToBatch(sheetSearchResult);
+	}
+
+	m_FontLoadQueue.clear();
 }

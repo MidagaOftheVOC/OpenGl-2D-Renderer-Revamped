@@ -1,43 +1,33 @@
-#include "base_batch.h"
+#include "batch.h"
 
 
 /*		DATA TYPES		*/
 
-uint16_t SpriteInformation::s_SheetSpriteBitmask = 0;
-
-uint16_t SpriteInformation::s_SheetIndexBits = 5;
-uint16_t SpriteInformation::s_SpriteIndexBits = 11;
-
-
-void SpriteInformation::InitialiseMasks() {
-	for (int i = 0; i < s_SheetIndexBits; i++) {
-		s_SheetSpriteBitmask |= 1ui16 << (15 - i);
-	}
-}
-
 SpriteInformation::SpriteInformation(
-	unsigned int _sheetIndex,
-	unsigned int _spriteIndex
+	uint32_t _sheetIndex,
+	uint32_t _spriteIndex
 ) {
-
-	uint16_t self = 0;
-
-	self |= _sheetIndex << (16 - s_SheetIndexBits);
-	self |= _spriteIndex;
-
-	m_SheetSpriteIndexData = self;
+	SetSheetIndex(_sheetIndex);
+	SetSpriteIndex(_spriteIndex);
 }
 
-
-uint16_t SpriteInformation::GetSheetIndex() const {
-	return uint16_t(m_SheetSpriteIndexData & s_SheetSpriteBitmask) >> (16 - s_SheetIndexBits);
+uint32_t SpriteInformation::GetSheetIndex() const {
+	return (data & 0xFF000000ui32) >> 24;
 }
 
-
-uint16_t SpriteInformation::GetSpriteIndex() const {
-	return uint16_t(m_SheetSpriteIndexData & ~s_SheetSpriteBitmask);
+uint32_t SpriteInformation::GetSpriteIndex() const {
+	return (data & 0x00FFFFFFui32);
 }
 
+void SpriteInformation::SetSheetIndex(uint32_t sheetIndex){
+	data &= 0x00FFFFFFui32;
+	data |= sheetIndex << 24;
+}
+
+void SpriteInformation::SetSpriteIndex(uint32_t spriteIndex){
+	data &= 0xFF000000ui32;
+	data |= spriteIndex;
+}
 
 unsigned int Batch::c_NotInitialised = 1 << 0;
 unsigned int Batch::c_MaximumInstanceCountExceeded = 1 << 16;
@@ -88,6 +78,11 @@ void Batch::AddSheetToBatch(
 		if (_spriteSheet->GetShader() != m_SpriteSheets[i]->GetShader()) {
 			DEBUG_ASSERT(0, "Batch w/ name [%s] has tried to append SpriteSheet objects with different shaders!", dm_BatchName.c_str());
 			return;
+		}
+
+		if (_spriteSheet == m_SpriteSheets[i]) {
+			DEBUG_WARN(0, "Batch w/ name [%s] has tried to append the same SprteSheet object more than once. Skipping...", dm_BatchName.c_str());
+			continue;
 		}
 	}
 
@@ -142,8 +137,6 @@ void Batch::BufferUBOs() {
 	glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
 	const Shader* ShaderObject = GetSpecialSheetPointer()->GetShader();
-
-
 
 	unsigned int Program = ShaderObject->GetShaderId();
 
@@ -212,7 +205,7 @@ int Batch::SendSpriteDataToGPU() {
 #ifdef DEBUG__CODE
 	CheckGLErrors();
 #endif
-	return retVal;
+	return int(retVal);
 }
 
 void Batch::DrawText(
@@ -222,12 +215,25 @@ void Batch::DrawText(
 	float z
 ) {
 	auto textGeometry = textObject->GetTextGeometry();
+	auto scale = textObject->GetTextOptions().scale;
+	uint32_t sheetIndexForFont = 0;
+	for (size_t i = 0; i < m_SpriteSheets.size(); i++) {
+		if (m_SpriteSheets[i] == textObject->GetFont()->GetFontSheet()) {
+			sheetIndexForFont = static_cast<unsigned int>(i);
+			break;
+		}
+	}
 
 	for (auto&& sprite : textGeometry) {
+		sprite.instance.SpriteInfo.SetSheetIndex(sheetIndexForFont);
+		sprite.instance.dimensions.x *= scale;
+		sprite.instance.dimensions.y *= scale;
+		
+
 		DrawSprite(
 			sprite.instance,
-			sprite.position.x + x,
-			sprite.position.y + y,
+			(sprite.position.x * scale) + x,
+			(sprite.position.y * scale) + y,
 			0.f,
 			z
 		);
@@ -352,7 +358,7 @@ void Batch::InitialiseCommonVAO() {
 		Full: {
 			SpriteInstance: {
 				SpriteInformation: {
-					unsigned short
+					uint32_t
 				}
 				xyPair: {
 					float *2;
@@ -369,7 +375,7 @@ void Batch::InitialiseCommonVAO() {
 	glBindVertexBuffer(2, 0, 0, sizeof(FullSprite)); // buffer bound later per-batch
 
 	//	SpriteInfo
-	glVertexAttribIFormat(2, 1, GL_UNSIGNED_SHORT, offsetof(FullSprite, instance) + offsetof(SpriteInstance, SpriteInfo));
+	glVertexAttribIFormat(2, 1, GL_UNSIGNED_INT, offsetof(FullSprite, instance) + offsetof(SpriteInstance, SpriteInfo));
 	glVertexAttribBinding(2, 2);
 	glEnableVertexAttribArray(2);
 

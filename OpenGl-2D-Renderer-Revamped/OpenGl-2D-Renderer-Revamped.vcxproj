@@ -143,19 +143,20 @@
   <ItemGroup>
     <ClCompile Include="common\common.cpp" />
     <ClCompile Include="common\standard_quad.cpp" />
-    <ClCompile Include="components\batch_types\batches.cpp" />
+    <ClCompile Include="components\batch\batch.cpp" />
     <ClCompile Include="components\camera.cpp" />
     <ClCompile Include="components\file_handler.cpp" />
     <ClCompile Include="components\input_controller.cpp" />
-    <ClCompile Include="components\managers\managers.cpp" />
     <ClCompile Include="components\shader.cpp" />
     <ClCompile Include="components\sprite_sheet.cpp" />
     <ClCompile Include="components\ui\font.cpp" />
     <ClCompile Include="components\ui\text.cpp" />
+    <ClCompile Include="components\ui\widget\background_skin.cpp" />
     <ClCompile Include="components\ui\widget\event_emitter.cpp" />
     <ClCompile Include="components\ui\widget\widgets\button.cpp" />
     <ClCompile Include="components\ui\widget\widgets\input.cpp" />
     <ClCompile Include="components\ui\widget\widgets\label.cpp" />
+    <ClCompile Include="components\ui\widget\widgets\textless_button.cpp" />
     <ClCompile Include="components\ui\widget\widget_interface.cpp" />
     <ClCompile Include="subsystems\ui_manager.cpp" />
     <ClCompile Include="components\ui\widget\widgets\window.cpp" />
@@ -172,19 +173,20 @@
     <ClInclude Include="common\common.h" />
     <ClInclude Include="common\io_util.h" />
     <ClInclude Include="common\standard_quad.h" />
-    <ClInclude Include="components\batch_types\base_batch.h" />
-    <ClInclude Include="components\batch_types\batch_instance_primitives.h" />
+    <ClInclude Include="components\batch\batch.h" />
+    <ClInclude Include="components\batch\batch_instance_primitives.h" />
     <ClInclude Include="components\camera.h" />
     <ClInclude Include="components\file_handler.h" />
     <ClInclude Include="components\input_controller.h" />
-    <ClInclude Include="components\managers\resource_manager.h" />
     <ClInclude Include="components\shader.h" />
     <ClInclude Include="components\sprite_sheet.h" />
     <ClInclude Include="components\ui\font.h" />
+    <ClInclude Include="components\ui\widget\background_skin.h" />
     <ClInclude Include="components\ui\widget\event_emitter.h" />
     <ClInclude Include="components\ui\widget\widgets\button.h" />
     <ClInclude Include="components\ui\widget\widgets\input.h" />
     <ClInclude Include="components\ui\widget\widgets\label.h" />
+    <ClInclude Include="components\ui\widget\widgets\textless_button.h" />
     <ClInclude Include="components\ui\widget\widget_interface.h" />
     <ClInclude Include="components\ui\text.h" />
     <ClInclude Include="subsystems\ui_manager.h" />
@@ -194,6 +196,10 @@
     <ClInclude Include="subsystems\factories\text_factory.h" />
     <ClInclude Include="subsystems\main_renderer.h" />
     <ClInclude Include="subsystems\resource_service.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="test\res\cyrillic_print.png" />
+    <Image Include="test\res\cyrillic_print_big.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

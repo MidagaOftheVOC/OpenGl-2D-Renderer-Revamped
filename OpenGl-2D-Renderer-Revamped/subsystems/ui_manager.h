@@ -4,11 +4,13 @@
 
 #include "resource_service.h"
 #include "../components/input_controller.h"
-#include "../components/batch_types/base_batch.h"
+#include "../components/batch/batch.h"
 
 #include "../components/ui/widget/event_emitter.h"
 #include "../components/ui/widget/widgets/window.h"
 #include "../components/ui/widget/widgets/input.h"
+#include "../components/ui/widget/widgets/button.h"
+#include "../components/ui/widget/widgets/textless_button.h"
 
 struct CapturedStates {
 	bool capturedMouse = false;
@@ -61,9 +63,15 @@ public:
 	UIManager(const UIManager&) = delete;
 	UIManager& operator=(const UIManager&) = delete;
 
+	std::unique_ptr<Window> GenWindowObject(
+		glm::vec2 dimensions,
+		const BackgroundSkinInterface* bgSkin = nullptr,
+		bool haveClosingButton = true
+	);
+
 	void InterpretInput();
 
-	void OpenWindow(std::unique_ptr<Window> window);
+	void OpenWindow(std::unique_ptr<Window> window, glm::vec2 openWhere);
 
 	void MoveWindowToFront(ID windowID);
 

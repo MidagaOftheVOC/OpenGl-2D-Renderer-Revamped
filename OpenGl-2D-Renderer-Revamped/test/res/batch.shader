@@ -27,8 +27,8 @@ flat out uint v_SheetIndex;
 void main(){
 
     // Texture region mapping
-    uint SheetIndex  = uint( b_SpriteInformationBuffer >> 11 );
-    uint SpriteIndex = uint( b_SpriteInformationBuffer & 0x07FFu );
+    uint SheetIndex  = uint( b_SpriteInformationBuffer >> 24 );
+    uint SpriteIndex = uint( b_SpriteInformationBuffer & 0x00FFFFFF );
     v_SheetIndex = SheetIndex;
 
     vec4 UVRegion = u_UVRegions[u_SheetOffsets[SheetIndex] + SpriteIndex];

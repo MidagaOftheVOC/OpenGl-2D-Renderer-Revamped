@@ -1,8 +1,6 @@
 #pragma once
 
-
 #include <bitset>
-
 
 #include "../common/common.h"
 #include "../common/standard_quad.h"
@@ -96,9 +94,6 @@ class InputController {
 	GameInput m_Input;
 	
 private:
-
-	//	TODO:	Implement range skips to minimise checks
-	//	TODO:	Implement mouse coordinate tracking
 
 	std::bitset<MAXIMUM_BITSET_SIZE> m_TrackedKeystatesBitmask;
 

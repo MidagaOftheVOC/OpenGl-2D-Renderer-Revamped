@@ -9,7 +9,6 @@ Text::Text(
 	m_TextContent(_string),
 	m_TextOptions(_textOptions)
 {
-	CalculateGeometry();
 	m_HasChanged = true;
 }
 
@@ -17,7 +16,6 @@ void Text::UpdateTextValue(
 	std::u32string&& _stringToMove
 ) {
 	m_TextContent = std::move(_stringToMove);
-	CalculateGeometry();
 	m_HasChanged = true;
 }
 
@@ -25,7 +23,6 @@ void Text::UpdateTextValue(
 	const std::u32string& _stringToCopy
 ) {
 	m_TextContent = _stringToCopy;
-	CalculateGeometry();
 	m_HasChanged = true;
 }
 
@@ -35,14 +32,12 @@ void Text::AppendCharacter(
 	char32_t _char
 ) {
 	m_TextContent += _char;
-	CalculateGeometry();
 	m_HasChanged = true;
 }
 
 void Text::RemoveLastCharacter() {
 	if (m_TextContent.size() > 0) {
 		m_TextContent.pop_back();
-		CalculateGeometry();
 		m_HasChanged = true;
 	}
 }
@@ -51,15 +46,17 @@ void Text::SetLineLength(
 	float length
 ) {
 	m_TextOptions.lineLength = length;
-	CalculateGeometry();
 	m_HasChanged = true;
 }
 
 const std::vector<FullSprite>& Text::GetTextGeometry() const {
+	if (m_HasChanged) {
+		CalculateGeometry();
+	}
 	return m_TextGeometry;
 }
 
-void Text::CalculateGeometry() {
+void Text::CalculateGeometry() const {
 
 	m_TextGeometry.clear();
 

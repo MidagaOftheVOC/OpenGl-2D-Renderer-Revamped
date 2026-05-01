@@ -4,18 +4,12 @@
 #include <memory>
 #include <functional>
 
+#include "background_skin.h"
 #include "event_emitter.h"
-#include "../../batch_types/base_batch.h"
+
+#define UI_EVENT_CONTEXT_PARAMS EventEmitter* ctx, Window* owningWindow
 
 class Window;
-
-//	TODO: this can be expanded to maintain an array of instances for the normal and pressed version of buttons or something
-//	We operate under the assumption all UI-related data is in one sheet
-struct PaneSkin {
-	int cornerLengthPx = 0;
-	std::string name;
-	SpriteInstance instanceArray[9];
-};
 
 class WidgetCompositionInterface {
 
@@ -29,7 +23,7 @@ private:
 	bool m_IsHitTestable = true;	//<<< Set to true, very advanced concept
 	bool m_IsInteractable = false;
 
-	const PaneSkin* m_BackgroundSkin = nullptr;
+	const BackgroundSkinInterface* m_BackgroundSkin = nullptr;
 
 	std::vector<FullSprite> m_BackgroundGeometry;
 
@@ -52,7 +46,7 @@ public:
 	WidgetCompositionInterface(
 		glm::vec2 offsetRelToParent,
 		glm::vec2 dimensions,
-		const PaneSkin* background,
+		const BackgroundSkinInterface* background,
 		bool isInteractable
 	) :
 		m_PositionRelToParent(offsetRelToParent),
@@ -70,7 +64,7 @@ public:
 		float yOffsetRelToParent,
 		float xDimension,
 		float yDimension,
-		const PaneSkin* background,
+		const BackgroundSkinInterface* background,
 		bool isInteractable
 	) :
 		m_PositionRelToParent(xOffsetRelToParent, yOffsetRelToParent),
@@ -134,6 +128,10 @@ protected:
 	) const;
 
 public:
+
+	void SetRelPosition(
+		glm::vec2 newPos
+	);
 
 	void SetOnClick(
 		std::function<void(EventEmitter* ctx, Window* owningWindow)> fn

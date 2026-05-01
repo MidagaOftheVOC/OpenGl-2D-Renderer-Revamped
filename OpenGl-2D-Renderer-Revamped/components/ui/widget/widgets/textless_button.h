@@ -1,15 +1,16 @@
 #pragma once
 
-#include "label.h"
+#pragma once
 
-class Button : public WidgetCompositionInterface {
+#include "../widget_interface.h"
+
+class TextlessButton : public WidgetCompositionInterface {
 
 public:
 
-	Button(
+	TextlessButton(
 		glm::vec2 offsetRelToParent,
 		glm::vec2 dimensions,
-		const Text& text,
 		const BackgroundSkinInterface* bgSkin
 	) :
 		WidgetCompositionInterface(
@@ -19,13 +20,12 @@ public:
 			true
 		)
 	{
-		AddChild(std::move(std::make_unique<Label>(text, glm::vec2(5.f, 5.f), dimensions - glm::vec2(5.f, 5.f))));
 	}
 
 	virtual void SendOwnRenderData(
 		Batch* uiBatch,
 		glm::vec2 absoluteCurrentWidgetOrigin,
 		float z
-	) const {}
-
+	) const {
+	}
 };

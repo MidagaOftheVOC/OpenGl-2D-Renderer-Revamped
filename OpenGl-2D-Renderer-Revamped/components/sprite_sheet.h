@@ -17,7 +17,7 @@
 #include <vector>
 
 #include "../common/common.h"
-#include "batch_types/batch_instance_primitives.h"
+#include "batch/batch_instance_primitives.h"
 #include "shader.h"
 
 
@@ -65,6 +65,7 @@ class SpriteSheet {
 
 	int m_SpriteCountPerRow = -1;	//	pieces per row
 	int m_SpriteCountPerCol = -1;	//	pieces per col
+	int m_PaddingPx = 0;
 
 	//	will be used for easier, but slower, search in Renderer2D
 	std::string m_SheetName;
@@ -101,7 +102,8 @@ public:
 		const std::string& _sheetName,
 		const Shader* _preferredShader,
 		int _spritesPerRow_IGNORED_IF_LOADING_CONFIG_FILE,
-		int _spritesPerCol_IGNORED_IF_LOADING_CONFIG_FILE
+		int _spritesPerCol_IGNORED_IF_LOADING_CONFIG_FILE,
+		int paddingPx
 	);
 
 
@@ -145,7 +147,8 @@ private:
 	void StandardImageLoadingMethod(
 		const char* _pathFromConstructor,
 		int _spritesPerRow,
-		int _spritesPerCol
+		int _spritesPerCol,
+		int paddingPx
 	);
 
 

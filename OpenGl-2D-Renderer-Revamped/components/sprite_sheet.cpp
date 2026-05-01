@@ -37,7 +37,8 @@ SpriteSheet::SpriteSheet(
 	const std::string& _sheetName,
 	const Shader* _preferredShader,
 	int _spritesPerRow_IGNORED_IF_LOADING_CONFIG_FILE,
-	int _spritesPerCol_IGNORED_IF_LOADING_CONFIG_FILE
+	int _spritesPerCol_IGNORED_IF_LOADING_CONFIG_FILE,
+	int paddingPx
 ) 
 	: 
 		m_SheetName(_sheetName),
@@ -52,7 +53,8 @@ SpriteSheet::SpriteSheet(
 		StandardImageLoadingMethod(
 			_locationOfImageOrConfigFile.c_str(),
 			_spritesPerRow_IGNORED_IF_LOADING_CONFIG_FILE,
-			_spritesPerCol_IGNORED_IF_LOADING_CONFIG_FILE
+			_spritesPerCol_IGNORED_IF_LOADING_CONFIG_FILE,
+			paddingPx
 		);
 	}
 	else if (ReturnCode == c_ConfigFileLoadingMethodReturnCode) {
@@ -245,14 +247,16 @@ void SpriteSheet::ConfigurationPairLoadingMethod(
 void SpriteSheet::StandardImageLoadingMethod(
 	const char* _pathFromConstructor,
 	int _spritesPerRow,
-	int _spritesPerCol
+	int _spritesPerCol,
+	int paddingPx
 ) {
 
 	m_SpriteCountPerRow = _spritesPerRow;
 	m_SpriteCountPerCol = _spritesPerCol;
+	m_PaddingPx = paddingPx;
 
-	m_TexParams.S_WrapMode = GL_REPEAT;
-	m_TexParams.T_WrapMode = GL_REPEAT;
+	m_TexParams.S_WrapMode = GL_CLAMP_TO_EDGE;
+	m_TexParams.T_WrapMode = GL_CLAMP_TO_EDGE;
 
 	LoadImageInTexture(_pathFromConstructor);
 
@@ -264,15 +268,15 @@ void SpriteSheet::StandardImageLoadingMethod(
 		float yTotalOffsetPx = y * assetHeight;
 
 		m_UVregionsFromConfigFile.emplace_back(
-			xTotalOffsetPx / float(m_SheetWidth),
-			yTotalOffsetPx / float(m_SheetHeight),
-			(xTotalOffsetPx + assetWidth) / float(m_SheetWidth),
-			(yTotalOffsetPx + assetHeight) / float(m_SheetHeight)
+			(xTotalOffsetPx + m_PaddingPx) / float(m_SheetWidth),
+			(yTotalOffsetPx + m_PaddingPx) / float(m_SheetHeight),
+			(xTotalOffsetPx - m_PaddingPx + assetWidth) / float(m_SheetWidth),
+			(yTotalOffsetPx - m_PaddingPx + assetHeight) / float(m_SheetHeight)
 		);
 
 		xyDimensions dims = {
-			.x = assetWidth,
-			.y = assetHeight
+			.x = assetWidth - 2 * m_PaddingPx,
+			.y = assetHeight - 2 * m_PaddingPx
 		};
 
 		m_SpriteDimensionsPx.emplace_back(dims);
@@ -335,6 +339,9 @@ void SpriteSheet::SetTextureParametersToGL() {
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 }
 
 
