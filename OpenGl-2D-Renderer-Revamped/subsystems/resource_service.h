@@ -24,19 +24,22 @@ struct SpriteSheetLoadingParameters {
 	const std::string m_PreferredShaderName;
 	int m_SpritesPerRow;
 	int m_SpritesPerCol;
+	int paddingPx = 0;
 
 	SpriteSheetLoadingParameters(
 		const char* _locationRawImage,
 		const char* _sheetName,
 		const char* _preferredShader,
 		int _spritesPerRow,
-		int _spritesPerCol
+		int _spritesPerCol,
+		int paddingPx = 0
 	) :
 		m_LocationOfImage(_locationRawImage),
 		m_SheetName(_sheetName),
 		m_PreferredShaderName(_preferredShader),
 		m_SpritesPerRow(_spritesPerRow),
-		m_SpritesPerCol(_spritesPerCol)
+		m_SpritesPerCol(_spritesPerCol),
+		paddingPx(paddingPx)
 	{}
 };
 
@@ -45,11 +48,11 @@ struct FontLoadingParameters {
 	const std::string name;
 
 	FontLoadingParameters(
-		const char* location,
-		const char* name
+		const char* fontName,
+		const char* fontFileLocation
 	) :
-		location(location),
-		name(name)
+		location(fontFileLocation),
+		name(fontName)
 	{}
 };
 
@@ -63,7 +66,7 @@ private:
 	std::vector<SpriteSheet> m_Sheets;
 
 	std::vector<Font> m_Fonts;
-	std::vector<BackgroundSkin> m_PaneSkins;
+	std::vector<std::unique_ptr<BackgroundSkinInterface>> m_BgSkins;
 
 	std::vector<ShaderLoadingParameters> m_ShaderLoadQueue;
 	std::vector<SpriteSheetLoadingParameters> m_SpriteSheetLoadQueue;
@@ -73,6 +76,10 @@ private:
 
 	TextOptions m_DefaultTextOptions;
 	Batch m_UIBatch;
+
+private:
+
+	const BackgroundSkinInterface* m_bgCloseBtnSkin = nullptr;
 
 public:
 
@@ -96,8 +103,11 @@ private:
 		const std::string& _sheetName,
 		const Shader* _preferredShader,
 		int _spritesPerRow,
-		int _spritesPerCol
+		int _spritesPerCol,
+		int paddingPx
 	);
+
+	void LoadFonts();
 
 	void LoadDefaultVariables();
 
@@ -113,15 +123,21 @@ public:
 		const char* _sheetName,
 		const char* _preferredShader,
 		int _spritesPerRow,
-		int _spritesPerCol
+		int _spritesPerCol,
+		int paddingPx = 0
+	);
+
+	void UploadFontParameters(
+		const char* fontName,
+		const char* fontFileLocation
 	);
 
 	void StartLoadingProcess();
 
 public:
 
-	void AddBackgroundSkin(
-		const BackgroundSkin& _skin
+	void AddBgSkin(
+		std::unique_ptr<BackgroundSkinInterface> _skin
 	);
 
 public:
@@ -134,13 +150,15 @@ public:
 		const char* _spriteSheetName
 	);
 
-	const BackgroundSkin* GetBgSkinByName(
+	const BackgroundSkinInterface* GetBgSkinByName(
 		const char* _name = nullptr
 	) const;
 
 	const Font* GetFontByName(
 		const char* name = nullptr
 	) const;
+
+	const BackgroundSkinInterface* GetCloseBtnBgSkin() const { return m_bgCloseBtnSkin; }
 
 public:
 

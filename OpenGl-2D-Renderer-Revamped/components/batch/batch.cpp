@@ -79,6 +79,11 @@ void Batch::AddSheetToBatch(
 			DEBUG_ASSERT(0, "Batch w/ name [%s] has tried to append SpriteSheet objects with different shaders!", dm_BatchName.c_str());
 			return;
 		}
+
+		if (_spriteSheet == m_SpriteSheets[i]) {
+			DEBUG_WARN(0, "Batch w/ name [%s] has tried to append the same SprteSheet object more than once. Skipping...", dm_BatchName.c_str());
+			continue;
+		}
 	}
 
 	m_SpriteSheets.emplace_back(
@@ -132,8 +137,6 @@ void Batch::BufferUBOs() {
 	glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
 	const Shader* ShaderObject = GetSpecialSheetPointer()->GetShader();
-
-
 
 	unsigned int Program = ShaderObject->GetShaderId();
 
@@ -212,6 +215,7 @@ void Batch::DrawText(
 	float z
 ) {
 	auto textGeometry = textObject->GetTextGeometry();
+	auto scale = textObject->GetTextOptions().scale;
 	uint32_t sheetIndexForFont = 0;
 	for (size_t i = 0; i < m_SpriteSheets.size(); i++) {
 		if (m_SpriteSheets[i] == textObject->GetFont()->GetFontSheet()) {
@@ -222,10 +226,14 @@ void Batch::DrawText(
 
 	for (auto&& sprite : textGeometry) {
 		sprite.instance.SpriteInfo.SetSheetIndex(sheetIndexForFont);
+		sprite.instance.dimensions.x *= scale;
+		sprite.instance.dimensions.y *= scale;
+		
+
 		DrawSprite(
 			sprite.instance,
-			sprite.position.x + x,
-			sprite.position.y + y,
+			(sprite.position.x * scale) + x,
+			(sprite.position.y * scale) + y,
 			0.f,
 			z
 		);

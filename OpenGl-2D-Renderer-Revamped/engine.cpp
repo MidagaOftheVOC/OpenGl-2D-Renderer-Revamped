@@ -61,7 +61,7 @@ bool Engine2D::GLFWInitialisation() {
 	}
 
 	glfwMakeContextCurrent(m_MainWindowContext);
-	glfwSwapInterval(1);
+	glfwSwapInterval(0);
 	GLenum glewReturnCode = glewInit();
 	if (glewReturnCode != GLEW_OK) {
 		std::cout << glewGetErrorString(glewReturnCode);

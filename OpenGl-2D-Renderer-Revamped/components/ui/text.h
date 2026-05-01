@@ -6,6 +6,7 @@ struct TextOptions {
 	const Font* font = nullptr;
 	float lineLength = 0.f;
 	float lineHeight = 20.f;
+	float scale = 1.0f;
 };
 
 class Text {

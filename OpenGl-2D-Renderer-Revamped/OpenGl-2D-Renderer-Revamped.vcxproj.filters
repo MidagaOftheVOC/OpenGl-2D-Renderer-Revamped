@@ -90,6 +90,12 @@
     <ClCompile Include="components\ui\widget\widgets\input.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="components\ui\widget\background_skin.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="components\ui\widget\widgets\textless_button.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="subsystems\main_renderer.h">
@@ -164,5 +170,19 @@
     <ClInclude Include="components\ui\widget\widgets\input.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="components\ui\widget\background_skin.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="components\ui\widget\widgets\textless_button.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="test\res\cyrillic_print.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="test\res\cyrillic_print_big.png">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>

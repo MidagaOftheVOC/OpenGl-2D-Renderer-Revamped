@@ -12,13 +12,12 @@ public:
 
 	Window(
 		ID id,
-		glm::vec2 offsetRelToParent,
 		glm::vec2 dimensions,
-		const BackgroundSkin* bgSkin
+		const BackgroundSkinInterface* bgSkin
 	) :
 		m_ID(id),
 		WidgetCompositionInterface(
-			offsetRelToParent,
+			glm::vec2(0.f, 0.f),
 			dimensions,
 			bgSkin,
 			true

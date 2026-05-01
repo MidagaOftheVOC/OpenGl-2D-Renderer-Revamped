@@ -1,4 +1,4 @@
-#include "font.h"
+﻿#include "font.h"
 
 Font::Font(
 	const SpriteSheet* _initialisedSheet,
@@ -9,29 +9,19 @@ Font::Font(
 {}
 
 void Font::Init(
-    const std::u32string& upperCaseLetters,
-    const std::u32string& lowerCaseLetters,
-    const std::u32string& otherGlyphs,
+    const std::u32string& glyphs,
     unsigned short* glyphOffsets,
-    int glyphCount
+    int glyphCount,
+    bool lowercaseOnly
 )
 {
+    m_IsLowercaseOnly = lowercaseOnly;
     m_GlyphIdentifier.clear();
     m_GlyphIdentifier.reserve(
-        upperCaseLetters.size() +
-        lowerCaseLetters.size() +
-        otherGlyphs.size() + 1
+        glyphs.size()
     );
 
-    for (char32_t c : upperCaseLetters)
-        m_GlyphIdentifier.push_back(c);
-
-    for (char32_t c : lowerCaseLetters)
-        m_GlyphIdentifier.push_back(c);
-
-    m_GlyphIdentifier.push_back(U' ');
-
-    for (char32_t c : otherGlyphs)
+    for (char32_t c : glyphs)
         m_GlyphIdentifier.push_back(c);
 
     memcpy(m_GlyphAdvances, glyphOffsets, glyphCount * sizeof(unsigned short));
@@ -66,6 +56,10 @@ GlyphSprite Font::GetGlyph(
     char32_t ch
 ) const {
 
+    if (m_IsLowercaseOnly) {
+        ch = TransformToLowercase(ch);
+    }
+
     size_t chIndex = GetGlyphIndex(ch);
     GlyphSprite result;
     //  Sheet index is queried in the DrawText function, once per Text draw call
@@ -73,4 +67,17 @@ GlyphSprite Font::GetGlyph(
     result.advance = m_GlyphAdvances[chIndex];
 
     return result;
+}
+
+char32_t Font::TransformToLowercase(char32_t ch) const
+{
+    switch (ch) {
+    case U'Ѝ': return U'ѝ';
+    case U'Ё': return U'ё';
+    }
+
+    if (ch >= U'А' && ch <= U'Я')
+        return ch + 32;
+
+    return ch;
 }

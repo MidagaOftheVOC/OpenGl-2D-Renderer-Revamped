@@ -12,7 +12,7 @@ public:
 		glm::vec2 offsetRelToParent,
 		glm::vec2 dimensions,
 		const Text& text,
-		const BackgroundSkin* bgSkin
+		const BackgroundSkinInterface* bgSkin
 	) :
 		WidgetCompositionInterface(
 			offsetRelToParent,

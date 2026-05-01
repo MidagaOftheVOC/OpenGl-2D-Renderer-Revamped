@@ -19,6 +19,8 @@ class Font {
 	//	images we'll be rendering
 	const SpriteSheet* m_SpriteSheet = nullptr;
 
+	bool m_IsLowercaseOnly = false;
+
 	unsigned short m_GlyphAdvances[MAXIMUM_GLYPHS_PER_FONT] = { 0 };
 
 	std::u32string m_GlyphIdentifier;
@@ -35,11 +37,10 @@ public:
 	);
 
 	void Init(
-		const std::u32string& upperCaseLetters,
-		const std::u32string& lowerCaseLetters,
-		const std::u32string& otherGlyphs,
+		const std::u32string& glyphs,
 		unsigned short* glyphOffsets,
-		int glyphCount
+		int glyphCount,
+		bool lowercaseOnly = false
 	);
 
 	unsigned short GetCharacterAdvance(
@@ -51,6 +52,10 @@ public:
 	) const;
 
 private:
+
+	char32_t TransformToLowercase(
+		char32_t ch
+	) const;
 
 	size_t GetGlyphIndex(
 		char32_t ch
