@@ -26,8 +26,6 @@ void Text::UpdateTextValue(
 	m_HasChanged = true;
 }
 
-//	TODO: mark for optimisation
-//	Technically, appending one character shouldn't have much influence outside the closest space to the end and its new position
 void Text::AppendCharacter(
 	char32_t _char
 ) {
@@ -60,6 +58,19 @@ void Text::CalculateGeometry() const {
 
 	m_TextGeometry.clear();
 
+	if (m_TextOptions.scrollType == TextScroll::Oneline) {
+		float CurrentLineLength = 0;
+		//	We render the right-most text which can be fitted in this distance
+		//	except the character which will be cut-off, since this isn't supported in the engine yet.
+		float DisplayedLength = m_TextOptions.lineLength;
+
+
+	}
+
+	if (m_TextOptions.scrollType == TextScroll::Multiline) {
+
+	}
+
 	int CurrentLineNumber = 0;
 	float CurrentLineLength = 0;
 
@@ -76,4 +87,11 @@ void Text::CalculateGeometry() const {
 	}
 
 	m_HasChanged = false;
+}
+
+void Text::SetScrollType(
+	TextScroll scrollType
+) {
+	m_TextOptions.scrollType = scrollType;
+	m_HasChanged = true;
 }

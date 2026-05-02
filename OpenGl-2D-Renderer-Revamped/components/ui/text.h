@@ -2,11 +2,18 @@
 
 #include "font.h"
 
+enum class TextScroll {
+	Multiline,	//	multiple lines, render the lower-most part
+	Oneline	//	all in one line, render the right-most part
+};
+
 struct TextOptions {
 	const Font* font = nullptr;
 	float lineLength = 0.f;
 	float lineHeight = 20.f;
 	float scale = 1.0f;
+
+	TextScroll scrollType = TextScroll::Multiline;
 };
 
 class Text {
@@ -45,6 +52,12 @@ public:
 		float length
 	);
 
+	void SetScrollType(
+		TextScroll scrollType
+	);
+
+private:
+	
 	void CalculateGeometry() const;
 
 public:

@@ -10,6 +10,19 @@ public:
 	
 	Label(
 		const Text& text,
+		glm::vec2 offsetRelToParent
+	) :
+		m_StoredText(text),
+		WidgetCompositionInterface(
+			offsetRelToParent,
+			glm::vec2(text.GetLineLength(), text.GetLineHeight()),
+			nullptr,
+			false
+		)
+	{}
+
+	Label(
+		const Text& text,
 		glm::vec2 offsetRelToParent,
 		glm::vec2 dimensions
 	) :
@@ -20,7 +33,9 @@ public:
 			nullptr,
 			false
 		)
-	{}
+	{
+		m_StoredText.SetLineLength(dimensions.x);
+	}
 
 	Text* GetText() { return &m_StoredText; }
 

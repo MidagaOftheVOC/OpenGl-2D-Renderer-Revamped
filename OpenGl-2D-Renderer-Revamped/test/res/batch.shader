@@ -8,6 +8,7 @@ layout(location = 3) in float b_Rotations;
 layout(location = 4) in vec2 b_PositionsRelativeToModel;    //  relative to batch origin
 layout(location = 5) in vec2 b_QuadDimensions;
 layout(location = 6) in float b_Zcoord;
+layout(location = 7) in uvec2 b_CutoffValue;
 
 layout(std140, binding = 0) uniform ubo_UVRegions {
     vec4 u_UVRegions[512];
@@ -27,15 +28,22 @@ flat out uint v_SheetIndex;
 void main(){
 
     // Texture region mapping
-    uint SheetIndex  = uint( b_SpriteInformationBuffer >> 24 );
+    uint SheetIndex  = uint( (b_SpriteInformationBuffer & 0x3F000000) >> 24 );
     uint SpriteIndex = uint( b_SpriteInformationBuffer & 0x00FFFFFF );
     v_SheetIndex = SheetIndex;
 
     vec4 UVRegion = u_UVRegions[u_SheetOffsets[SheetIndex] + SpriteIndex];
 
-    vec2 MinUV = UVRegion.xy;
-    vec2 MaxUV = UVRegion.zw;
+    float cutFromLeft = float((b_SpriteInformationBuffer >> 30) & 1u);
+    float cutFromTop  = float((b_SpriteInformationBuffer >> 31) & 1u);
 
+    vec2 remainFactor = vec2(float(b_CutoffValue.x) / 65535, float(b_CutoffValue.y) / 65535);
+    vec2 UVrawDistance = (UVRegion.zw - UVRegion.xy);
+    vec2 remainDistance = UVrawDistance * remainFactor;
+
+    vec2 MinUV = UVRegion.xy + (UVrawDistance * (vec2(1.f, 1.f) - remainFactor)) * vec2(cutFromLeft, cutFromTop);
+    vec2 MaxUV = MinUV + remainDistance;
+    
     v_TextureVertex = mix(MinUV, MaxUV, b_TexBuffer);
 
     //  Rotation calculation
@@ -51,7 +59,7 @@ void main(){
 	   PointOfRotation.x * sine + PointOfRotation.y * cosine
 	);
 
-    vec2 WorldPosition = RotatedPosition + b_PositionsRelativeToModel + b_QuadDimensions / 2.0;
+    vec2 WorldPosition = RotatedPosition + b_PositionsRelativeToModel + b_QuadDimensions / 2.0f;
 
 	gl_Position = u_Projection * u_View * u_Model * vec4(WorldPosition, 0.f, 1.f);
 }

@@ -106,32 +106,23 @@ void Engine2D::ExecuteFrame() {
 	auto start = Clock::now();
 
 	glfwPollEvents();
-
 	m_InputController.CaptureKeystates();
-
 	m_UIManager.InterpretInput();
 
 	m_GameLoop(m_ElapsedTimeSeconds, m_InputController.ExposeGameInput(), StoredRenderCommands);
 
-	//	Also, we must allow for other types to be queued for drawing.
 	QueueBatchesToRenderer(StoredRenderCommands);
-
 	m_Renderer.ExecuteDraws();
 
 	auto end = Clock::now();
-
 	m_ElapsedTimeSeconds = std::chrono::duration<float>(end - start).count();
 }
 
 /*
-next:
-
-Low prio:
-We should probably check if the Camera type var works as it should inside the renderer and how moving it affects the screen.
-Should probably make the input for the lambda be just a non-const Engine* and pass this. The user can set their own names for ptrs to subsystems
-*/
-
-/*
-MAKE SEPARATE FACTORIES FOR EACH TYPE THAT NEEDS FACTORIES
-(and make them depend on res service)
+remaining:
+	word wrap for text
+	cyrillic graphic
+	UI ergonomics like auto centering of text within a button
+	colour palette-dependant sprites
+	playing of sounds
 */

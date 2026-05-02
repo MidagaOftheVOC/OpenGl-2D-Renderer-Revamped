@@ -18,6 +18,8 @@ struct SpriteInformation {
 	
 	void SetSheetIndex(uint32_t sheetIndex);
 	void SetSpriteIndex(uint32_t spriteIndex);
+	void SetXCutoff(bool fromLeft);
+	void SetYCutoff(bool fromTop);
 
 private:
 
@@ -32,6 +34,15 @@ struct xyPair {
 struct SpriteInstance {
 	SpriteInformation SpriteInfo;	//	ushort
 	xyPair dimensions;				//	float *2
+	unsigned short xCut = 65535;
+	unsigned short yCut = 65535;
+
+	unsigned short PackRemainFactor(float remainFactor);
+
+	void SetXCut(float remainFactor, bool cutFromLeft = false);
+	void SetYCut(float remainFactor, bool cutFromTop = false);
+	void SetXCutPixels(float pixelsToCut, bool cutFromLeft = false);
+	void SetYCutPixels(float pixelsToCut, bool cutFromTop = false);
 
 	bool IsNull() { return fEqual(dimensions.x, -1) || fEqual(dimensions.y, -1); }
 };

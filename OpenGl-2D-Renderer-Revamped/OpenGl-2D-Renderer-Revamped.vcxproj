@@ -183,6 +183,7 @@
     <ClInclude Include="components\ui\font.h" />
     <ClInclude Include="components\ui\widget\background_skin.h" />
     <ClInclude Include="components\ui\widget\event_emitter.h" />
+    <ClInclude Include="components\ui\widget\event_types.h" />
     <ClInclude Include="components\ui\widget\widgets\button.h" />
     <ClInclude Include="components\ui\widget\widgets\input.h" />
     <ClInclude Include="components\ui\widget\widgets\label.h" />

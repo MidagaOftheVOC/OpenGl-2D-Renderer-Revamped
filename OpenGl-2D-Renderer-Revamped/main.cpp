@@ -40,6 +40,7 @@ int main(int argc, char** argv) {
 	SpriteInstance instance = freebatch.GetSprite("pandaSheet", "nose");
 	SpriteInstance eye = freebatch.GetSprite("pandaSheet", "eye");
 	SpriteInstance testedInstance = freebatch.GetSprite("testSheet", "nose");
+	
 
 	constexpr float oneDef = 1.f / 3.1418f;
 
@@ -64,12 +65,12 @@ int main(int argc, char** argv) {
 
 	Text emptyText = Text(U"", options);
 
-	auto label = std::make_unique<Label>(txt, glm::vec2(10.f, 10.f), glm::vec2(200, 50));
+	auto label = std::make_unique<Label>(txt, glm::vec2(10.f, 10.f));
 	auto window = eng.GetUIManager().GenWindowObject(glm::vec2(300, 200));
 
 	window.get()->AddChild(std::move(label));
 
-	auto label2 = std::make_unique<Label>(txt2, glm::vec2(10.f, 10.f), glm::vec2(200, 50));
+	auto label2 = std::make_unique<Label>(txt2, glm::vec2(10.f, 10.f));
 	auto window2 = eng.GetUIManager().GenWindowObject(glm::vec2(300, 200));
 	
 	auto input2 = std::make_unique<Input>(glm::vec2(10.f, 90.f), glm::vec2(200.f, 30.f), emptyText, resService.GetBgSkinByName("default"));
@@ -99,13 +100,6 @@ int main(int argc, char** argv) {
 	eng.GetUIManager().OpenWindow(std::move(window), glm::vec2(300, 400));
 	eng.GetUIManager().OpenWindow(std::move(window2), glm::vec2(350, 350));
 
-	auto str = std::u32string(U"АБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЬЮЯЍ"
-		U"абвгдежзийклмнопрстуфхцчшщъьюяѝ"
-		U"0123456789"
-		U" .,+-!?;:&><#/");
-	for (size_t i = 0; i < str.size(); i++) {
-		std::print(" {}", int(str.at(i)));
-	}
 	eng.SetGameLoop([&](float elapsedTimeSeconds, GameInput input, GameLoopReturnType& renderComms) {
 		renderComms.QueueRenderObject(&freebatch, 2);
 
@@ -130,7 +124,15 @@ int main(int argc, char** argv) {
 		}
 
 		freebatch.DrawSprite(instance, x, y, Rotation);
-		freebatch.DrawSprite(eye, x + 20, y, Rotation);
+		freebatch.DrawSprite(eye, x, y + 200, Rotation);
+
+		//	Testing cuts
+		SpriteInstance testEye = eye;
+
+		testEye = eye;
+		testEye.SetXCutPixels(10, false);
+		testEye.SetYCutPixels(10, false);
+		freebatch.DrawSprite(testEye, x, y + 260, Rotation);
 	});
 
 	while (eng.IsRunning()) {

@@ -3,6 +3,17 @@
 
 /*		DATA TYPES		*/
 
+//	Spread(bits)
+//	31	-	y-axis cut off direction - 0 shrink from bottom, 1 shrink from top
+//	30	-	x-axis cut off direction - 0 shrink from right, 1 shrink from left
+//	
+//	29	-	sheet index
+//	..
+//	24
+//	23	-	sprite index within sheet
+//	..
+//	0
+
 SpriteInformation::SpriteInformation(
 	uint32_t _sheetIndex,
 	uint32_t _spriteIndex
@@ -12,22 +23,82 @@ SpriteInformation::SpriteInformation(
 }
 
 uint32_t SpriteInformation::GetSheetIndex() const {
-	return (data & 0xFF000000ui32) >> 24;
+	return (data & 0x3F000000ui32) >> 24;
 }
 
 uint32_t SpriteInformation::GetSpriteIndex() const {
-	return (data & 0x00FFFFFFui32);
+	return data & 0x00FFFFFFui32;
 }
 
-void SpriteInformation::SetSheetIndex(uint32_t sheetIndex){
-	data &= 0x00FFFFFFui32;
-	data |= sheetIndex << 24;
+void SpriteInformation::SetSheetIndex(uint32_t sheetIndex) {
+	data &= 0xC0FFFFFFui32;
+	data |= (sheetIndex & 0x3F) << 24;
 }
 
-void SpriteInformation::SetSpriteIndex(uint32_t spriteIndex){
+void SpriteInformation::SetSpriteIndex(uint32_t spriteIndex) {
 	data &= 0xFF000000ui32;
-	data |= spriteIndex;
+	data |= (spriteIndex & 0x00FFFFFFui32);
 }
+
+void SpriteInformation::SetXCutoff(bool fromLeft) {
+	if (!fromLeft) {
+		data &= ~(1u << 30);                 // clear
+	}
+	else {
+		data |= (1u << 30);                  // set
+	}
+}
+
+void SpriteInformation::SetYCutoff(bool fromTop) {
+	if (!fromTop) {
+		data &= ~(1u << 31);                 // clear
+	}
+	else {
+		data |= (1u << 31);                  // set
+	}
+}
+
+unsigned short SpriteInstance::PackRemainFactor(float remainFactor) {
+	return 65535ui16 * remainFactor;
+}
+
+void SpriteInstance::SetXCut(float remainFactor, bool cutFromLeft) {
+	xCut = PackRemainFactor(remainFactor);
+	SpriteInfo.SetXCutoff(cutFromLeft);
+}
+
+void SpriteInstance::SetYCut(float remainFactor, bool cutFromTop) {
+	yCut = PackRemainFactor(remainFactor);
+	SpriteInfo.SetYCutoff(cutFromTop);
+}
+
+void SpriteInstance::SetXCutPixels(float pixelsToCut, bool cutFromLeft) {
+	if (dimensions.x <= 0.0f) {
+		xCut = 0;
+		return;
+	}
+
+	dimensions.x -= pixelsToCut;
+	float remainPixels = std::max(0.0f, dimensions.x - pixelsToCut);
+	float remainFactor = remainPixels / dimensions.x;
+
+	SetXCut(remainFactor, cutFromLeft);
+}
+
+void SpriteInstance::SetYCutPixels(float pixelsToCut, bool cutFromTop) {
+	if (dimensions.y <= 0.0f) {
+		yCut = 0;
+		return;
+	}
+
+	dimensions.y -= pixelsToCut;
+	float remainPixels = std::max(0.0f, dimensions.y - pixelsToCut);
+	float remainFactor = remainPixels / dimensions.y;
+
+	SetYCut(remainFactor, cutFromTop);
+}
+
+
 
 unsigned int Batch::c_NotInitialised = 1 << 0;
 unsigned int Batch::c_MaximumInstanceCountExceeded = 1 << 16;
@@ -352,26 +423,6 @@ void Batch::InitialiseCommonVAO() {
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), static_cast<void*>(0));
 	glEnableVertexAttribArray(1);
 
-	/*
-		Approx mem layout:
-
-		Full: {
-			SpriteInstance: {
-				SpriteInformation: {
-					uint32_t
-				}
-				xyPair: {
-					float *2;
-				}
-			}
-			xyPair: {
-				float *2;
-			}
-			float
-			float
-		}
-	*/
-
 	glBindVertexBuffer(2, 0, 0, sizeof(FullSprite)); // buffer bound later per-batch
 
 	//	SpriteInfo
@@ -398,6 +449,16 @@ void Batch::InitialiseCommonVAO() {
 	glVertexAttribFormat(6, 1, GL_FLOAT, GL_FALSE, offsetof(FullSprite, z));
 	glVertexAttribBinding(6, 2);
 	glEnableVertexAttribArray(6);
+
+	//	Z coord	(ignored in regular render)
+	glVertexAttribFormat(6, 1, GL_FLOAT, GL_FALSE, offsetof(FullSprite, z));
+	glVertexAttribBinding(6, 2);
+	glEnableVertexAttribArray(6);
+
+	//	Cut values
+	glVertexAttribIFormat(7, 2, GL_UNSIGNED_SHORT, offsetof(FullSprite, instance) + offsetof(SpriteInstance, xCut));
+	glVertexAttribBinding(7, 2);
+	glEnableVertexAttribArray(7);
 
 	// All share the same divisor (since per-instance)
 	glVertexBindingDivisor(2, 1);

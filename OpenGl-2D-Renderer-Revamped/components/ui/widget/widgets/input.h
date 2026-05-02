@@ -21,7 +21,7 @@ public:
 			true
 		)
 	{
-		auto label = std::make_unique<Label>(text, glm::vec2(5.f, 5.f), dimensions - glm::vec2(5.f, 5.f));
+		auto label = std::make_unique<Label>(text, glm::vec2(5.f, 5.f));
 
 		m_TextContent = label.get();
 
