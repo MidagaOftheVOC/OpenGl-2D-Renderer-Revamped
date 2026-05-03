@@ -107,7 +107,7 @@ void Engine2D::ExecuteFrame() {
 
 	glfwPollEvents();
 	m_InputController.CaptureKeystates();
-	m_UIManager.InterpretInput();
+	m_UIManager.InterpretInput(m_ElapsedTimeSeconds);
 
 	m_GameLoop(m_ElapsedTimeSeconds, m_InputController.ExposeGameInput(), StoredRenderCommands);
 
@@ -120,9 +120,14 @@ void Engine2D::ExecuteFrame() {
 
 /*
 remaining:
-	word wrap for text
 	cyrillic graphic
 	UI ergonomics like auto centering of text within a button
 	colour palette-dependant sprites
 	playing of sounds
+
+	font file chars are in this order:
+	АБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЬЮЯЍ
+	абвгдежзийклмнопрстуфхцчшщъьюяѝ
+	0123456789
+	 .,+-!?;:&><#/
 */

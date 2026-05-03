@@ -81,6 +81,14 @@ public:
 		float z
 	);
 
+	void DrawSprites(
+		const std::vector<FullSprite>& sprite,
+		const Font* fontToAsign,
+		float x,
+		float y,
+		float z
+	);
+
 	void DrawSprite(
 		const FullSprite& sprite
 	);

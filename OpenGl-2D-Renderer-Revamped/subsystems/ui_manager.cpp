@@ -9,7 +9,9 @@ void UIManager::SetZSpaceDistribution(
 	m_FurtherBoundOfZLayerDistribution = zFurther;
 }
 
-void UIManager::InterpretInput() {
+void UIManager::InterpretInput(
+	float elapsedTimeSeconds
+) {
 	GameInput& input = GetInput()->ExposeGameInput();
 
 	/* process keyboard here */
@@ -52,10 +54,43 @@ void UIManager::InterpretInput() {
 
 	if (m_FocusedInputField) {
 		std::u32string bufferedInput = input.GetUtfInput();
-		m_FocusedInputField->AppendString(bufferedInput);
+		
+		glm::vec2 caretPosition = m_FocusedInputField->GetAbsoluteCaretPosition();
+		
+		if (m_CaretBlinkerTimer >= 1.0f)
+			m_CaretBlinkerTimer -= 1.0f;
+
+		if(m_CaretBlinkerTimer < 0.5f)
+			uiBatch->DrawSprite(GetResService()->GetCaretInstance(), caretPosition.x, caretPosition.y, 0, GetCloserZBound());
+		m_CaretBlinkerTimer += elapsedTimeSeconds;
+
+		if (input.IsPressed(GLFW_KEY_LEFT)) {
+			if (input.IsHeld(GLFW_KEY_LEFT_CONTROL))
+				m_FocusedInputField->MoveCaretToPrevNonLetter();
+			else
+				m_FocusedInputField->MoveCaretBackwardOnce();
+			m_CaretBlinkerTimer = 0.f;
+		}
+
+		if (input.IsPressed(GLFW_KEY_RIGHT)) {
+			if (input.IsHeld(GLFW_KEY_LEFT_CONTROL))
+				m_FocusedInputField->MoveCaretToNextNonLetter();
+			else
+				m_FocusedInputField->MoveCaretForwardOnce();
+			m_CaretBlinkerTimer = 0.f;
+		}
 
 		if (input.IsPressed(GLFW_KEY_BACKSPACE)) {
-			m_FocusedInputField->RemoveLastCharacter();
+			m_FocusedInputField->DeleteCharacterBeforeCaretPosition();
+			m_CaretBlinkerTimer = 0.f;
+		}
+
+		if (bufferedInput.size()) {
+			m_CaretBlinkerTimer = 0.f;
+		}
+
+		for (auto ch : bufferedInput) {
+			m_FocusedInputField->InsertCharacterAtCaretPosition(ch);
 		}
 
 		input.SetKeyboardCapturedFlag();

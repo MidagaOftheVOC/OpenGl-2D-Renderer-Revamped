@@ -3,13 +3,14 @@
 
 /*		DATA TYPES		*/
 
-//	Spread(bits)
+//	Spread(bits) for type SpriteInformation
 //	31	-	y-axis cut off direction - 0 shrink from bottom, 1 shrink from top
 //	30	-	x-axis cut off direction - 0 shrink from right, 1 shrink from left
 //	
 //	29	-	sheet index
 //	..
 //	24
+// 
 //	23	-	sprite index within sheet
 //	..
 //	0
@@ -78,10 +79,10 @@ void SpriteInstance::SetXCutPixels(float pixelsToCut, bool cutFromLeft) {
 		return;
 	}
 
-	dimensions.x -= pixelsToCut;
 	float remainPixels = std::max(0.0f, dimensions.x - pixelsToCut);
 	float remainFactor = remainPixels / dimensions.x;
 
+	dimensions.x -= pixelsToCut;
 	SetXCut(remainFactor, cutFromLeft);
 }
 
@@ -91,10 +92,10 @@ void SpriteInstance::SetYCutPixels(float pixelsToCut, bool cutFromTop) {
 		return;
 	}
 
-	dimensions.y -= pixelsToCut;
 	float remainPixels = std::max(0.0f, dimensions.y - pixelsToCut);
 	float remainFactor = remainPixels / dimensions.y;
 
+	dimensions.y -= pixelsToCut;
 	SetYCut(remainFactor, cutFromTop);
 }
 
@@ -305,6 +306,34 @@ void Batch::DrawText(
 			sprite.instance,
 			(sprite.position.x * scale) + x,
 			(sprite.position.y * scale) + y,
+			0.f,
+			z
+		);
+	}
+}
+
+void Batch::DrawSprites(
+	const std::vector<FullSprite>& sprites,
+	const Font* fontToAssign,
+	float x,
+	float y,
+	float z
+) {
+	uint32_t sheetIndexForFont = 0;
+	for (size_t i = 0; i < m_SpriteSheets.size(); i++) {
+		if (m_SpriteSheets[i] == fontToAssign->GetFontSheet()) {
+			sheetIndexForFont = static_cast<unsigned int>(i);
+			break;
+		}
+	}
+
+	for (auto sprite : sprites) {
+		sprite.instance.SpriteInfo.SetSheetIndex(sheetIndexForFont);
+
+		DrawSprite(
+			sprite.instance,
+			(sprite.position.x) + x,
+			(sprite.position.y) + y,
 			0.f,
 			z
 		);

@@ -139,6 +139,8 @@ public:
 
 public:
 
+	glm::vec2 GetDimensions() const { return m_Dimensions; }
+
 	const std::vector<std::unique_ptr<WidgetCompositionInterface>>& GetWidgets() { return m_WidgetComposition; }
 
 	virtual ~WidgetCompositionInterface() {}

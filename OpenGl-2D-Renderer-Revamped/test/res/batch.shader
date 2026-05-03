@@ -61,7 +61,7 @@ void main(){
 
     vec2 WorldPosition = RotatedPosition + b_PositionsRelativeToModel + b_QuadDimensions / 2.0f;
 
-	gl_Position = u_Projection * u_View * u_Model * vec4(WorldPosition, 0.f, 1.f);
+	gl_Position = u_Projection * u_View * u_Model * vec4(WorldPosition, b_Zcoord, 1.f);
 }
 
 

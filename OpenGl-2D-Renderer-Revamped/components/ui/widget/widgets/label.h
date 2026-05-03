@@ -6,6 +6,9 @@ class Label : public WidgetCompositionInterface {
 
 	Text m_StoredText;
 
+	float m_ScrollX = 0.f;
+	bool m_IsClampingText = false;
+
 public:
 	
 	Label(
@@ -48,6 +51,10 @@ private:
 	) const override;
 
 public:
+
+	void SetClampingMode(bool isClamping) { m_IsClampingText = isClamping; }
+
+	void UpdateScrollX(float scrollX) { m_ScrollX = scrollX; }
 
 	virtual ~Label() {}
 

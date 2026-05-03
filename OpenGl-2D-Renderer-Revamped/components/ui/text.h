@@ -13,7 +13,7 @@ struct TextOptions {
 	float lineHeight = 20.f;
 	float scale = 1.0f;
 
-	TextScroll scrollType = TextScroll::Multiline;
+	TextScroll scrollType = TextScroll::Oneline;
 };
 
 class Text {
@@ -56,6 +56,17 @@ public:
 		TextScroll scrollType
 	);
 
+public:
+
+	void InsertCharacter(
+		char32_t ch,
+		size_t oldCaretPosition
+	);
+
+	void DeleteCharacter(
+		size_t caretPosition
+	);
+
 private:
 	
 	void CalculateGeometry() const;
@@ -68,7 +79,7 @@ public:
 	const TextOptions& GetTextOptions() const { return m_TextOptions; }
 	const Font* GetFont() const { return m_TextOptions.font; }
 	const float GetLineHeight() const { return m_TextOptions.lineHeight; }
-	float GetLineLength() const { return m_TextOptions.lineLength; }
+	float GetLineLength() const { return m_TextOptions.lineLength * (1.f / m_TextOptions.scale); }
 
 	const std::vector<FullSprite>& GetTextGeometry() const;
 

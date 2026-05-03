@@ -149,6 +149,11 @@ void ResourceService::LoadDefaultVariables() {
 	AddBgSkin(std::move(closeBtnSkin));
 
 	m_bgCloseBtnSkin = GetBgSkinByName("closeBtnSkin");
+
+	
+	m_CaretSprite = m_UIBatch.GetSprite(c_SpecialUISheetName, "caret_pixel");
+	m_CaretSprite.dimensions.x = 1;
+	m_CaretSprite.dimensions.y = 24;
 }
 
 const BackgroundSkinInterface* ResourceService::GetBgSkinByName(

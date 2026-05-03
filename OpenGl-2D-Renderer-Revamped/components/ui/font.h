@@ -51,6 +51,10 @@ public:
 		char32_t ch
 	) const;
 
+	float GetGlyphAdvance(
+		char32_t ch
+	) const;
+
 private:
 
 	char32_t TransformToLowercase(

@@ -55,11 +55,6 @@ size_t Font::GetGlyphIndex(
 GlyphSprite Font::GetGlyph(
     char32_t ch
 ) const {
-
-    if (m_IsLowercaseOnly) {
-        ch = TransformToLowercase(ch);
-    }
-
     size_t chIndex = GetGlyphIndex(ch);
     GlyphSprite result;
     //  Sheet index is queried in the DrawText function, once per Text draw call
@@ -69,15 +64,9 @@ GlyphSprite Font::GetGlyph(
     return result;
 }
 
-char32_t Font::TransformToLowercase(char32_t ch) const
-{
-    switch (ch) {
-    case U'Ѝ': return U'ѝ';
-    case U'Ё': return U'ё';
-    }
-
-    if (ch >= U'А' && ch <= U'Я')
-        return ch + 32;
-
-    return ch;
+float Font::GetGlyphAdvance(
+    char32_t ch
+) const {
+    size_t chIndex = GetGlyphIndex(ch);
+    return m_GlyphAdvances[chIndex];
 }

@@ -77,6 +77,8 @@ private:
 	TextOptions m_DefaultTextOptions;
 	Batch m_UIBatch;
 
+	SpriteInstance m_CaretSprite;
+
 private:
 
 	const BackgroundSkinInterface* m_bgCloseBtnSkin = nullptr;
@@ -165,6 +167,8 @@ public:
 	const TextOptions& GetDefaultTextOptions() const { return m_DefaultTextOptions; }
 	
 	Batch* GetUIBatch() { return &m_UIBatch; }
+
+	const SpriteInstance GetCaretInstance() const { return m_CaretSprite; }
 
 public:
 
