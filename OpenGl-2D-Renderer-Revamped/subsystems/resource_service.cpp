@@ -75,6 +75,7 @@ void ResourceService::UploadSpriteSheetParameters(
 	const char* _preferredShader,
 	int _spritesPerRow,
 	int _spritesPerCol,
+	bool loadInUIsheet,
 	int paddingPx
 ) {
 	m_SpriteSheetLoadQueue.emplace_back(
@@ -83,6 +84,7 @@ void ResourceService::UploadSpriteSheetParameters(
 		_preferredShader,
 		_spritesPerRow,
 		_spritesPerCol,
+		loadInUIsheet,
 		paddingPx
 	);
 }
@@ -120,6 +122,10 @@ void ResourceService::StartLoadingProcess() {
 			params.m_SpritesPerCol,
 			params.paddingPx
 		);
+
+		if (params.loadInUIsheet) {
+			m_UIBatch.AddSheetToBatch(GetSpriteSheetByName(params.m_SheetName.c_str()));
+		}
 	}
 	m_SpriteSheetLoadQueue.clear();
 
@@ -134,7 +140,6 @@ void ResourceService::LoadDefaultVariables() {
 	}
 
 	m_UIBatch.InitialiseBuffers();
-	m_UIBatch.AddSheetToBatch(GetSpriteSheetByName(c_SpecialUISheetName));
 	m_UIBatch.BufferUBOs();
 
 	auto defSkin = std::make_unique<NineSliceBgSkin>("default");
@@ -149,6 +154,9 @@ void ResourceService::LoadDefaultVariables() {
 	AddBgSkin(std::move(closeBtnSkin));
 
 	m_bgCloseBtnSkin = GetBgSkinByName("closeBtnSkin");
+	
+	m_CaretSprite = m_UIBatch.GetSprite(c_SpecialUISheetName, "caret_pixel");
+	m_CaretSprite.dimensions.x = 1;
 }
 
 const BackgroundSkinInterface* ResourceService::GetBgSkinByName(
@@ -209,11 +217,13 @@ const Font* ResourceService::GetFontByName(
 
 void ResourceService::UploadFontParameters(
 	const char* fontName,
-	const char* fontFileLocation
+	const char* fontFileLocation,
+	bool loadInUIsheet
 ) {
 	m_FontLoadQueue.emplace_back(
 		fontName,
-		fontFileLocation
+		fontFileLocation,
+		loadInUIsheet
 	);
 }
 
@@ -231,6 +241,7 @@ void ResourceService::LoadFonts() {
 		int offsetCounter = 0;
 		std::string fontName;
 		std::string sheetName;
+		float gWidth = 0.f, gHeight = 0.f;
 
 		DEBUG_ASSERT(file.is_open(), "Font with name [%s] tried to open file at [%s] but couldn\'t open it.", name.c_str(), location.c_str());
 		
@@ -252,6 +263,16 @@ void ResourceService::LoadFonts() {
 
 			if (key == "sheet_name") {
 				sheetName = std::move(val);
+				continue;
+			}
+
+			if (key == "width") {
+				gWidth = std::stof(val);
+				continue;
+			}
+
+			if (key == "height") {
+				gHeight = std::stof(val);
 				continue;
 			}
 
@@ -280,7 +301,7 @@ void ResourceService::LoadFonts() {
 		DEBUG_ASSERT(sheetSearchResult, "Font with name [%s] queried for non-existant sprite sheet with name [%s]", name.c_str(), sheetName.c_str());
 		DEBUG_ASSERT(offsetCounter >= preparedGlyphCount, "Font with name [%s] has less offsets than glyphs in its charset.", name.c_str());
 
-		Font self(sheetSearchResult, fontName);
+		Font self(sheetSearchResult, fontName, gWidth, gHeight);
 		self.Init(
 			preparedCharset,
 			preparedOffsets.data(),
@@ -288,7 +309,9 @@ void ResourceService::LoadFonts() {
 		);
 
 		m_Fonts.emplace_back(std::move(self));
-		m_UIBatch.AddSheetToBatch(sheetSearchResult);
+		if (params.loadInUISheet) {
+			m_UIBatch.AddFont(GetFontByName(params.name.c_str()));
+		}
 	}
 
 	m_FontLoadQueue.clear();

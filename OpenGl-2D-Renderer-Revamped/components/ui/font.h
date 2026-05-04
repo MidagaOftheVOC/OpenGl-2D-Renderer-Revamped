@@ -19,13 +19,14 @@ class Font {
 	//	images we'll be rendering
 	const SpriteSheet* m_SpriteSheet = nullptr;
 
-	bool m_IsLowercaseOnly = false;
-
 	unsigned short m_GlyphAdvances[MAXIMUM_GLYPHS_PER_FONT] = { 0 };
 
 	std::u32string m_GlyphIdentifier;
 
 	std::string m_FontName;
+
+	float m_GlyphWidth = 0.f;
+	float m_GlyphHeight = 0.f;
 
 public:
 
@@ -33,14 +34,15 @@ public:
 
 	Font(
 		const SpriteSheet* _initialisedSheet,
-		const std::string& _name
+		const std::string& _name,
+		float glyphWidth,
+		float glyphHeight
 	);
 
 	void Init(
 		const std::u32string& glyphs,
 		unsigned short* glyphOffsets,
-		int glyphCount,
-		bool lowercaseOnly = false
+		int glyphCount
 	);
 
 	unsigned short GetCharacterAdvance(
@@ -48,6 +50,10 @@ public:
 	) const;
 
 	GlyphSprite GetGlyph(
+		char32_t ch
+	) const;
+
+	float GetGlyphAdvance(
 		char32_t ch
 	) const;
 
@@ -65,6 +71,8 @@ public:
 
 	const std::string& GetName() const { return m_FontName; }
 	const SpriteSheet* GetFontSheet() const { return m_SpriteSheet; }
+	const float GetGlyphWidth() const { return m_GlyphWidth; }
+	const float GetGlyphHeight() const { return m_GlyphHeight; }
 
 };
 

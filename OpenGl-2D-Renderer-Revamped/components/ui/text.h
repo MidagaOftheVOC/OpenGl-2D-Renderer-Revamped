@@ -2,11 +2,19 @@
 
 #include "font.h"
 
+enum class TextScroll {
+	Multiline,	//	multiple lines, render the lower-most part
+	Oneline	//	all in one line, render the right-most part
+};
+
 struct TextOptions {
 	const Font* font = nullptr;
+	uint16_t storedSheetIndex = 0;
 	float lineLength = 0.f;
 	float lineHeight = 20.f;
 	float scale = 1.0f;
+
+	TextScroll scrollType = TextScroll::Oneline;
 };
 
 class Text {
@@ -45,6 +53,23 @@ public:
 		float length
 	);
 
+	void SetScrollType(
+		TextScroll scrollType
+	);
+
+public:
+
+	void InsertCharacter(
+		char32_t ch,
+		size_t oldCaretPosition
+	);
+
+	void DeleteCharacter(
+		size_t caretPosition
+	);
+
+private:
+	
 	void CalculateGeometry() const;
 
 public:

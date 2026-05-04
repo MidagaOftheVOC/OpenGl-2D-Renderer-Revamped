@@ -3,6 +3,18 @@
 
 /*		DATA TYPES		*/
 
+//	Spread(bits) for type SpriteInformation
+//	31	-	y-axis cut off direction - 0 shrink from bottom, 1 shrink from top
+//	30	-	x-axis cut off direction - 0 shrink from right,  1 shrink from left
+//	
+//	29	-	sheet index
+//	..
+//	24
+// 
+//	23	-	sprite index within sheet
+//	..
+//	0
+
 SpriteInformation::SpriteInformation(
 	uint32_t _sheetIndex,
 	uint32_t _spriteIndex
@@ -12,22 +24,82 @@ SpriteInformation::SpriteInformation(
 }
 
 uint32_t SpriteInformation::GetSheetIndex() const {
-	return (data & 0xFF000000ui32) >> 24;
+	return (data & 0x3F000000ui32) >> 24;
 }
 
 uint32_t SpriteInformation::GetSpriteIndex() const {
-	return (data & 0x00FFFFFFui32);
+	return data & 0x00FFFFFFui32;
 }
 
-void SpriteInformation::SetSheetIndex(uint32_t sheetIndex){
-	data &= 0x00FFFFFFui32;
-	data |= sheetIndex << 24;
+void SpriteInformation::SetSheetIndex(uint32_t sheetIndex) {
+	data &= 0xC0FFFFFFui32;
+	data |= (sheetIndex & 0x3F) << 24;
 }
 
-void SpriteInformation::SetSpriteIndex(uint32_t spriteIndex){
+void SpriteInformation::SetSpriteIndex(uint32_t spriteIndex) {
 	data &= 0xFF000000ui32;
-	data |= spriteIndex;
+	data |= (spriteIndex & 0x00FFFFFFui32);
 }
+
+void SpriteInformation::SetXCutoff(bool fromLeft) {
+	if (!fromLeft) {
+		data &= ~(1u << 30);                 // clear
+	}
+	else {
+		data |= (1u << 30);                  // set
+	}
+}
+
+void SpriteInformation::SetYCutoff(bool fromTop) {
+	if (!fromTop) {
+		data &= ~(1u << 31);                 // clear
+	}
+	else {
+		data |= (1u << 31);                  // set
+	}
+}
+
+unsigned short SpriteInstance::PackRemainFactor(float remainFactor) {
+	return 65535ui16 * remainFactor;
+}
+
+void SpriteInstance::SetXCut(float remainFactor, bool cutFromLeft) {
+	xCut = PackRemainFactor(remainFactor);
+	SpriteInfo.SetXCutoff(cutFromLeft);
+}
+
+void SpriteInstance::SetYCut(float remainFactor, bool cutFromTop) {
+	yCut = PackRemainFactor(remainFactor);
+	SpriteInfo.SetYCutoff(cutFromTop);
+}
+
+void SpriteInstance::SetXCutPixels(float pixelsToCut, bool cutFromLeft) {
+	if (dimensions.x <= 0.0f) {
+		xCut = 0;
+		return;
+	}
+
+	float remainPixels = std::max(0.0f, dimensions.x - pixelsToCut);
+	float remainFactor = remainPixels / dimensions.x;
+
+	dimensions.x -= pixelsToCut;
+	SetXCut(remainFactor, cutFromLeft);
+}
+
+void SpriteInstance::SetYCutPixels(float pixelsToCut, bool cutFromTop) {
+	if (dimensions.y <= 0.0f) {
+		yCut = 0;
+		return;
+	}
+
+	float remainPixels = std::max(0.0f, dimensions.y - pixelsToCut);
+	float remainFactor = remainPixels / dimensions.y;
+
+	dimensions.y -= pixelsToCut;
+	SetYCut(remainFactor, cutFromTop);
+}
+
+
 
 unsigned int Batch::c_NotInitialised = 1 << 0;
 unsigned int Batch::c_MaximumInstanceCountExceeded = 1 << 16;
@@ -74,21 +146,66 @@ void Batch::AddSheetToBatch(
 ) {
 	DEBUG_ASSERT(_spriteSheet != nullptr, "Null pointers passed to batch method for adding sheets.");
 
-	for (size_t i = 0; i < m_SpriteSheets.size(); i++) {
-		if (_spriteSheet->GetShader() != m_SpriteSheets[i]->GetShader()) {
-			DEBUG_ASSERT(0, "Batch w/ name [%s] has tried to append SpriteSheet objects with different shaders!", dm_BatchName.c_str());
-			return;
-		}
+	if (m_SpriteSheets.size()) {
+		DEBUG_ASSERT(_spriteSheet->GetShader() == m_SpriteSheets[0]->GetShader(), "Batch w/ name [%s] has tried to append SpriteSheet objects with different shaders!", dm_BatchName.c_str());
+	}
 
+	for (size_t i = 0; i < m_SpriteSheets.size(); i++) {
 		if (_spriteSheet == m_SpriteSheets[i]) {
-			DEBUG_WARN(0, "Batch w/ name [%s] has tried to append the same SprteSheet object more than once. Skipping...", dm_BatchName.c_str());
-			continue;
+			//DEBUG_WARN(0, "Batch w/ name [%s] has tried to append the same SprteSheet object more than once. Skipping...", dm_BatchName.c_str());
+			return;
 		}
 	}
 
-	m_SpriteSheets.emplace_back(
-		_spriteSheet
-	);
+	m_SpriteSheets.emplace_back(_spriteSheet);
+}
+
+void Batch::AddFont(
+	const Font* font
+) {
+	DEBUG_ASSERT(font != nullptr, "Null pointers passed to batch method for adding fonts.");
+
+	//	Confirm font is not added already
+	for (size_t i = 0; i < m_Fonts.size(); i++) {
+		if (font == m_Fonts[i]) {
+			DEBUG_WARN(0, "Batch tried to enter font with name [%s] twice.", font->GetName().c_str());
+			return;
+		}
+	}
+
+	AddSheetToBatch(font->GetFontSheet());
+	m_Fonts.push_back(font);
+}
+
+Text Batch::GenText(
+	const std::u32string& str,
+	const char* fontName
+) const {
+	DEBUG_ASSERT(m_Fonts.size(), "Batch attepmpted to generate Text object without fonts.");
+
+	const Font* font = GetFont(fontName);
+	TextOptions options;
+	options.font = font;
+	options.storedSheetIndex = GetSheetIndex(font->GetFontSheet());
+	
+	return Text(str, options);
+}
+
+Text Batch::GenText(
+	const std::u32string& str,
+	const TextOptions& options
+) const {
+	return Text(str, options);
+}
+
+TextOptions Batch::GetTextOptionsForFont(
+	const char* fontName
+) const {
+	TextOptions self;
+	self.font = GetFont(fontName);
+	self.storedSheetIndex = GetSheetIndex(self.font->GetFontSheet());
+
+	return self;
 }
 
 const SpriteSheet* Batch::GetSpecialSheetPointer() const {
@@ -215,25 +332,29 @@ void Batch::DrawText(
 	float z
 ) {
 	auto textGeometry = textObject->GetTextGeometry();
-	auto scale = textObject->GetTextOptions().scale;
-	uint32_t sheetIndexForFont = 0;
-	for (size_t i = 0; i < m_SpriteSheets.size(); i++) {
-		if (m_SpriteSheets[i] == textObject->GetFont()->GetFontSheet()) {
-			sheetIndexForFont = static_cast<unsigned int>(i);
-			break;
-		}
-	}
 
 	for (auto&& sprite : textGeometry) {
-		sprite.instance.SpriteInfo.SetSheetIndex(sheetIndexForFont);
-		sprite.instance.dimensions.x *= scale;
-		sprite.instance.dimensions.y *= scale;
-		
-
 		DrawSprite(
 			sprite.instance,
-			(sprite.position.x * scale) + x,
-			(sprite.position.y * scale) + y,
+			sprite.position.x + x,
+			sprite.position.y + y,
+			0.f,
+			z
+		);
+	}
+}
+
+void Batch::DrawSprites(
+	const std::vector<FullSprite>& sprites,
+	float x,
+	float y,
+	float z
+) {
+	for (const auto& sprite : sprites) {
+		DrawSprite(
+			sprite.instance,
+			(sprite.position.x) + x,
+			(sprite.position.y) + y,
 			0.f,
 			z
 		);
@@ -352,26 +473,6 @@ void Batch::InitialiseCommonVAO() {
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), static_cast<void*>(0));
 	glEnableVertexAttribArray(1);
 
-	/*
-		Approx mem layout:
-
-		Full: {
-			SpriteInstance: {
-				SpriteInformation: {
-					uint32_t
-				}
-				xyPair: {
-					float *2;
-				}
-			}
-			xyPair: {
-				float *2;
-			}
-			float
-			float
-		}
-	*/
-
 	glBindVertexBuffer(2, 0, 0, sizeof(FullSprite)); // buffer bound later per-batch
 
 	//	SpriteInfo
@@ -399,6 +500,16 @@ void Batch::InitialiseCommonVAO() {
 	glVertexAttribBinding(6, 2);
 	glEnableVertexAttribArray(6);
 
+	//	Z coord	(ignored in regular render)
+	glVertexAttribFormat(6, 1, GL_FLOAT, GL_FALSE, offsetof(FullSprite, z));
+	glVertexAttribBinding(6, 2);
+	glEnableVertexAttribArray(6);
+
+	//	Cut values
+	glVertexAttribIFormat(7, 2, GL_UNSIGNED_SHORT, offsetof(FullSprite, instance) + offsetof(SpriteInstance, xCut));
+	glVertexAttribBinding(7, 2);
+	glEnableVertexAttribArray(7);
+
 	// All share the same divisor (since per-instance)
 	glVertexBindingDivisor(2, 1);
 	glBindVertexArray(0);
@@ -423,4 +534,30 @@ void Batch::BindCommonVAO(){
 
 void Batch::UnbindCommonVAO(){
 	glBindVertexArray(0);
+}
+
+const Font* Batch::GetFont(
+	const char* fontName
+) const {
+	DEBUG_ASSERT(m_Fonts.size(), "Batch searched for fonts when none were loaded.");
+
+	for (size_t i = 0; i < m_Fonts.size(); i++) {
+		if (!strcmp(fontName, m_Fonts[i]->GetName().c_str())) {
+			return m_Fonts[i];
+		}
+	}
+
+	return m_Fonts[0];
+}
+
+const uint32_t Batch::GetSheetIndex(
+	const SpriteSheet* sheetPtr
+) const {
+	for (size_t i = 0; i < m_SpriteSheets.size(); i++) {
+		if (sheetPtr == m_SpriteSheets[i]) {
+			return static_cast<uint32_t>(i);
+		}
+	}
+
+	return 0;
 }

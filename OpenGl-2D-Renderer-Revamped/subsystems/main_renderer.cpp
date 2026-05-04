@@ -23,7 +23,7 @@ void Renderer2D::ExecuteDraws() {
 #ifdef DEBUG__CODE
 
 	// easily recognisable when some sprite is black or at all drawn
-	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+	glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
 
 #else
 

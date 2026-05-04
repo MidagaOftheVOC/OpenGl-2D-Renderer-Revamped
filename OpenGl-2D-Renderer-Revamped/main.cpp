@@ -11,18 +11,14 @@ int main(int argc, char** argv) {
 	auto& resService = eng.GetResourceService();
 
 	resService.UploadShaderParameters("test\\res\\batch.shader",		"batch");		//	WITH UBO
-	resService.UploadShaderParameters("test\\res\\batch_ui.shader",		"batch_ui");
 
 
-	resService.UploadSpriteSheetParameters("test\\res\\cyrillic.png",			"cyrillic",				"batch_ui",		9,	9);
-	resService.UploadSpriteSheetParameters("test\\res\\cyrillic_print.png",		"cyrillic_print",		"batch_ui",		10, 10);
-	resService.UploadSpriteSheetParameters("test\\res\\cyrillic_print_big.png", "cyrillic_print_big",	"batch_ui",		10, 10, 4);
+	resService.UploadSpriteSheetParameters("test\\res\\cyrillic_print_big.png", "cyrillic_print_big",		"batch",		10, 10, true, 4);
 	
 	resService.UploadSpriteSheetParameters("test\\res\\test.cfg",		"testSheet",						"batch",		0, 0);
 	resService.UploadSpriteSheetParameters("test\\res\\panda.cfg",		"pandaSheet",						"batch",		0, 0);
+	resService.UploadSpriteSheetParameters("test\\res\\gui.cfg",		resService.c_SpecialUISheetName,	"batch",		0, 0, true);
 	
-	resService.UploadSpriteSheetParameters("test\\res\\gui.cfg",		resService.c_SpecialUISheetName,	"batch_ui",		0, 0);
-
 	resService.UploadFontParameters("cyrillic_print_big", "test\\res\\ui\\cyrillic_print_big.font");
 
 	eng.Init();
@@ -40,12 +36,12 @@ int main(int argc, char** argv) {
 	SpriteInstance instance = freebatch.GetSprite("pandaSheet", "nose");
 	SpriteInstance eye = freebatch.GetSprite("pandaSheet", "eye");
 	SpriteInstance testedInstance = freebatch.GetSprite("testSheet", "nose");
+	
 
 	constexpr float oneDef = 1.f / 3.1418f;
 
-	TextOptions options;
-	options.scale = 0.75f;
-	options.font = resService.GetFontByName("cyrillic_print_big");
+	TextOptions options = resService.GetUIBatch()->GetTextOptionsForFont("cyrillic_print_big");
+	options.scale = 0.7f;
 
 	Text txt = Text(
 		U"ЕДНО",
@@ -64,15 +60,15 @@ int main(int argc, char** argv) {
 
 	Text emptyText = Text(U"", options);
 
-	auto label = std::make_unique<Label>(txt, glm::vec2(10.f, 10.f), glm::vec2(200, 50));
+	auto label = std::make_unique<Label>(txt, glm::vec2(10.f, 10.f));
 	auto window = eng.GetUIManager().GenWindowObject(glm::vec2(300, 200));
 
 	window.get()->AddChild(std::move(label));
 
-	auto label2 = std::make_unique<Label>(txt2, glm::vec2(10.f, 10.f), glm::vec2(200, 50));
+	auto label2 = std::make_unique<Label>(txt2, glm::vec2(10.f, 10.f));
 	auto window2 = eng.GetUIManager().GenWindowObject(glm::vec2(300, 200));
 	
-	auto input2 = std::make_unique<Input>(glm::vec2(10.f, 90.f), glm::vec2(200.f, 30.f), emptyText, resService.GetBgSkinByName("default"));
+	auto input2 = std::make_unique<Input>(glm::vec2(10.f, 90.f), glm::vec2(215.f, 30.f), emptyText, resService.GetBgSkinByName("default"));
 	Input* input2ptr = input2.get();
 
 	auto btn2 = std::make_unique<Button>(glm::vec2(10.f, 40.f), glm::vec2(150.f, 30.f), btntxt, resService.GetBgSkinByName("default"));
@@ -99,17 +95,10 @@ int main(int argc, char** argv) {
 	eng.GetUIManager().OpenWindow(std::move(window), glm::vec2(300, 400));
 	eng.GetUIManager().OpenWindow(std::move(window2), glm::vec2(350, 350));
 
-	auto str = std::u32string(U"АБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЬЮЯЍ"
-		U"абвгдежзийклмнопрстуфхцчшщъьюяѝ"
-		U"0123456789"
-		U" .,+-!?;:&><#/");
-	for (size_t i = 0; i < str.size(); i++) {
-		std::print(" {}", int(str.at(i)));
-	}
 	eng.SetGameLoop([&](float elapsedTimeSeconds, GameInput input, GameLoopReturnType& renderComms) {
 		renderComms.QueueRenderObject(&freebatch, 2);
 
-		std::println("FPS: {:.0f}", 1 / elapsedTimeSeconds); 
+		//std::println("FPS: {:.0f}", 1 / elapsedTimeSeconds); 
 
 		if (input.IsHeld(GLFW_KEY_LEFT)) {
 			x -= 1;
@@ -130,7 +119,20 @@ int main(int argc, char** argv) {
 		}
 
 		freebatch.DrawSprite(instance, x, y, Rotation);
-		freebatch.DrawSprite(eye, x + 20, y, Rotation);
+		freebatch.DrawSprite(eye, x, y + 200, Rotation);
+
+		//	Testing cuts
+		SpriteInstance testEye = eye;
+
+		testEye = eye;
+		testEye.SetXCutPixels(10, false);
+		testEye.SetYCutPixels(10, false);
+		freebatch.DrawSprite(testEye, x, y + 260, Rotation);
+
+		testEye = eye;
+		float cut = 15.f;
+		testEye.SetXCutPixels(cut, true);
+		freebatch.DrawSprite(testEye, x + cut, y + 360, Rotation);
 	});
 
 	while (eng.IsRunning()) {

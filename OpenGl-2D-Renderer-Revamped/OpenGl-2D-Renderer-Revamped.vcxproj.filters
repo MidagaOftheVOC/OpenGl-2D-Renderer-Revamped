@@ -176,6 +176,9 @@
     <ClInclude Include="components\ui\widget\widgets\textless_button.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="components\ui\widget\event_types.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="test\res\cyrillic_print.png">

@@ -25,6 +25,7 @@ struct SpriteSheetLoadingParameters {
 	int m_SpritesPerRow;
 	int m_SpritesPerCol;
 	int paddingPx = 0;
+	bool loadInUIsheet;
 
 	SpriteSheetLoadingParameters(
 		const char* _locationRawImage,
@@ -32,6 +33,7 @@ struct SpriteSheetLoadingParameters {
 		const char* _preferredShader,
 		int _spritesPerRow,
 		int _spritesPerCol,
+		bool loadInUIsheet,
 		int paddingPx = 0
 	) :
 		m_LocationOfImage(_locationRawImage),
@@ -39,6 +41,7 @@ struct SpriteSheetLoadingParameters {
 		m_PreferredShaderName(_preferredShader),
 		m_SpritesPerRow(_spritesPerRow),
 		m_SpritesPerCol(_spritesPerCol),
+		loadInUIsheet(loadInUIsheet),
 		paddingPx(paddingPx)
 	{}
 };
@@ -46,13 +49,16 @@ struct SpriteSheetLoadingParameters {
 struct FontLoadingParameters {
 	const std::string location;
 	const std::string name;
+	bool loadInUISheet;
 
 	FontLoadingParameters(
 		const char* fontName,
-		const char* fontFileLocation
+		const char* fontFileLocation,
+		bool loadInUIsheet = false
 	) :
 		location(fontFileLocation),
-		name(fontName)
+		name(fontName),
+		loadInUISheet(loadInUISheet)
 	{}
 };
 
@@ -76,6 +82,8 @@ private:
 
 	TextOptions m_DefaultTextOptions;
 	Batch m_UIBatch;
+
+	SpriteInstance m_CaretSprite;
 
 private:
 
@@ -124,12 +132,14 @@ public:
 		const char* _preferredShader,
 		int _spritesPerRow,
 		int _spritesPerCol,
+		bool loadInUIsheet = false,
 		int paddingPx = 0
 	);
 
 	void UploadFontParameters(
 		const char* fontName,
-		const char* fontFileLocation
+		const char* fontFileLocation,
+		bool loadInUIsheet = false
 	);
 
 	void StartLoadingProcess();
@@ -165,6 +175,8 @@ public:
 	const TextOptions& GetDefaultTextOptions() const { return m_DefaultTextOptions; }
 	
 	Batch* GetUIBatch() { return &m_UIBatch; }
+
+	const SpriteInstance GetCaretInstance() const { return m_CaretSprite; }
 
 public:
 

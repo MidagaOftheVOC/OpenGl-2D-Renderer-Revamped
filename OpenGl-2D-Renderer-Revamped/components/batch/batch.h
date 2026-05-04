@@ -12,6 +12,7 @@ static constexpr size_t MIN_SPRITES_WITH_RESERVED_MEM = 50;
 class Batch {
 	
 	std::vector<const SpriteSheet*> m_SpriteSheets;
+	std::vector<const Font*> m_Fonts;
 	
 	FlagTracker m_Flags = FlagTracker(c_NotInitialised);
 
@@ -66,6 +67,24 @@ public:
 		const SpriteSheet* _spriteSheet
 	);
 
+	void AddFont(
+		const Font* font
+	);
+
+	Text GenText(
+		const std::u32string& str,
+		const char* fontName = nullptr
+	) const;
+
+	Text GenText(
+		const std::u32string& str,
+		const TextOptions& options
+	) const;
+
+	TextOptions GetTextOptionsForFont(
+		const char* fontName
+	) const;
+
 	void DrawSprite(
 		const SpriteInstance& spriteInstance,
 		float x, 
@@ -76,6 +95,13 @@ public:
 
 	void DrawText(
 		const Text* textObject,
+		float x,
+		float y,
+		float z
+	);
+
+	void DrawSprites(
+		const std::vector<FullSprite>& sprite,
 		float x,
 		float y,
 		float z
@@ -141,6 +167,14 @@ public:
 private:
 	
 	const unsigned int GetBufferID() const { return m_BatchBuffer; }
+
+	const Font* GetFont(
+		const char* fontName
+	) const;
+
+	const uint32_t GetSheetIndex(
+		const SpriteSheet* sheetPtr
+	) const;
 
 };
 

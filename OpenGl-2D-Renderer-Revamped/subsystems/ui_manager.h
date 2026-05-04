@@ -38,6 +38,8 @@ private:
 
 	std::vector<std::unique_ptr<Window>> m_OpenedWindows;
 
+	float m_CaretBlinkerTimer = 0.f;
+
 public:
 
 	UIManager(
@@ -69,7 +71,9 @@ public:
 		bool haveClosingButton = true
 	);
 
-	void InterpretInput();
+	void InterpretInput(
+		float elapsedTimeSeconds
+	);
 
 	void OpenWindow(std::unique_ptr<Window> window, glm::vec2 openWhere);
 
