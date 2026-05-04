@@ -178,10 +178,6 @@ void Input::MoveCaretToPosition(
 		m_ScrollX = caretXposition - m_TextContent->GetDimensions().x;
 	}
 
-	//	m_ScrollX = left bound
-	//	m_ScrollX + Label.dimensions.x = right bound
-	//	MOVE GEOMETRY CLIPPING TO THE LABEL
-
 	m_CaretPosition = newPosition;
 	m_CaretXPosition = caretXposition - m_ScrollX;
 	m_TextContent->UpdateScrollX(m_ScrollX);
@@ -191,15 +187,14 @@ float Input::GetXOffsetForCaretPosition(
 	size_t caretPosition
 ) const {
 	size_t valueCharCount = m_TextContent->GetText()->GetCharCount();
-	float textScale = GetText()->GetTextOptions().scale;
 	
 	if (valueCharCount == 0) return 0;
 	
 	if (caretPosition == valueCharCount) {
 		size_t lastGlyphIndex = caretPosition - 1;
 		const auto& lastGlyph = GetText()->GetTextGeometry()[caretPosition - 1];
-		return (lastGlyph.position.x + GetText()->GetFont()->GetCharacterAdvance(GetText()->GetTextString()[caretPosition - 1])) * textScale;
+		return (lastGlyph.position.x + GetText()->GetFont()->GetCharacterAdvance(GetText()->GetTextString()[caretPosition - 1]) * GetText()->GetTextOptions().scale);
 	}
 
-	return GetText()->GetTextGeometry()[caretPosition].position.x * textScale;
+	return GetText()->GetTextGeometry()[caretPosition].position.x;
 }

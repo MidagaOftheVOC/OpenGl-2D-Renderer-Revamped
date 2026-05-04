@@ -101,4 +101,6 @@ public:
 
 	glm::vec2 GetAbsoluteCaretPosition() const { return m_AbsoluteCaretPosition; }
 
+	float GetCharHeight() const { return GetText()->GetLineHeight(); }
+
 };

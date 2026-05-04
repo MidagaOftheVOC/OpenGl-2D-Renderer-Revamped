@@ -18,13 +18,9 @@ void Label::SendOwnRenderData(
 		
 		//	This should return just the clipped text
 		std::vector<FullSprite> textGeometry;
-		float scale = m_StoredText.GetTextOptions().scale;
 		for (const auto& sprite : m_StoredText.GetTextGeometry()) {
 			FullSprite preparedSprite = sprite;
-			preparedSprite.position.x = sprite.position.x * scale - m_ScrollX;
-			preparedSprite.position.y *= scale;
-			preparedSprite.instance.dimensions.x *= scale;
-			preparedSprite.instance.dimensions.y *= scale;
+			preparedSprite.position.x = sprite.position.x - m_ScrollX;
 
 			if (preparedSprite.position.x + preparedSprite.instance.dimensions.x > 0 && preparedSprite.position.x < GetDimensions().x) {
 				textGeometry.emplace_back(preparedSprite);
@@ -53,7 +49,6 @@ void Label::SendOwnRenderData(
 
 		uiBatch->DrawSprites(
 			textGeometry,
-			m_StoredText.GetFont(),
 			absoluteCurrentWidgetOrigin.x,
 			absoluteCurrentWidgetOrigin.y,
 			z

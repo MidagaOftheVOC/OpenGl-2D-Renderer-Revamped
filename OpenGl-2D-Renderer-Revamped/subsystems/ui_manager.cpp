@@ -60,8 +60,11 @@ void UIManager::InterpretInput(
 		if (m_CaretBlinkerTimer >= 1.0f)
 			m_CaretBlinkerTimer -= 1.0f;
 
-		if(m_CaretBlinkerTimer < 0.5f)
-			uiBatch->DrawSprite(GetResService()->GetCaretInstance(), caretPosition.x, caretPosition.y, 0, GetCloserZBound());
+		if(m_CaretBlinkerTimer < 0.5f) {
+			SpriteInstance caretInstance = GetResService()->GetCaretInstance();
+			caretInstance.dimensions.y = m_FocusedInputField->GetCharHeight();
+			uiBatch->DrawSprite(caretInstance, caretPosition.x, caretPosition.y, 0, GetCloserZBound());
+		}
 		m_CaretBlinkerTimer += elapsedTimeSeconds;
 
 		if (input.IsPressed(GLFW_KEY_LEFT)) {

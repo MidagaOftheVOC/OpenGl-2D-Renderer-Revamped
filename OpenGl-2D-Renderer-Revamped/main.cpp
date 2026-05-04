@@ -13,15 +13,12 @@ int main(int argc, char** argv) {
 	resService.UploadShaderParameters("test\\res\\batch.shader",		"batch");		//	WITH UBO
 
 
-	resService.UploadSpriteSheetParameters("test\\res\\cyrillic.png",			"cyrillic",				"batch",		9,	9);
-	resService.UploadSpriteSheetParameters("test\\res\\cyrillic_print.png",		"cyrillic_print",		"batch",		10, 10);
-	resService.UploadSpriteSheetParameters("test\\res\\cyrillic_print_big.png", "cyrillic_print_big",	"batch",		10, 10, 4);
+	resService.UploadSpriteSheetParameters("test\\res\\cyrillic_print_big.png", "cyrillic_print_big",		"batch",		10, 10, true, 4);
 	
 	resService.UploadSpriteSheetParameters("test\\res\\test.cfg",		"testSheet",						"batch",		0, 0);
 	resService.UploadSpriteSheetParameters("test\\res\\panda.cfg",		"pandaSheet",						"batch",		0, 0);
+	resService.UploadSpriteSheetParameters("test\\res\\gui.cfg",		resService.c_SpecialUISheetName,	"batch",		0, 0, true);
 	
-	resService.UploadSpriteSheetParameters("test\\res\\gui.cfg",		resService.c_SpecialUISheetName,	"batch",		0, 0);
-
 	resService.UploadFontParameters("cyrillic_print_big", "test\\res\\ui\\cyrillic_print_big.font");
 
 	eng.Init();
@@ -43,10 +40,8 @@ int main(int argc, char** argv) {
 
 	constexpr float oneDef = 1.f / 3.1418f;
 
-	TextOptions options;
-	options.lineHeight = 32;
-	options.scale = 0.70f;
-	options.font = resService.GetFontByName("cyrillic_print_big");
+	TextOptions options = resService.GetUIBatch()->GetTextOptionsForFont("cyrillic_print_big");
+	options.scale = 0.7f;
 
 	Text txt = Text(
 		U"ЕДНО",

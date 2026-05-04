@@ -9,6 +9,7 @@ enum class TextScroll {
 
 struct TextOptions {
 	const Font* font = nullptr;
+	uint16_t storedSheetIndex = 0;
 	float lineLength = 0.f;
 	float lineHeight = 20.f;
 	float scale = 1.0f;
@@ -79,7 +80,7 @@ public:
 	const TextOptions& GetTextOptions() const { return m_TextOptions; }
 	const Font* GetFont() const { return m_TextOptions.font; }
 	const float GetLineHeight() const { return m_TextOptions.lineHeight; }
-	float GetLineLength() const { return m_TextOptions.lineLength * (1.f / m_TextOptions.scale); }
+	float GetLineLength() const { return m_TextOptions.lineLength; }
 
 	const std::vector<FullSprite>& GetTextGeometry() const;
 

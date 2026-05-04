@@ -66,20 +66,34 @@ void Text::CalculateGeometry() const {
 	m_HasChanged = false;
     float scale = m_TextOptions.scale;
 
+    auto AppendGlyph = [&](char32_t ch, float x, float y) {
+        GlyphSprite glyph = GetFont()->GetGlyph(ch);
+        glyph.instance.SpriteInfo.SetSheetIndex(m_TextOptions.storedSheetIndex);
+
+        FullSprite self;
+        self.instance = glyph.instance;
+
+        self.instance.dimensions.x *= scale;
+        self.instance.dimensions.y *= scale;
+
+        self.position.x = x;
+        self.position.y = y;
+
+        m_TextGeometry.emplace_back(self);
+
+        return glyph.advance * scale;
+    };
+
 	if (m_TextOptions.scrollType == TextScroll::Oneline) {
 		float CurrentLineLength = 0;
 
-		for (size_t index = 0; index < m_TextContent.size(); index++) {
-			GlyphSprite glyph = GetFont()->GetGlyph(m_TextContent[index]);
-
-			FullSprite self;
-			self.instance = glyph.instance;
-			self.position.x = CurrentLineLength;
-			self.position.y = 0;
-
-			CurrentLineLength += glyph.advance;
-			m_TextGeometry.emplace_back(self);
-		}
+        for (size_t index = 0; index < m_TextContent.size(); index++) {
+            CurrentLineLength += AppendGlyph(
+                m_TextContent[index],
+                CurrentLineLength,
+                0.0f
+            );
+        }
 
 		return;
 	}
@@ -103,7 +117,7 @@ void Text::CalculateGeometry() const {
             float wordLength = 0.0f;
 
             while (index < m_TextContent.length() && m_TextContent[index] != ' ' && m_TextContent[index] != '\n') {
-                wordLength += GetFont()->GetCharacterAdvance(m_TextContent[index]) ;
+                wordLength += GetFont()->GetCharacterAdvance(m_TextContent[index]) * scale ;
                 index++;
             }
 
@@ -111,9 +125,9 @@ void Text::CalculateGeometry() const {
 
             size_t spacesStart = index;
             float spacesLength = 0.0f;
-
+            float singleSpaceLength = GetFont()->GetCharacterAdvance(' ') * scale;
             while (index < m_TextContent.length() && m_TextContent[index] == ' ') {
-                spacesLength += GetFont()->GetCharacterAdvance(' ');
+                spacesLength += singleSpaceLength;
                 index++;
             }
 
@@ -131,59 +145,45 @@ void Text::CalculateGeometry() const {
                     for (size_t charIndex = wordStart; charIndex < wordEnd; ++charIndex) {
                         GlyphSprite glyph = GetFont()->GetGlyph(m_TextContent[charIndex]);
 
-                        if (CurrentLineLength + glyph.advance > GetLineLength()) {
+                        if (CurrentLineLength + glyph.advance * scale > GetLineLength()) {
                             CurrentLineCount++;
                             CurrentLineLength = 0.0f;
                         }
 
-                        FullSprite self;
-                        self.instance = glyph.instance;
-                        self.position.x = CurrentLineLength;
-                        self.position.y = (float(CurrentLineCount) * GetLineHeight());
-
-                        CurrentLineLength += glyph.advance;
-                        m_TextGeometry.emplace_back(self);
+                        CurrentLineLength += AppendGlyph(
+                            m_TextContent[charIndex],
+                            CurrentLineLength,
+                            float(CurrentLineCount) * GetLineHeight() * scale
+                        );
                     }
                 }
                 else {
                     for (size_t charIndex = wordStart; charIndex < wordEnd; ++charIndex) {
-                        GlyphSprite glyph = GetFont()->GetGlyph(m_TextContent[charIndex]);
-
-                        FullSprite self;
-                        self.instance = glyph.instance;
-                        self.position.x = CurrentLineLength;
-                        self.position.y = (float(CurrentLineCount) * GetLineHeight());
-
-                        CurrentLineLength += glyph.advance;
-                        m_TextGeometry.emplace_back(self);
+                        CurrentLineLength += AppendGlyph(
+                            m_TextContent[charIndex],
+                            CurrentLineLength,
+                            float(CurrentLineCount) * GetLineHeight() * scale
+                        );
                     }
                 }
             }
             else {
                 for (size_t charIndex = wordStart; charIndex < wordEnd; ++charIndex) {
-                    GlyphSprite glyph = GetFont()->GetGlyph(m_TextContent[charIndex]);
-
-                    FullSprite self;
-                    self.instance = glyph.instance;
-                    self.position.x = CurrentLineLength;
-                    self.position.y = (float(CurrentLineCount) * GetLineHeight());
-
-                    CurrentLineLength += glyph.advance;
-                    m_TextGeometry.emplace_back(self);
+                    CurrentLineLength += AppendGlyph(
+                        m_TextContent[charIndex],
+                        CurrentLineLength,
+                        float(CurrentLineCount) * GetLineHeight() * scale
+                    );
                 }
             }
 
             if (CurrentLineLength + spacesLength <= GetLineLength()) {
                 for (size_t spaceIndex = spacesStart; spaceIndex < index; ++spaceIndex) {
-                    GlyphSprite glyph = GetFont()->GetGlyph(' ');
-
-                    FullSprite self;
-                    self.instance = glyph.instance;
-                    self.position.x = CurrentLineLength;
-                    self.position.y = (float(CurrentLineCount) * GetLineHeight());
-
-                    CurrentLineLength += glyph.advance;
-                    m_TextGeometry.emplace_back(self);
+                    CurrentLineLength += AppendGlyph(
+                        m_TextContent[spaceIndex],
+                        CurrentLineLength,
+                        float(CurrentLineCount) * GetLineHeight() * scale
+                    );;
                 }
             }
             else {

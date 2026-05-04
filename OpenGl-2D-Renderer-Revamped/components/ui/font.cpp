@@ -2,20 +2,22 @@
 
 Font::Font(
 	const SpriteSheet* _initialisedSheet,
-	const std::string& _name
+	const std::string& _name,
+    float glyphWidth,
+    float glyphHeight
 ):
 	m_SpriteSheet(_initialisedSheet),
-	m_FontName(_name)
+	m_FontName(_name),
+    m_GlyphWidth(glyphWidth),
+    m_GlyphHeight(glyphHeight)
 {}
 
 void Font::Init(
     const std::u32string& glyphs,
     unsigned short* glyphOffsets,
-    int glyphCount,
-    bool lowercaseOnly
+    int glyphCount
 )
 {
-    m_IsLowercaseOnly = lowercaseOnly;
     m_GlyphIdentifier.clear();
     m_GlyphIdentifier.reserve(
         glyphs.size()

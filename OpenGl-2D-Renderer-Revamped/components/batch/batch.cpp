@@ -5,7 +5,7 @@
 
 //	Spread(bits) for type SpriteInformation
 //	31	-	y-axis cut off direction - 0 shrink from bottom, 1 shrink from top
-//	30	-	x-axis cut off direction - 0 shrink from right, 1 shrink from left
+//	30	-	x-axis cut off direction - 0 shrink from right,  1 shrink from left
 //	
 //	29	-	sheet index
 //	..
@@ -146,21 +146,66 @@ void Batch::AddSheetToBatch(
 ) {
 	DEBUG_ASSERT(_spriteSheet != nullptr, "Null pointers passed to batch method for adding sheets.");
 
-	for (size_t i = 0; i < m_SpriteSheets.size(); i++) {
-		if (_spriteSheet->GetShader() != m_SpriteSheets[i]->GetShader()) {
-			DEBUG_ASSERT(0, "Batch w/ name [%s] has tried to append SpriteSheet objects with different shaders!", dm_BatchName.c_str());
-			return;
-		}
+	if (m_SpriteSheets.size()) {
+		DEBUG_ASSERT(_spriteSheet->GetShader() == m_SpriteSheets[0]->GetShader(), "Batch w/ name [%s] has tried to append SpriteSheet objects with different shaders!", dm_BatchName.c_str());
+	}
 
+	for (size_t i = 0; i < m_SpriteSheets.size(); i++) {
 		if (_spriteSheet == m_SpriteSheets[i]) {
-			DEBUG_WARN(0, "Batch w/ name [%s] has tried to append the same SprteSheet object more than once. Skipping...", dm_BatchName.c_str());
-			continue;
+			//DEBUG_WARN(0, "Batch w/ name [%s] has tried to append the same SprteSheet object more than once. Skipping...", dm_BatchName.c_str());
+			return;
 		}
 	}
 
-	m_SpriteSheets.emplace_back(
-		_spriteSheet
-	);
+	m_SpriteSheets.emplace_back(_spriteSheet);
+}
+
+void Batch::AddFont(
+	const Font* font
+) {
+	DEBUG_ASSERT(font != nullptr, "Null pointers passed to batch method for adding fonts.");
+
+	//	Confirm font is not added already
+	for (size_t i = 0; i < m_Fonts.size(); i++) {
+		if (font == m_Fonts[i]) {
+			DEBUG_WARN(0, "Batch tried to enter font with name [%s] twice.", font->GetName().c_str());
+			return;
+		}
+	}
+
+	AddSheetToBatch(font->GetFontSheet());
+	m_Fonts.push_back(font);
+}
+
+Text Batch::GenText(
+	const std::u32string& str,
+	const char* fontName
+) const {
+	DEBUG_ASSERT(m_Fonts.size(), "Batch attepmpted to generate Text object without fonts.");
+
+	const Font* font = GetFont(fontName);
+	TextOptions options;
+	options.font = font;
+	options.storedSheetIndex = GetSheetIndex(font->GetFontSheet());
+	
+	return Text(str, options);
+}
+
+Text Batch::GenText(
+	const std::u32string& str,
+	const TextOptions& options
+) const {
+	return Text(str, options);
+}
+
+TextOptions Batch::GetTextOptionsForFont(
+	const char* fontName
+) const {
+	TextOptions self;
+	self.font = GetFont(fontName);
+	self.storedSheetIndex = GetSheetIndex(self.font->GetFontSheet());
+
+	return self;
 }
 
 const SpriteSheet* Batch::GetSpecialSheetPointer() const {
@@ -287,25 +332,12 @@ void Batch::DrawText(
 	float z
 ) {
 	auto textGeometry = textObject->GetTextGeometry();
-	auto scale = textObject->GetTextOptions().scale;
-	uint32_t sheetIndexForFont = 0;
-	for (size_t i = 0; i < m_SpriteSheets.size(); i++) {
-		if (m_SpriteSheets[i] == textObject->GetFont()->GetFontSheet()) {
-			sheetIndexForFont = static_cast<unsigned int>(i);
-			break;
-		}
-	}
 
 	for (auto&& sprite : textGeometry) {
-		sprite.instance.SpriteInfo.SetSheetIndex(sheetIndexForFont);
-		sprite.instance.dimensions.x *= scale;
-		sprite.instance.dimensions.y *= scale;
-		
-
 		DrawSprite(
 			sprite.instance,
-			(sprite.position.x * scale) + x,
-			(sprite.position.y * scale) + y,
+			sprite.position.x + x,
+			sprite.position.y + y,
 			0.f,
 			z
 		);
@@ -314,22 +346,11 @@ void Batch::DrawText(
 
 void Batch::DrawSprites(
 	const std::vector<FullSprite>& sprites,
-	const Font* fontToAssign,
 	float x,
 	float y,
 	float z
 ) {
-	uint32_t sheetIndexForFont = 0;
-	for (size_t i = 0; i < m_SpriteSheets.size(); i++) {
-		if (m_SpriteSheets[i] == fontToAssign->GetFontSheet()) {
-			sheetIndexForFont = static_cast<unsigned int>(i);
-			break;
-		}
-	}
-
-	for (auto sprite : sprites) {
-		sprite.instance.SpriteInfo.SetSheetIndex(sheetIndexForFont);
-
+	for (const auto& sprite : sprites) {
 		DrawSprite(
 			sprite.instance,
 			(sprite.position.x) + x,
@@ -513,4 +534,30 @@ void Batch::BindCommonVAO(){
 
 void Batch::UnbindCommonVAO(){
 	glBindVertexArray(0);
+}
+
+const Font* Batch::GetFont(
+	const char* fontName
+) const {
+	DEBUG_ASSERT(m_Fonts.size(), "Batch searched for fonts when none were loaded.");
+
+	for (size_t i = 0; i < m_Fonts.size(); i++) {
+		if (!strcmp(fontName, m_Fonts[i]->GetName().c_str())) {
+			return m_Fonts[i];
+		}
+	}
+
+	return m_Fonts[0];
+}
+
+const uint32_t Batch::GetSheetIndex(
+	const SpriteSheet* sheetPtr
+) const {
+	for (size_t i = 0; i < m_SpriteSheets.size(); i++) {
+		if (sheetPtr == m_SpriteSheets[i]) {
+			return static_cast<uint32_t>(i);
+		}
+	}
+
+	return 0;
 }
